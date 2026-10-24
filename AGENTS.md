@@ -37,3 +37,14 @@ This is a personal, playful, non-research science illustration website. Prioriti
 - The three current exhibit pages are explicitly Coming soon. Do not add fake controls or describe them as working simulations.
 - Code is AI-generated or AI-assisted and is not manually audited by the owner. Document scientific assumptions and add automated numerical tests when implementing each model.
 - Before publishing a visual change, inspect it in a real browser at desktop, tablet and phone widths; check links, fonts, artwork, missing assets, overflow, and console errors. Publish to the existing GitHub Pages URL and preserve its deployment settings.
+
+## Repository maintenance
+- GitHub Pages publishes the committed static files from `main`; preserve the existing project URL and deployment settings.
+- `index.html` is the homepage; `about/` contains the project introduction. `assets/fonts/` contains the self-hosted font and its license. Illustration roles and provenance are documented in `assets/illustrations/README.md`.
+- To edit the shared page templates, update `scripts/build_pages.py`, run `python3 scripts/build_pages.py`, and commit the generated HTML. Serve the repository with a static HTTP server for local review. Production needs no Python runtime or build command.
+
+## Editorial scope
+- Write the root README and website for visitors: explain the project, what they can explore, and relevant limitations.
+- Keep architecture, publishing instructions, asset preparation and maintenance guidance in developer documentation.
+- Public copy should describe the project itself, without narrating design approvals, implementation history or conversations with the owner.
+- Describe unfinished functionality clearly when it affects a visitor's expectations. Keep code comments focused on behavior, assumptions and reasons for non-obvious choices.

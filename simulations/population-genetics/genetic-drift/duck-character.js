@@ -9,12 +9,26 @@
   function oval(c, x, y, rx, ry, fill, rotation = 0) {
     c.beginPath(); c.ellipse(x, y, rx, ry, rotation, 0, 2 * Math.PI); c.fillStyle = fill; c.fill();
   }
-  function wash(c, cream, top, bottom) {
-    const g = c.createLinearGradient(-16, top, 24, bottom);
-    g.addColorStop(0, cream ? '#fff9df' : '#fff0ad');
-    g.addColorStop(.53, cream ? '#fff0c2' : '#ffdc6a');
-    g.addColorStop(1, cream ? '#eddda9' : '#efc651');
+  // Keep the reference outline; broad light and shadow describe its rounded surface.
+  function wash(c, cream, part) {
+    const head = part === 'head';
+    const g = c.createRadialGradient(head ? 2 : -12, head ? -48 : -10, 2, head ? 12 : -1, head ? -35 : 4, head ? 45 : 53);
+    g.addColorStop(0, cream ? '#fff9df' : '#fff2a5');
+    g.addColorStop(.37, cream ? '#fff1cb' : '#ffe17a');
+    g.addColorStop(.72, cream ? '#f4e5b9' : '#f9cf58');
+    g.addColorStop(1, cream ? (head ? '#f4e6bb' : '#d8cca1') : (head ? '#f8d465' : '#d5b149'));
     return g;
+  }
+  function volume(c, shape, cream, part) {
+    c.fillStyle = wash(c, cream, part); c.fill(shape);
+    if (part === 'head') return;
+    c.save(); c.clip(shape);
+    // Reflected pond light along the underside is diffuse, without extra contour shapes.
+    const low = part === 'head' ? -10 : 28;
+    const bounce = c.createLinearGradient(0, low - 13, 0, low + 2);
+    bounce.addColorStop(0, '#75bfc000'); bounce.addColorStop(1, '#75bfc02b');
+    c.fillStyle = bounce; c.fillRect(-50, low - 13, 110, 20);
+    c.restore();
   }
   function draw(c, duck, time = 0, pose = {}) {
     const face = duck.facing >= 0 ? 1 : -1, scale = duck.scale || 1;
@@ -30,22 +44,25 @@
     c.translate(duck.x, duck.y + bob); c.scale(scale * face, scale); c.rotate(roll);
     c.lineJoin = 'round'; c.lineCap = 'round';
     c.save(); c.translate(0, -puff * 2); c.scale(chestX, chestY);
-    c.fillStyle = wash(c, duck.cream, -20, 28); c.fill(body); c.strokeStyle = '#34777b'; c.lineWidth = 2.25; c.stroke(body);
-    // A soft belly shade retains the simple silhouette without a glossy plastic finish.
-    c.save(); c.clip(body); oval(c, 1, 23, 28, 7, '#b88c2820'); c.restore();
+    volume(c, body, duck.cream, 'body'); c.strokeStyle = '#34777b'; c.lineWidth = 2.25; c.stroke(body);
+    // The head casts a soft contact shadow into the chest, inside the original silhouette.
+    c.save(); c.clip(body);
+    const neckShadow = c.createRadialGradient(12, -12, 1, 12, -12, 23);
+    neckShadow.addColorStop(0, duck.cream ? '#ae9d6a26' : '#a982292a'); neckShadow.addColorStop(1, '#a9822900');
+    oval(c, 12, -12, 25, 19, neckShadow); c.restore();
     c.save(); c.translate(-13, 1); c.rotate(-flap * .55);
     c.beginPath(); c.moveTo(-10, -5); c.bezierCurveTo(0, -14, 21, -6, 18, 6); c.bezierCurveTo(5, 14, -8, 10, -10, -5);
-    c.fillStyle = wash(c, duck.cream, -17, 24); c.fill();
-    c.strokeStyle = duck.cream ? '#d6ca9b80' : '#d0b55480'; c.lineWidth = 1; c.stroke(); c.restore();
+    c.fillStyle = wash(c, duck.cream, 'body'); c.globalAlpha *= .12 + flap * .65; c.fill();
+    c.strokeStyle = duck.cream ? '#c3b48660' : '#b89d4560'; c.lineWidth = 1; c.stroke(); c.restore();
     c.restore();
     c.save(); c.translate(3, -13 - puff * 2); c.rotate(nod); c.translate(-3, 13);
     if (duck.baby) { c.translate(8, -21); c.scale(1.1, 1.1); c.translate(-8, 21); }
-    c.fillStyle = wash(c, duck.cream, -61, -6); c.fill(head); c.strokeStyle = '#34777b'; c.lineWidth = 2.25; c.stroke(headEdge);
-    c.fillStyle = '#f6a060'; c.fill(beak); c.strokeStyle = '#3c7b7d'; c.lineWidth = 1.9; c.stroke(beak);
+    volume(c, head, duck.cream, 'head'); c.strokeStyle = '#34777b'; c.lineWidth = 2.25; c.stroke(headEdge);
+    const bill = c.createLinearGradient(0, -33, 0, -19); bill.addColorStop(0, '#ffb17a'); bill.addColorStop(.6, '#f69c62'); bill.addColorStop(1, '#db8654');
+    c.fillStyle = bill; c.fill(beak); c.strokeStyle = '#3c7b7d'; c.lineWidth = 1.9; c.stroke(beak);
     const blink = pose.blink || (!pose.still && (time + (duck.phase || 0)) % 5.9 < .12);
     if (blink) { c.beginPath(); c.moveTo(19.5, -35); c.quadraticCurveTo(23.5, -32, 27, -35); c.strokeStyle = '#174551'; c.lineWidth = 2.3; c.stroke(); }
-    else { oval(c, 23.5, -35, 3.6, 4.9, '#174551'); oval(c, 24.2, -36.7, .65, .85, '#fff9db'); }
-    oval(c, 28, -25, 4.6, 2.7, '#edac7532');
+    else { oval(c, 23.5, -35, 3.6, 4.9, '#174551'); }
     c.restore();
     const localMarkers = [-10, 12].map((x, i) => ({ x: x * chestX, y: markerY, allele: duck.alleles[i] }));
     localMarkers.forEach((m, i) => {
@@ -60,5 +77,5 @@
     const cos = Math.cos(roll), sin = Math.sin(roll);
     return localMarkers.map(m => ({ x: duck.x + (m.x * cos - m.y * sin) * scale * face, y: duck.y + bob + (m.x * sin + m.y * cos) * scale, allele: m.allele }));
   }
-  window.DuckCharacter = { draw, palette, oval };
+  window.DuckCharacter = { draw, palette, oval, renderer: 'reference-volume' };
 })();

@@ -53,7 +53,7 @@ This is a personal, playful, non-research science illustration website. Prioriti
 
 ## Duck family motion study
 - `motion.html` is an isolated two-parent inheritance story, generated from `motion-fragment.html`. It does not replace the population illustration.
-- The two-parent study now uses `duck-mesh.js`: actual WebGL 3D meshes with smooth turning and articulated chest, head and wing poses, keeping the rounded reference proportions. An analytic software 3D renderer handles browsers without WebGL. `duck-character.js` supplies shared Canvas utilities and a last-resort fallback. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
+- `duck-character.js` preserves the original rounded cartoon silhouette, proportions, small bill, dot eye and teal outline. Add gentle volume with soft lighting within that outline; do not substitute rubber-duck ellipsoids or change the reference character. Chest, head and wing poses remain articulated. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
 - `family-model.js` samples one copy independently from each specified diploid parent. Replay and scrubbing preserve the draw; Another duckling samples again. Run `node --test tests/duck-family.test.cjs` after changing inheritance.
 
 ## Exhibit catalogue

@@ -1,31 +1,36 @@
-# This is not a species
+# This is not a species.
 
-A personal, playful collection of interactive illustrations for evolution, population genetics, ecology, genomics and bioinformatics.
+A personal illustrated playground for evolution, population genetics, ecology, genomics and bioinformatics.
 
-## Live website
+**Live website: https://yacinebenchehida.github.io/this-is-not-a-species/**
 
-**https://yacinebenchehida.github.io/this-is-not-a-species/**
+GitHub Pages is active and publishes the committed static files from `main`.
 
-GitHub Pages is already enabled and deploying from the `main` branch.
+## Current state
 
-## Current status
+The illustrated homepage, five theme galleries, About page and three simulation preview pages are in place. The homepage uses artwork extracted from the approved reference, the original butterfly–mule logo, a separate multicoloured evolutionary tree, and a matching landscape prepared for live HTML content. All three simulations are explicitly **Coming soon**; none is implemented yet.
 
-**Early prototype — not the approved visual design yet.** The website's structure, navigation, five theme pages and three simulation placeholders are in place, but most illustrations are temporary. No working simulations have been published.
+## Structure and editing
 
-The butterfly–mule remains the small site logo. The homepage hero uses a smaller multicoloured evolutionary tree, based on the original logo-sheet concept. The artwork is a simplified reconstruction, not a faithful extraction of the approved illustration.
+- `index.html` — homepage, real HTML headings, links and cards.
+- `about/` — project philosophy and limitations.
+- `simulations/<theme>/` — five galleries.
+- `simulations/<theme>/<exhibit>/` — independent exhibit folders.
+- `shared/styles.css` — palette, typography, responsive layouts and shared components.
+- `shared/app.js` — progressive mobile navigation, including Escape to close.
+- `assets/illustrations/` — optimized artwork and provenance notes.
+- `assets/fonts/` — self-hosted La Belle Aurore and its SIL Open Font License.
+- `scripts/build_pages.py` — optional standard-library Python helper generating the current static pages from shared header/footer and content definitions. After editing its templates, run `python3 scripts/build_pages.py` and commit the resulting HTML. GitHub Pages requires no build command or Python runtime.
+- `AGENTS.md` — guidance for future AI development.
 
-## Structure
+Plain HTML/CSS/JavaScript; no framework, package installation, backend, tracking, or external font request. Relative paths support the existing GitHub Pages project URL. Locally, serve the repository with a static HTTP server. Mobile cards reflow, navigation collapses, keyboard focus remains visible and reduced-motion preferences are respected.
 
-- `index.html` — homepage
-- `shared/` — shared styles and JS
-- `assets/` — illustrations and icons
-- `simulations/evolution/` — evolution
-- `simulations/population-genetics/` — population genetics
-- `simulations/ecology/` — ecology
-- `simulations/genomics/` — genomics
-- `simulations/bioinformatics/` — bioinformatics
-- `AGENTS.md` — guidance for future AI development
+Keep the approved art direction: warm ivory, dark navy, coral and botanical teal; handwritten site name and serif headings; compact illustrated galleries. The hero contains the smaller evolutionary tree, while the butterfly–mule remains the official header/footer mark. The landscape is a separate image, never a screenshot of a complete interface.
 
-## Disclaimer
+## Adding an exhibit
 
-This is a hobby project using AI-generated or AI-assisted code and artwork, without manual source-code auditing. Interactive scientific behaviour may be inspected, but scientific correctness is not guaranteed. These illustrations are intended for exploration and teaching, not research analysis.
+Give each simulation its own folder and maintain its numerical model and UI independently. Link galleries to that shared folder rather than duplicating a simulation across themes. Update the content definitions/templates or write an independent page using the existing shared styles and navigation. Keep a preview labelled Coming soon until a working interaction is present. Future scientific models need documented assumptions and automated numerical sanity checks before publication.
+
+## Limitations
+
+A hobby project using AI-generated or AI-assisted code and artwork. The underlying code has not undergone independent human review. Applications are intended for illustrative and educational exploration rather than scientific research. No institutional affiliation is claimed.

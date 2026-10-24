@@ -40,6 +40,7 @@ This is a personal, playful, non-research science illustration website. Prioriti
 
 ## Inner-page artwork
 - Cartoon characters share soft teal outlines, dot eyes, warm ivory space, and teal/coral/yellow/green fills. Keep important biological differences legible at thumbnail size.
+- Predator characters use playful open mouths and a dining fork and knife; keep the tone friendly and comic.
 - `scripts/build_schematics.py` regenerates static sequence, chromosome and ancestry SVG previews. These are illustrations, not implemented scientific simulations.
 - Keep the shared site typography and colours. Inner galleries use plain introductions and simple cards, without large scenic banners.
 

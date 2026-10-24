@@ -66,7 +66,7 @@
     c.restore();
     const localMarkers = [-10, 12].map((x, i) => ({ x: x * chestX, y: markerY, allele: duck.alleles[i] }));
     localMarkers.forEach((m, i) => {
-      if (pose.highlight === i) {
+      if (pose.highlight === i || (pose.highlights && pose.highlights.includes(i))) {
         oval(c, m.x, m.y, 12.4, 12.4, '#fffbd4');
         c.beginPath(); c.arc(m.x, m.y, 12.4, 0, Math.PI * 2); c.strokeStyle = '#fffef1'; c.lineWidth = 1; c.stroke();
       }

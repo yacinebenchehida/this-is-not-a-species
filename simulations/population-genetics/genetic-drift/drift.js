@@ -3,9 +3,9 @@
   const $ = id => document.getElementById(id);
   try {
     const { createPopulation, nextGeneration, countAlleles } = window.DriftModel;
-    const rates = [.5, .75, 1, 3, 10, 30, 100];
+    const rates = [.125, .25, .5, 3, 10, 30, 100];
     const modelLimit = 100000;
-    const scene = new window.PondScene($('pond-canvas'), chooseDuck);
+    const scene = new window.PondScene($('pond-canvas'), chooseDuck, $('brood-canvas'));
     let population, previous = null, parents = null, generation = 0, history = [], selected = 0;
     let running = false, stepping = false, pending = null, accumulator = 0, lastFrame = null, lastUI = 0, lastPaint = 0, dirty = false;
     const colour = allele => allele ? 'teal' : 'coral';
@@ -101,7 +101,7 @@
     function speedLabel() {
       const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
       $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
-      $('speed-note').textContent = r <= 1 ? 'Follow a courtship and a duckling. Turn up the speed to watch many generations.' : 'Fast-forward: courtship is skipped so generations can move quickly.';
+      $('speed-note').textContent = r <= 1 ? 'Follow one family, then watch all N ducklings replace the N adults. Swimming stays lively at every speed.' : 'Fast-forward: courtship is skipped so generations can move quickly.';
     }
     function restart() {
       running = false; stepping = false; pending = null; accumulator = 0;
@@ -116,12 +116,19 @@
       $('scene-phase').textContent = 'A quiet moment at the pond'; speedLabel(); renderUI(true);
     }
     function phaseLabel() {
+      const size = population.length;
+      const count = pending ? scene.bornCount() : 0;
+      $('brood-count').textContent = `${count} / ${size} ducklings`;
+      $('brood-caption').textContent = pending ? count < size ? 'Growing the next generation' : 'Ready to take over the pond' : 'Next generation';
       if (!pending) return running ? 'The generations are flowing' : 'A quiet moment at the pond';
-      const p = pending.elapsed / pending.duration;
-      if (p < .4) return 'A chance meeting…';
-      if (p < .6) return 'A little courtship';
-      if (p < .83) return 'Hello, little duckling';
-      return 'A whole new generation';
+      const p = pending.elapsed / pending.duration, story = Math.min(1, p / .8);
+      if (p >= .94) return `${size} adults → ${size} new adults`;
+      if (p >= .8) return `The next generation: ${count} of ${size} ducklings`;
+      if (story < .34) return 'A chance meeting…';
+      if (story < .51) return 'A chest puff, a wing wiggle…';
+      if (story < .7) return 'One gene copy from each parent';
+      if (story < .85) return 'A little splash of possibility';
+      return 'Hello, little duckling!';
     }
     function frame(now) {
       const elapsed = lastFrame === null ? 0 : Math.min(2, (now - lastFrame) / 1000); lastFrame = now;
@@ -132,7 +139,7 @@
             scene.birth.progress = Math.min(1, pending.elapsed / pending.duration);
             if (pending.elapsed >= pending.duration) {
               const finished = pending; pending = null; commit(finished.next, true, finished.child);
-              if (finished.singleStep) { stepping = false; running = false; if (!isFixed()) $('pond-message').textContent = 'A new generation, chosen by chance. Follow its family below, or take another step.'; }
+              if (finished.singleStep) { stepping = false; running = false; if (!isFixed()) $('pond-message').textContent = `${population.length} new ducks replace ${population.length} adults. Follow their families below, or take another step.`; }
               updateButtons();
             }
           } else if (rate() <= 1) beginFamily(stepping);

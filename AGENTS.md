@@ -47,9 +47,9 @@ This is a personal, playful, non-research science illustration website. Prioriti
 ## Duck Pond visual direction
 - Prioritise visual appeal and engaging movement: simple rounded ducks with flat yellow or cream fills and teal outlines, gently moving water, one or two water lilies, and an irregular bank or sandy pond edge.
 - Use code-native Canvas 2D ducks matching the simple original duck-pond illustration, swimming and turning with water trails; the bank uses simple sand and grass shapes, with two water-lily pads. Cache the sprites and background; cap drawing at 30 fps.
-- Ducks swim between destinations independently of generation speed; the slowest family sequence takes two seconds.
+- Ducks swim throughout the safe pond area, including the centre, independently of generation speed. Detailed generation sequences take 8, 4 or 2 seconds; default 4 seconds.
 - Allele colours carry the genetic information without letter labels. Keep their meaning clear through a simple legend.
-- Slow playback shows one recorded family courting and hatching; fast playback skips the family sequence while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
+- Slow playback uses the approved shaded duck character for courtship, allele-copy trails and birth. Show N adults and a separately labelled nursery of N recorded offspring; replace adults only after all offspring are ready. Fast playback skips this sequence while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
 
 ## Duck family motion study
 - `motion.html` is an isolated two-parent inheritance story, generated from `motion-fragment.html`. It does not replace the population illustration.

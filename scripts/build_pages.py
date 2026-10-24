@@ -36,7 +36,7 @@ def page(title,body,p='',active=''):
  return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Playful illustrated explorations of evolution, population genetics, ecology, genomics and bioinformatics. A personal science project."><meta name="theme-color" content="#fbf5e7"><title>{escape(title)} — This is not a species.</title><link rel="icon" type="image/png" href="{p}assets/illustrations/favicon.png"><link rel="preload" href="{p}assets/fonts/LaBelleAurore.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="{p}shared/styles.css"><script src="{p}shared/app.js" defer></script></head><body>{header(p,active)}<main id="main">{body}</main>{footer(p)}</body></html>\n'''
 def exhibit_url(ex, p=''):
- return f"{p}simulations/{ex['theme']}/{ex['slug']}/"
+ return f"{p}simulations/{ex['theme']}/{ex['slug']}/{ex.get('entry', '')}"
 def feature(ex, p='', catalogue=False, homepage=False):
  if homepage:
   ex = {**ex, **HOMEPAGE_PREVIEWS[ex['slug']]}
@@ -62,7 +62,10 @@ for ex in EXHIBITS:
  if ex.get('interactive'):
   folder=ROOT/'simulations'/theme/ex['slug']
   body=(folder/'illustration.html').read_text()
-  (folder/'index.html').write_text(page(ex['title'],body,p,'Illustrations'))
+  html=page(ex['title'],body,p,'Illustrations')
+  (folder/'index.html').write_text(html)
+  if ex.get('entry'):
+   (folder/ex['entry']).write_text(html)
   continue
  related=' · '.join(f'<a href="{p}simulations/{key}/">{THEME_NAMES[key]}</a>' for key in ex['themes'])
  controls=''.join(f'<li>{escape(label)}</li>' for label in ex['controls'])

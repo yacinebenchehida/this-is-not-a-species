@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Playful illustrated explorations of evolution, population genetics, ecology, genomics and bioinformatics. A personal science project."><meta name="theme-color" content="#fbf5e7"><title>The Duck Pond — This is not a species.</title><link rel="icon" type="image/png" href="../../../assets/illustrations/favicon.png"><link rel="preload" href="../../../assets/fonts/LaBelleAurore.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="../../../shared/styles.css"><script src="../../../shared/app.js" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="identity" href="../../../index.html" aria-label="This is not a species. — Home"><img src="../../../assets/illustrations/butterfly-mule.png" alt="" width="54" height="54"><span>This is not a species.</span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation"><span class="menu-lines" aria-hidden="true"></span><span>Menu</span></button><nav id="navigation" class="nav" aria-label="Main navigation"><a href="../../../index.html">Home</a><a href="../../../simulations/" class="active" aria-current="page">Illustrations</a><a href="../../../index.html#themes">Themes</a><a href="../../../about/">About</a></nav></div></header><main id="main"><link rel="stylesheet" href="./drift.css?v=20261024-2">
+<script src="./model.js?v=20261024-2" defer></script>
+<script src="./drift.js?v=20261024-2" defer></script>
+<div class="subpage drift-page">
+  <a class="back-link" href="../">← Population Genetics</a>
+  <section class="pond-intro" aria-labelledby="pond-title">
+    <div><span class="eyebrow">Genetic drift</span><h1 id="pond-title">The Duck Pond</h1>
+    <p>A little pond. A few ducks. A lot left to chance.</p></div>
+    <p class="pond-lede">Two dots, two copies of a gene. Watch which alleles make it into the next generation—even when neither has an advantage.</p>
+  </section>
+  <noscript><p class="no-script">Turn on JavaScript to play with the Duck Pond.</p></noscript>
+  <div id="drift-app" hidden>
+    <div class="pond-layout">
+      <section class="pond-world" aria-label="The duck population">
+        <div class="pond-heading"><h2>Meet your ducks</h2><span class="generation-badge">Generation <strong id="generation">0</strong></span></div>
+        <div class="pond-scene">
+          <svg class="pond-plants left" viewBox="0 0 80 130" aria-hidden="true"><g fill="none" stroke="#658d65" stroke-width="6" stroke-linecap="round"><path d="M40 120Q40 65 24 26M44 120Q54 65 64 46M37 120Q26 86 12 77"/></g><g fill="#83a56b"><rect x="15" y="5" width="15" height="42" rx="8" transform="rotate(-17 22 26)"/><path d="M62 90Q50 66 72 36Q80 72 62 90M29 111Q4 111 5 72Q27 84 29 111"/></g></svg>
+          <div class="pond-water" aria-hidden="true"></div>
+          <div id="flock" class="flock" role="group" aria-label="Ducks; choose one to inspect its alleles"></div>
+          <svg class="pond-plants right" viewBox="0 0 80 130" aria-hidden="true"><g fill="none" stroke="#658d65" stroke-width="6" stroke-linecap="round"><path d="M40 120Q40 65 24 26M44 120Q54 65 64 46M37 120Q26 86 12 77"/></g><g fill="#83a56b"><rect x="15" y="5" width="15" height="42" rx="8" transform="rotate(-17 22 26)"/><path d="M62 90Q50 66 72 36Q80 72 62 90M29 111Q4 111 5 72Q27 84 29 111"/></g></svg>
+        </div>
+        <div class="pond-caption"><p>Every duck is shown. Choose one to follow its alleles.</p><span id="duck-count">12 ducks · 24 gene copies</span></div>
+        <div class="pond-actions"><button id="play" class="btn primary" type="button">Play <span aria-hidden="true">▶</span></button><button id="step" class="btn outline" type="button">Next generation <span aria-hidden="true">→</span></button><button id="restart" class="restart" type="button">Start again <span aria-hidden="true">↺</span></button></div>
+        <p id="pond-message" class="pond-message" role="status" aria-live="polite">Nothing favours either allele. What will chance do?</p>
+      </section>
+      <aside class="pond-controls" aria-labelledby="controls-title">
+        <h2 id="controls-title">Make it your pond</h2>
+        <div class="pond-control"><label for="population">Population size</label><select id="population"><option value="6">6 ducks</option><option value="12" selected>12 ducks</option><option value="24">24 ducks</option><option value="48">48 ducks</option><option value="96">96 ducks</option></select></div>
+        <div class="pond-control"><label for="frequency">Starting share of <span class="allele-token allele-A">A</span><output id="frequency-label" for="frequency">50%</output></label><input id="frequency" type="range" min="0" max="100" step="5" value="50"><div class="range-ends"><span>All a</span><span>All A</span></div><p id="starting-count" class="control-note"></p></div>
+        <p class="setup-note">Changing either setting starts a new pond.</p>
+        <div class="pond-control speed-control"><label for="speed">Generation speed<output id="speed-label" for="speed">1 / second</output></label><input id="speed" type="range" min="0.5" max="3" step="0.5" value="1"><div class="range-ends"><span>Take it slowly</span><span>Keep them coming</span></div></div>
+        <div class="try-this"><span class="eyebrow">Try this</span><p>Start again with the same settings. Does chance tell the same story?</p><p>Then try a bigger pond. Are the changes gentler?</p></div>
+      </aside>
+    </div>
+    <div class="pond-results">
+      <section class="frequency-panel" aria-labelledby="frequency-title"><div class="result-heading"><h2 id="frequency-title">Two alleles, one pond</h2><span class="result-kicker">Share of all gene copies</span></div><div class="allele-totals"><div><span class="allele-token allele-A">A</span><strong id="total-A">50%</strong><span id="copies-A">12 copies</span></div><div><span class="allele-token allele-a">a</span><strong id="total-a">50%</strong><span id="copies-a">12 copies</span></div></div><div class="frequency-bar" aria-hidden="true"><span id="bar-A"></span><span id="bar-a"></span></div><div id="frequency-chart" class="frequency-chart"></div><p class="chart-note">Up or down by chance. Neither allele is “better”.</p></section>
+      <section class="inheritance-panel" aria-labelledby="inheritance-title"><div class="result-heading"><h2 id="inheritance-title">A duck's little story</h2><span id="selected-generation" class="result-kicker">Generation 0</span></div><div id="inheritance" class="inheritance"></div><p id="inheritance-note" class="inheritance-note"></p></section>
+    </div>
+  </div>
+  <section class="pond-explainer" aria-labelledby="drift-title"><h2 id="drift-title">That's genetic drift.</h2><p>Alleles are versions of a gene. Neither <span class="inline-allele A">A</span> nor <span class="inline-allele a">a</span> gives a duck an advantage. Each gene copy has an equal chance of being passed on. But chance does not guarantee an equal result. In a small population, a few lucky draws can make a big difference.</p><p>Eventually, one allele can disappear altogether. The other is then <strong>fixed</strong>: every copy of this gene is the same allele. The ducks are still here; it is a version of the gene that has been lost.</p>
+    <details><summary>How does this pond work?</summary><div><p>The pond uses a neutral Wright–Fisher model. Its population size stays constant, and each new generation replaces the previous one. Each duck has two gene copies; every new copy is sampled independently from the previous generation's pool. A copy can be chosen more than once, or not at all.</p><p>There is no selection, mutation or migration. Once an allele is lost, it cannot return here. Starting frequencies are rounded to the nearest whole gene copy; the exact starting count is shown by the controls.</p><p>The dots are genetic labels, not plumage colours. The ducks represent individuals in a simplified population: their movements do not affect reproduction. Sexes are not modelled, and both copies can come from the same parent, so this is not a model of real duck mating.</p><p>Read more about <a href="https://tskit-dev.github.io/tutorials/forward_sims.html#core-steps">random inheritance in the Wright–Fisher model</a>.</p></div></details>
+  </section>
+  <p class="related-themes">Explore this idea in <a href="../">Population Genetics</a> · <a href="../../evolution/">Evolution</a></p>
+</div>
+</main><footer class="site-footer"><div class="footer-inner"><a class="identity" href="../../../index.html" aria-label="This is not a species. — Home"><img src="../../../assets/illustrations/butterfly-mule.png" alt="" width="54" height="54"><span>This is not a species.</span></a><p>A personal hobby project with AI-assisted artwork and code. The code has not undergone independent human review. For illustrative and educational exploration, rather than scientific research.</p><a class="github" href="https://github.com/yacinebenchehida/this-is-not-a-species">GitHub <span aria-hidden="true">↗</span></a></div></footer></body></html>

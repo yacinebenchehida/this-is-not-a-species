@@ -16,7 +16,8 @@
       "Initial allele frequency",
       "Generation speed"
     ],
-    "interactive": true
+    "interactive": true,
+    "entry": "play.html"
   },
   {
     "theme": "evolution",

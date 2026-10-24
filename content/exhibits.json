@@ -17,7 +17,8 @@
       "Generation speed"
     ],
     "interactive": true,
-    "entry": "play.html"
+    "entry": "play.html",
+    "version": "pond-3"
   },
   {
     "theme": "evolution",

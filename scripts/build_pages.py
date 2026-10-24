@@ -36,7 +36,8 @@ def page(title,body,p='',active=''):
  return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Playful illustrated explorations of evolution, population genetics, ecology, genomics and bioinformatics. A personal science project."><meta name="theme-color" content="#fbf5e7"><title>{escape(title)} — This is not a species.</title><link rel="icon" type="image/png" href="{p}assets/illustrations/favicon.png"><link rel="preload" href="{p}assets/fonts/LaBelleAurore.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="{p}shared/styles.css"><script src="{p}shared/app.js" defer></script></head><body>{header(p,active)}<main id="main">{body}</main>{footer(p)}</body></html>\n'''
 def exhibit_url(ex, p=''):
- return f"{p}simulations/{ex['theme']}/{ex['slug']}/{ex.get('entry', '')}"
+ url = f"{p}simulations/{ex['theme']}/{ex['slug']}/{ex.get('entry', '')}"
+ return url + (f"?v={ex['version']}" if ex.get('version') else '')
 def feature(ex, p='', catalogue=False, homepage=False):
  if homepage:
   ex = {**ex, **HOMEPAGE_PREVIEWS[ex['slug']]}

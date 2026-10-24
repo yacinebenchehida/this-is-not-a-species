@@ -26,7 +26,7 @@ function moments(size, p, repetitions, seed) {
 }
 
 test('initial populations contain exactly the nearest possible starting allele count', () => {
-  for (const size of [1, 6, 12, 24, 48, 96]) {
+  for (const size of [1, 6, 12, 24, 48, 96, 200, 500]) {
     for (const p of [0, .05, .2, .5, .95, 1]) {
       const pop = createPopulation(size, p, seeded(size));
       assert.equal(pop.length, size);
@@ -109,5 +109,22 @@ test('neutral fixation probability follows the starting allele frequency', () =>
       if (count === 12) fixedA++;
     }
     assert.ok(Math.abs(fixedA / trials - p) < 6 * Math.sqrt(p * (1 - p) / trials));
+  }
+});
+
+
+test('large cohorts retain diploidy and exact inherited source copies over fast batches', () => {
+  const random = seeded(291);
+  let population = createPopulation(500, .5, random);
+  for (let generation = 0; generation < 1000; generation++) {
+    const next = nextGeneration(population, random);
+    assert.equal(next.population.length, 500);
+    for (let i = 0; i < 500; i++) {
+      for (let copy = 0; copy < 2; copy++) {
+        const source = next.parents[i][copy];
+        assert.equal(next.population[i][copy], population[Math.floor(source / 2)][source % 2]);
+      }
+    }
+    population = next.population;
   }
 });

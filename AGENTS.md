@@ -46,7 +46,9 @@ This is a personal, playful, non-research science illustration website. Prioriti
 
 ## Duck Pond visual direction
 - Prioritise visual appeal and engaging movement: expressive ducks with a soft sense of depth, gently moving water, one or two water lilies, and an irregular bank or sandy pond edge.
-- Allele colours can carry the genetic information without prominent letter labels. Keep their meaning clear through a simple legend.
+- Use shaded code-native Canvas 2D ducks, swimming and turning with water trails; the bank has sand, grass, stones and two water lilies. Cache the shaded sprites and background; cap drawing at 30 fps.
+- Allele colours carry the genetic information without letter labels. Keep their meaning clear through a simple legend.
+- Slow playback shows one recorded family courting and hatching; fast playback skips the family sequence while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
 
 ## Exhibit catalogue
 - `content/exhibits.json` is the single catalogue of titles, concepts, descriptions, intended controls, artwork and theme membership. The page generator reads it to create cards and canonical exhibit pages.

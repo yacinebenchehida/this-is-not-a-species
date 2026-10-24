@@ -1,0 +1,11 @@
+# Two-parent motion study
+
+`motion.html` is a standalone inheritance story, generated from `motion-fragment.html` by the shared page generator. The population illustration remains independently implemented in `play.html`.
+
+`duck-character.js` draws the same rounded reference silhouette with gentle shading and articulated chest, head and wing poses. Movement and poses are cosmetic. `motion.js` owns the six-part timeline: freely swimming throughout the safe pond area, approaching, chest/wing courtship, copied allele trails, cloud overlap and a duckling reveal. The background and character style use the existing site palette. Reduced motion uses discrete poses and suppresses ambient movement.
+
+`family-model.js` samples one of the two copies of each specified parent independently, with probability 1/2 for each copy. The two featured parents are heterozygotes with ordered genotypes [teal, coral] and [coral, teal]. Thus teal/teal and coral/coral offspring each have probability 1/4; a mixed pair has probability 1/2. The highlighted parent copies, flying copies, offspring drawing and outcome labels use the same retained draw. Parent allele dots remain intact while copies move towards the offspring. The overlap/cloud is a visual transition, not literal fusion of organisms or four-copy inheritance. This is a conditional single-family illustration, rather than a population Wright–Fisher generation.
+
+Replay and scrubbing preserve the retained family and its paths. Another duckling samples again. Pausing freezes story progress while ambient water and small character bobbing continue. A completed duckling swims freely; scrubbing to the end holds the specified final pose. Hiding the tab pauses the story. The 6.4-second normal sequence has adjustable tempo and can be inspected by stage buttons or the timeline slider.
+
+Run `node --test tests/duck-family.test.cjs` for exhaustive checks of the four possible parental-copy draws, homozygous inheritance, input validation and unchanged parent data. The main population model is unchanged.

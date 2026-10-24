@@ -51,6 +51,11 @@ This is a personal, playful, non-research science illustration website. Prioriti
 - Allele colours carry the genetic information without letter labels. Keep their meaning clear through a simple legend.
 - Slow playback shows one recorded family courting and hatching; fast playback skips the family sequence while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
 
+## Duck family motion study
+- `motion.html` is an isolated two-parent inheritance story, generated from `motion-fragment.html`. It does not replace the population illustration.
+- `duck-character.js` preserves the reference silhouette with gentle shading and articulated chest, head and wing poses. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
+- `family-model.js` samples one copy independently from each specified diploid parent. Replay and scrubbing preserve the draw; Another duckling samples again. Run `node --test tests/duck-family.test.cjs` after changing inheritance.
+
 ## Exhibit catalogue
 - `content/exhibits.json` is the single catalogue of titles, concepts, descriptions, intended controls, artwork and theme membership. The page generator reads it to create cards and canonical exhibit pages.
 - An exhibit has one primary `theme` and folder, and can appear in additional `themes` without duplicating its page or future implementation. Preserve existing exhibit URLs.

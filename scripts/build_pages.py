@@ -82,4 +82,8 @@ p='../'
 about=f'''<div class="subpage about-page"><a class="back-link" href="../index.html">← Back to the gallery</a><section class="about-intro"><span class="eyebrow">A small cabinet of curiosities</span><h1>About the project</h1><p class="intro-text">A personal playground for exploring life's complexity.</p></section><div class="about-body"><div><h2>Made for curiosity</h2><p>This is a hobby project about evolution, population genetics, ecology, genomics and bioinformatics. The idea is simple: small, playful interactive illustrations that make scientific ideas enjoyable to explore.</p><p>The name nods to René Magritte's <em>The Treachery of Images</em> and its inscription, <em>Ceci n'est pas une pipe</em>. A picture of an organism is a representation; a scientific model is one too. Both can help us look more closely.</p><h2>A note on how it is made</h2><p>The artwork and code are AI-generated or AI-assisted. The underlying code has not undergone independent human review. The illustrations are intended for educational exploration, rather than scientific research or analysis.</p><p>This is a personal project without institutional affiliation.</p><a class="btn outline" href="{REPO}">Visit the GitHub repository <span aria-hidden="true">↗</span></a></div></div></div>'''
 (ROOT/'about').mkdir(exist_ok=True)
 (ROOT/'about/index.html').write_text(page('About the project',about,p,'About'))
-print(f'Generated {len(EXHIBITS) + len(THEMES) + 3} static pages')
+motion_folder=ROOT/'simulations/population-genetics/genetic-drift'
+motion_fragment=motion_folder/'motion-fragment.html'
+if motion_fragment.exists():
+ (motion_folder/'motion.html').write_text(page('A little duck story',motion_fragment.read_text(),'../../../','Illustrations'))
+print(f'Generated {len(EXHIBITS) + len(THEMES) + 3 + int(motion_fragment.exists())} static pages')

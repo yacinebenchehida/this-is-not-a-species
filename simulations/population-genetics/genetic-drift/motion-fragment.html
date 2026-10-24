@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="./motion.css?v=family-1">
+<script src="./family-model.js?v=family-1" defer></script>
+<script src="./duck-character.js?v=family-1" defer></script>
+<script src="./motion.js?v=family-1" defer></script>
+<div class="motion-page">
+  <div class="motion-top"><a class="back-link" href="./play.html?v=pond-4">← The Duck Pond</a><span class="eyebrow">A little inheritance story</span></div>
+  <section class="motion-intro"><h1>Two ducks. One little surprise.</h1><p>One gene copy from each parent.<br>A whole new little duck.</p></section>
+  <noscript><p>Turn on JavaScript to watch the ducks.</p></noscript>
+  <p id="motion-loading" role="status">Waking up the pond…</p>
+  <section id="motion-app" class="story-board" hidden aria-label="A duck family">
+    <div class="story-scene"><canvas id="family-canvas" width="1500" height="690" role="img" aria-label="Two ducks swimming freely in a pond. Press Play the story to watch courtship and inheritance."></canvas><div class="scene-caption"><span id="story-phase">Two ducks, two copies each.</span><span id="story-line">Let them explore, or play their story.</span></div></div>
+    <div class="story-controls"><div class="story-buttons"><button id="story-play" class="btn primary" type="button">Play the story <span aria-hidden="true">▶</span></button><button id="story-new" class="btn outline" type="button">Another duckling <span aria-hidden="true">↻</span></button></div><label class="tempo-label" for="story-tempo">Tempo <select id="story-tempo"><option value="0.75">Gentle</option><option value="1" selected>Normal</option><option value="1.5">Lively</option><option value="2">Quick</option></select></label></div>
+    <div class="story-timeline"><label class="sr-only" for="story-progress">Story position</label><input id="story-progress" type="range" min="0" max="1000" step="1" value="0" aria-valuetext="Swimming"><nav class="story-stages" aria-label="Jump to part of the story"><button type="button" data-stage="0">Swim</button><button type="button" data-stage="0.26">Meet</button><button type="button" data-stage="0.43">Dance</button><button type="button" data-stage="0.61">Share</button><button type="button" data-stage="0.765">Splash</button><button type="button" data-stage="0.88">Hello!</button></nav></div>
+    <div class="family-strip"><div class="family-card"><span class="family-name">Parent one</span><div id="first-copies" class="copy-pair"></div></div><span class="family-plus" aria-hidden="true">+</span><div class="family-card"><span class="family-name">Parent two</span><div id="second-copies" class="copy-pair"></div></div><span class="family-arrow" aria-hidden="true">→</span><div class="family-card offspring-card"><span class="family-name">Their duckling</span><div id="child-copies" class="copy-pair"></div></div><p id="family-outcome" role="status" aria-live="polite">Which two copies will the duckling inherit?</p></div>
+  </section>
+  <p class="motion-hint">Pause or drag the line to look closer. “Another duckling” makes a fresh random draw.</p>
+</div>

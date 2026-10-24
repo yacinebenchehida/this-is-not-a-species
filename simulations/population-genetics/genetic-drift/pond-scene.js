@@ -17,11 +17,11 @@
       this.nursery = nursery; this.nc = nursery.getContext('2d');
       if (!this.c) throw new Error('Canvas is unavailable');
       this.water = new Path2D(WATER); this.ground = new Path2D(GROUND);
-      this.ducks = []; this.population = []; this.birth = null; this.wakes = []; this.time = 0; this.selected = 0;
+      this.ducks = []; this.population = []; this.birth = null; this.wakes = []; this.fastMatings = null; this.time = 0; this.selected = 0;
       this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
       this.sprites = {}; this.thumbnails = {};
       for (const pair of [[0, 0], [0, 1], [1, 0], [1, 1]]) {
-        for (const cream of [false, true]) for (const blink of [false, true]) {
+        for (const cream of [false]) for (const blink of [false, true]) {
           const sprite = document.createElement('canvas'); sprite.width = 288; sprite.height = 288;
           const c = sprite.getContext('2d'); c.scale(2.5, 2.5); c.translate(55, 70); window.DuckCharacter.draw(c, { x: 0, y: 0, scale: 1, facing: 1, alleles: pair, cream }, 1, { still: true, blink });
           this.sprites[`${pair.join('')}${cream ? 'c' : ''}${blink ? 'b' : ''}`] = sprite;
@@ -55,9 +55,11 @@
         }
         const target = this.swimTarget(x, y);
         const angle = Math.atan2(target.y - y, target.x - x);
-        const speed = (85 + Math.random() * 25) * (.8 + this.scale * .2);
+        // Larger shoals drift more gently; this is independent of the generation clock.
+        const crowding = Math.max(.42, Math.min(1, Math.pow(6 / population.length, .18)));
+        const speed = (85 + Math.random() * 25) * (.8 + this.scale * .2) * crowding;
         result.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-          targetX: target.x, targetY: target.y, speed, headingTimer: 2 + Math.random() * 2, cream: i % 3 === 1,
+          targetX: target.x, targetY: target.y, speed, wanderTime: 1 / crowding, headingTimer: (2 + Math.random() * 2) / crowding, cream: false,
           phase: Math.random() * 50, facing: Math.cos(angle) >= 0 ? 1 : -1, alleles, wake: Math.random(), blink: Math.random() * 8 });
       });
       return result;
@@ -84,7 +86,13 @@
         }
       });
     }
-    setPopulation(population, newborn = false) {
+    setPopulation(population, newborn = false, parents = null) {
+      if (!parents) this.fastMatings = null;
+      else if (!this.fastMatings || this.time - this.fastMatings.started >= 1.15) {
+        // Retain one real generation long enough to see, even at 100 generations/second.
+        this.fastMatings = { plan: this.planMatings(parents), started: this.time,
+          positions: this.ducks.map(d => ({ x: d.x, y: d.y })) };
+      }
       this.population = population; this.scale = Math.max(.19, Math.min(1.15, 2.5 / Math.pow(population.length, .43)));
       if (this.ducks.length !== population.length) this.ducks = this.makeDucks(population);
       this.ducks.forEach((d, i) => { d.alleles = population[i]; });
@@ -95,13 +103,49 @@
       this.canvas.setAttribute('aria-label', `${population.length} swimming ducks, each carrying two coloured allele markers. Choose a duck with the pointer or the duck selector below.`);
     }
     beginBirth(previous, next, parents, child) {
+      this.fastMatings = null;
       const sources = parents[child].map(source => Math.floor(source / 2));
       const from = sources.map(i => ({ x: this.ducks[i].x, y: this.ducks[i].y }));
       const meeting = { x: clamp((from[0].x + from[1].x) / 2, 340, 660), y: clamp((from[0].y + from[1].y) / 2, 280, 370) };
       // The complete cohort is already sampled by the model. These events never draw genes.
       this.birth = { sources, copies: parents[child].map(source => source % 2), alleles: next[child], child,
-        progress: 0, next: this.makeDucks(next), from, meeting,
+        progress: 0, next: this.makeDucks(next), from, meeting, matings: this.planMatings(parents),
         order: [child, ...next.map((_, i) => i).filter(i => i !== child)] };
+    }
+    planMatings(parents) {
+      return parents.map((copies, i) => ({ sources: [...new Set(copies.map(copy => Math.floor(copy / 2)))],
+        start: .06 + i / parents.length * .55 }));
+    }
+    matingHearts(plan, progress) {
+      const hearts = new Map();
+      for (const event of plan) {
+        const age = (progress - event.start) / .34;
+        if (age <= 0 || age >= 1) continue;
+        const alpha = Math.min(1, age * 5, (1 - age) * 5);
+        for (const index of event.sources) {
+          // Repeated contributions pulse again; overlapping hearts on one parent merge.
+          const previous = hearts.get(index);
+          if (!previous || alpha > previous.alpha) hearts.set(index, { alpha, age });
+        }
+      }
+      return hearts;
+    }
+    drawMatings(c, excluded) {
+      let hearts = new Map();
+      if (!this.reduced.matches) {
+        if (this.birth) hearts = this.matingHearts(this.birth.matings, this.birth.progress);
+        else if (this.fastMatings) hearts = this.matingHearts(this.fastMatings.plan, (this.time - this.fastMatings.started) / 1.15);
+      }
+      let shown = 0;
+      const scale = clamp(this.scale * .65, .22, .48);
+      for (const [index, pulse] of hearts) {
+        if (excluded.has(index)) continue; // The close-up has its own large heart.
+        const d = this.birth ? this.ducks[index] : this.fastMatings.positions[index];
+        if (!d) continue;
+        this.drawHeart(c, d.x, d.y - (62 * this.scale + 8) * 620 / H - pulse.age * 16, scale, pulse.alpha * .9, true);
+        shown++;
+      }
+      this.canvas.dataset.matingHearts = String(shown);
     }
     bornCount() {
       if (!this.birth) return 0;
@@ -193,7 +237,7 @@
       d.headingTimer -= dt;
       let dx = d.targetX - d.x, dy = d.targetY - d.y;
       if (Math.hypot(dx, dy) < 35 || d.headingTimer <= 0) {
-        const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y; d.headingTimer = 2 + Math.random() * 2;
+        const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y; d.headingTimer = (2 + Math.random() * 2) * d.wanderTime;
         dx = d.targetX - d.x; dy = d.targetY - d.y;
       }
       const distance = Math.max(1, Math.hypot(dx, dy));
@@ -214,9 +258,9 @@
         this.wakes.push({ x: d.x - Math.sign(d.facing) * 20 * this.scale, y: d.y + 5 * this.scale, age: 0, size: this.scale }); d.wake = 0;
       }
     }
-    drawHeart(c, x, y, scale, alpha) {
-      c.save(); c.translate(x, y); c.scale(scale, scale * 620 / H); c.globalAlpha = alpha; c.shadowColor = '#d9798560'; c.shadowBlur = 12;
-      c.fillStyle = '#e58e99'; c.beginPath(); c.moveTo(0, 9); c.bezierCurveTo(-26, -8, -14, -27, 0, -14); c.bezierCurveTo(14, -27, 26, -8, 0, 9); c.fill(); c.shadowColor = 'transparent'; ellipse(c, -7, -13, 3, 1.5, '#ffd6cf9c', -.5); c.restore();
+    drawHeart(c, x, y, scale, alpha, small = false) {
+      c.save(); c.translate(x, y); c.scale(scale, scale * 620 / H); c.globalAlpha = alpha; c.shadowColor = '#d9798560'; c.shadowBlur = small ? 0 : 12;
+      c.fillStyle = small ? '#d7768f' : '#e58e99'; c.beginPath(); c.moveTo(0, 9); c.bezierCurveTo(-26, -8, -14, -27, 0, -14); c.bezierCurveTo(14, -27, 26, -8, 0, 9); c.fill(); if (small) { c.strokeStyle = '#bb637b'; c.lineWidth = .8; c.stroke(); } c.shadowColor = 'transparent'; ellipse(c, -7, -13, 3, 1.5, '#ffd6cf9c', -.5); c.restore();
     }
     character(c, display, pose) {
       // Compress pond depth for the laptop layout while preserving the approved duck proportions.
@@ -306,12 +350,13 @@
       }
       const birth = this.birth, p = birth ? birth.progress : 0;
       const oldAlpha = birth ? 1 - smooth((p - .94) / .06) : 1;
-      const focus = birth && p < .8 && !this.reduced.matches;
+      const focus = birth && this.population.length <= 24 && p < .8 && !this.reduced.matches;
       const focusIndices = new Set(focus ? birth.sources : []);
       const others = this.ducks.map((d, i) => ({ d, i })).filter(({ i }) => !focusIndices.has(i)).sort((a, b) => a.d.y - b.d.y);
       const dim = focus ? 1 - .45 * smooth(p / .15) * (1 - smooth((p - .7) / .1)) : 1;
       others.forEach(({ d, i }) => this.drawDuck(c, d, oldAlpha * dim, this.growth, i === this.selected));
       if (focus) this.drawFamily(c, birth);
+      this.drawMatings(c, focusIndices);
       if (birth && p > .94) birth.next.forEach(d => this.drawDuck(c, d, smooth((p - .94) / .06), .65, false));
       this.lily(c, 780, 410, 36, false, 4);
       this.drawNursery();

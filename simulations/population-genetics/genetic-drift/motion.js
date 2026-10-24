@@ -20,7 +20,7 @@
       return { x: 500 + Math.cos(angle) * radius * 305, y: 265 + Math.sin(angle) * radius * 87 };
     }
     function actor(x, y, i) {
-      return { x, y, vx: i ? -78 : 80, vy: i ? -9 : 12, target: i ? { x: 290, y: 240 } : { x: 740, y: 285 }, facing: i ? -1 : 1, yaw: i ? -1.16 : 1.16, phase: i * 2.1, scale: 1.6, cream: Boolean(i), alleles: parentAlleles[i], wake: 0, headingTimer: 2.5 };
+      return { x, y, vx: i ? -78 : 80, vy: i ? -9 : 12, target: i ? { x: 290, y: 240 } : { x: 740, y: 285 }, facing: i ? -1 : 1, yaw: i ? -1.16 : 1.16, phase: i * 2.1, scale: 1.6, cream: false, alleles: parentAlleles[i], wake: 0, headingTimer: 2.5 };
     }
     const adults = [actor(270, 235, 0), actor(740, 300, 1)];
     let baby = { ...actor(500, 285, 0), scale: 1.03, baby: true };

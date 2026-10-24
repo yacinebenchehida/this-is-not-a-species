@@ -45,15 +45,15 @@ This is a personal, playful, non-research science illustration website. Prioriti
 - Keep the shared site typography and colours. Inner galleries use plain introductions and simple cards, without large scenic banners.
 
 ## Duck Pond visual direction
-- Prioritise visual appeal and engaging movement: simple rounded ducks with flat yellow or cream fills and teal outlines, gently moving water, one or two water lilies, and an irregular bank or sandy pond edge.
+- Prioritise visual appeal and engaging movement: simple rounded ducks with the same yellow body colour and teal outlines, gently moving water, one or two water lilies, and an irregular bank or sandy pond edge.
 - Use code-native Canvas 2D ducks matching the simple original duck-pond illustration, swimming and turning with water trails; the bank uses simple sand and grass shapes, with two water-lily pads. Cache the sprites and background; cap drawing at 30 fps.
-- Ducks swim throughout the safe pond area, including the centre, independently of generation speed. Detailed generation sequences take 8, 4 or 2 seconds; default 4 seconds.
+- Ducks swim throughout the safe pond area, including the centre, independently of generation speed, with gentler swimming as population size grows. Detailed generation sequences take 8, 4 or 2 seconds; default 4 seconds.
 - Allele colours carry the genetic information without letter labels. Keep their meaning clear through a simple legend.
-- Slow playback uses the approved shaded duck character for courtship, allele-copy trails and birth. Show N adults and a separately labelled nursery of N recorded offspring; replace adults only after all offspring are ready. Fast playback skips this sequence while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
+- Slow playback uses the approved shaded duck character for courtship, allele-copy trails and birth. Show N adults and a separately labelled nursery of N recorded offspring; replace adults only after all offspring are ready. Small hearts follow the actual sampled parent indices throughout the pond; preserve the detailed close-up for N ≤ 24 at slow speeds. Fast playback uses representative sampled-generation heart pulses and skips the close-up while preserving every numerical generation. Population controls support up to 500 ducks, all drawn, and speed controls up to 100 generations per second. Keep movement independent of inheritance.
 
 ## Duck family motion study
 - `motion.html` is an isolated two-parent inheritance story, generated from `motion-fragment.html`. It does not replace the population illustration.
-- `duck-character.js` preserves the original rounded cartoon silhouette, proportions, small bill, dot eye and teal outline. Add gentle volume with soft lighting within that outline; do not substitute rubber-duck ellipsoids or change the reference character. Chest, head and wing poses remain articulated. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
+- `duck-character.js` preserves the original rounded cartoon silhouette, proportions, small bill, dot eye and teal outline. Use the same yellow body for all ducks so colour cannot imply male/female classes; only the two allele dots encode genetic information. Add gentle volume with soft lighting within that outline; do not substitute rubber-duck ellipsoids or change the reference character. Chest, head and wing poses remain articulated. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
 - `family-model.js` samples one copy independently from each specified diploid parent. Replay and scrubbing preserve the draw; Another duckling samples again. Run `node --test tests/duck-family.test.cjs` after changing inheritance.
 
 ## Exhibit catalogue

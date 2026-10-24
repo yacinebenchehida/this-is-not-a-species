@@ -57,3 +57,35 @@ test('swimming destinations include the pond centre and remain inside the safe a
   }
   assert(central > 30, 'ducks should frequently choose destinations in the centre');
 });
+
+test('dense ponds swim more slowly and all bodies use the same colour', () => {
+  const small = sceneFixture(), large = sceneFixture();
+  small.setPopulation(model.createPopulation(6, .5)); large.setPopulation(model.createPopulation(500, .5));
+  assert(Math.max(...large.ducks.map(d => d.speed)) < Math.min(...small.ducks.map(d => d.speed)));
+  assert([...small.ducks, ...large.ducks].every(d => d.cream === false));
+});
+
+test('small hearts cover every sampled parent and never mark an unused duck', () => {
+  const scene = sceneFixture();
+  const parents = [[0, 3], [3, 0], [6, 6], [0, 6], [3, 6], [6, 0]];
+  const plan = scene.planMatings(parents), seen = new Set();
+  for (let p = 0; p <= 1; p += .005) {
+    for (const [index, pulse] of scene.matingHearts(plan, p)) {
+      assert([0, 1, 3].includes(index)); assert(pulse.alpha > 0 && pulse.alpha <= 1); seen.add(index);
+    }
+  }
+  assert.deepEqual([...seen].sort(), [0, 1, 3]);
+  assert.equal(plan[2].sources.length, 1, 'one-parent draws have one heart, not two overlapping copies');
+});
+
+test('fast mating cues retain one recorded generation while other numerical generations continue', () => {
+  const scene = sceneFixture(), initial = model.createPopulation(6, .5);
+  const first = model.nextGeneration(initial); scene.setPopulation(initial);
+  scene.setPopulation(first.population, false, first.parents); const retained = scene.fastMatings;
+  const next = model.nextGeneration(first.population); scene.time = .3;
+  scene.setPopulation(next.population, false, next.parents);
+  assert.equal(scene.population, next.population); assert.equal(scene.fastMatings, retained);
+  scene.time = 1.2; scene.setPopulation(first.population, false, first.parents);
+  assert.notEqual(scene.fastMatings, retained);
+  scene.setPopulation(initial); assert.equal(scene.fastMatings, null, 'restart clears the previous run’s cues');
+});

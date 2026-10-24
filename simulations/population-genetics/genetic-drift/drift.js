@@ -78,7 +78,7 @@
     function commit(next, animated = false, child = selected) {
       previous = population; population = next.population; parents = next.parents; generation++;
       selected = child; history.push(countAlleles(population) / (2 * population.length));
-      if (animated) scene.finishBirth(population); else scene.setPopulation(population);
+      if (animated) scene.finishBirth(population); else scene.setPopulation(population, false, parents);
       scene.selected = selected; dirty = true;
       if (isFixed()) pause(fixedMessage());
       else if (generation >= modelLimit) pause('100,000 generations explored. Start again for another story.');
@@ -101,7 +101,7 @@
     function speedLabel() {
       const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
       $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
-      $('speed-note').textContent = r <= 1 ? 'Follow one family, then watch all N ducklings replace the N adults. Swimming stays lively at every speed.' : 'Fast-forward: courtship is skipped so generations can move quickly.';
+      $('speed-note').textContent = r <= 1 ? 'Small hearts mark the sampled parents. Up to 24 ducks, follow one family up close.' : 'Fast-forward: small hearts show matings from sampled generations; the close-up is skipped.';
     }
     function restart() {
       running = false; stepping = false; pending = null; accumulator = 0;
@@ -124,6 +124,7 @@
       const p = pending.elapsed / pending.duration, story = Math.min(1, p / .8);
       if (p >= .94) return `${size} adults → ${size} new adults`;
       if (p >= .8) return `The next generation: ${count} of ${size} ducklings`;
+      if (population.length > 24) return 'Little hearts, chance meetings';
       if (story < .34) return 'A chance meeting…';
       if (story < .51) return 'A chest puff, a wing wiggle…';
       if (story < .7) return 'One gene copy from each parent';

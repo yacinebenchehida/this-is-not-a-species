@@ -41,8 +41,9 @@ def feature(ex, p='', catalogue=False, homepage=False):
  if homepage:
   ex = {**ex, **HOMEPAGE_PREVIEWS[ex['slug']]}
  concept = '' if homepage else f'<span class="concept-label">{escape(ex["concept"])}</span>'
+ status = 'Explore illustration' if ex.get('interactive') else 'Coming soon'
  class_name = 'exhibit-card' if catalogue else 'feature'
- return f'''<a class="{class_name}" href="{exhibit_url(ex,p)}">{art(ex['art'],p,width=600,height=400,loading='lazy')}<div class="feature-copy">{concept}<h3>{escape(ex['title'])}</h3><p>{escape(ex['description'])}</p><span class="status">Coming soon <span aria-hidden="true">→</span></span></div></a>'''
+ return f'''<a class="{class_name}" href="{exhibit_url(ex,p)}">{art(ex['art'],p,width=600,height=400,loading='lazy')}<div class="feature-copy">{concept}<h3>{escape(ex['title'])}</h3><p>{escape(ex['description'])}</p><span class="status">{status} <span aria-hidden="true">→</span></span></div></a>'''
 def theme_card(t,p=''):
  slug,title,_=t
  return f'<a class="theme-card" href="{p}simulations/{slug}/">{art(slug,p,width=280,height=148,loading="lazy")}<h3>{title}<span aria-hidden="true">›</span></h3></a>'
@@ -58,6 +59,11 @@ for slug,title,desc in THEMES:
  (ROOT/'simulations'/slug/'index.html').write_text(page(title,body,p,'Themes'))
 for ex in EXHIBITS:
  p='../../../';theme=ex['theme'];theme_title=THEME_NAMES[theme]
+ if ex.get('interactive'):
+  folder=ROOT/'simulations'/theme/ex['slug']
+  body=(folder/'illustration.html').read_text()
+  (folder/'index.html').write_text(page(ex['title'],body,p,'Illustrations'))
+  continue
  related=' · '.join(f'<a href="{p}simulations/{key}/">{THEME_NAMES[key]}</a>' for key in ex['themes'])
  controls=''.join(f'<li>{escape(label)}</li>' for label in ex['controls'])
  body=f'''<div class="subpage"><a class="back-link" href="../">← {theme_title}</a><article class="exhibit-detail"><div class="exhibit-picture">{art(ex['art'],p,width=730,height=480)}</div><div class="exhibit-description"><span class="eyebrow">{escape(ex['concept'])}</span><h1>{escape(ex['title'])}</h1><p class="intro-text">{escape(ex['detail'])}</p><span class="status">Coming soon</span><p>This illustration is not interactive yet.</p><div class="planned-controls"><h2>What you'll be able to change</h2><ul>{controls}</ul></div><a class="btn outline" href="../">Explore {theme_title.lower()}</a></div></article><p class="related-themes">Explore this idea in {related}</p></div>'''
@@ -66,7 +72,7 @@ for ex in EXHIBITS:
 p='../'
 groups=''.join(f'<section class="catalogue-section" id="{slug}"><div class="section-heading"><h2><a href="{slug}/">{title}</a></h2><span class="rule" aria-hidden="true"></span></div><div class="exhibit-grid">'+''.join(feature(ex,p,catalogue=True) for ex in EXHIBITS if ex['theme']==slug)+'</div></section>' for slug,title,_ in THEMES)
 jumps=''.join(f'<a href="#{slug}">{title}</a>' for slug,title,_ in THEMES)
-catalogue=f'''<div class="subpage catalogue-page"><a class="back-link" href="../index.html">← Back to the gallery</a><div class="catalogue-intro"><span class="eyebrow">A collection of small worlds</span><h1>Explore the illustrations</h1><p>From a duck pond to the inside of a sequencer, explore the ideas behind life's complexity.</p><p class="availability-note">All illustrations below are coming soon.</p></div><nav class="catalogue-jumps" aria-label="Browse illustrations by theme">{jumps}</nav>{groups}</div>'''
+catalogue=f'''<div class="subpage catalogue-page"><a class="back-link" href="../index.html">← Back to the gallery</a><div class="catalogue-intro"><span class="eyebrow">A collection of small worlds</span><h1>Explore the illustrations</h1><p>From a duck pond to the inside of a sequencer, explore the ideas behind life's complexity.</p></div><nav class="catalogue-jumps" aria-label="Browse illustrations by theme">{jumps}</nav>{groups}</div>'''
 (ROOT/'simulations/index.html').write_text(page('Explore the illustrations',catalogue,p,'Illustrations'))
 p='../'
 about=f'''<div class="subpage about-page"><a class="back-link" href="../index.html">← Back to the gallery</a><section class="about-intro"><span class="eyebrow">A small cabinet of curiosities</span><h1>About the project</h1><p class="intro-text">A personal playground for exploring life's complexity.</p></section><div class="about-body"><div><h2>Made for curiosity</h2><p>This is a hobby project about evolution, population genetics, ecology, genomics and bioinformatics. The idea is simple: small, playful interactive illustrations that make scientific ideas enjoyable to explore.</p><p>The name nods to René Magritte's <em>The Treachery of Images</em> and its inscription, <em>Ceci n'est pas une pipe</em>. A picture of an organism is a representation; a scientific model is one too. Both can help us look more closely.</p><h2>A note on how it is made</h2><p>The artwork and code are AI-generated or AI-assisted. The underlying code has not undergone independent human review. The illustrations are intended for educational exploration, rather than scientific research or analysis.</p><p>This is a personal project without institutional affiliation.</p><a class="btn outline" href="{REPO}">Visit the GitHub repository <span aria-hidden="true">↗</span></a></div></div></div>'''

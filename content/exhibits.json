@@ -15,7 +15,8 @@
       "Population size",
       "Initial allele frequency",
       "Generation speed"
-    ]
+    ],
+    "interactive": true
   },
   {
     "theme": "evolution",

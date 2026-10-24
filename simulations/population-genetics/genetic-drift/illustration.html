@@ -1,7 +1,7 @@
-<link rel="stylesheet" href="./drift.css?v=pond-3">
-<script src="./model.js?v=pond-3" defer></script>
-<script src="./pond-scene.js?v=pond-3" defer></script>
-<script src="./drift.js?v=pond-3" defer></script>
+<link rel="stylesheet" href="./drift.css?v=pond-4">
+<script src="./model.js?v=pond-4" defer></script>
+<script src="./pond-scene.js?v=pond-4" defer></script>
+<script src="./drift.js?v=pond-4" defer></script>
 <div class="subpage drift-page">
   <div class="pond-topline"><a class="back-link" href="../">← Population Genetics</a><span class="eyebrow">Genetic drift</span></div>
   <section class="pond-intro" aria-labelledby="pond-title"><div><h1 id="pond-title">The Duck Pond</h1><p>A little world, left to chance.</p></div><p class="pond-lede">Swim, meet, hatch. Which colours will the next generation carry?</p></section>
@@ -12,16 +12,16 @@
       <section class="pond-world" aria-label="The duck population">
         <div class="pond-heading"><div class="pond-legend"><span><i class="allele-swatch teal"></i>Teal allele</span><span><i class="allele-swatch coral"></i>Coral allele</span></div><span class="generation-badge">Generation <strong id="generation">0</strong></span></div>
         <div class="pond-stage"><canvas id="pond-canvas" width="1500" height="930" role="img" aria-label="A pond with swimming ducks, each carrying two coloured allele markers.">The pond contains diploid ducks with teal and coral allele markers. Use the controls and duck selector to explore their inheritance.</canvas><span id="scene-phase" class="scene-phase">A quiet moment at the pond</span></div>
-        <div class="pond-playbar"><div class="pond-actions"><button id="play" class="btn primary" type="button">Play <span aria-hidden="true">▶</span></button><button id="step" class="btn outline" type="button">Next generation <span aria-hidden="true">→</span></button><button id="restart" class="restart" type="button" aria-label="Start again">↺</button></div><span id="duck-count" class="duck-count">12 ducks · 24 gene copies</span></div>
+        <div class="pond-playbar"><div class="pond-actions"><button id="play" class="btn primary" type="button">Play <span aria-hidden="true">▶</span></button><button id="step" class="btn outline" type="button">Next generation <span aria-hidden="true">→</span></button><button id="restart" class="restart" type="button" aria-label="Start again">↺</button></div><span id="duck-count" class="duck-count">6 ducks · 12 gene copies</span></div>
         <p id="pond-message" class="pond-message" role="status" aria-live="polite">Every duck has the same chances. Let the story unfold.</p>
       </section>
       <aside class="pond-controls" aria-labelledby="controls-title">
         <h2 id="controls-title">Make it your pond</h2>
-        <div class="pond-control"><label for="population">Population size</label><select id="population"><option value="6">6 ducks</option><option value="12" selected>12 ducks</option><option value="24">24 ducks</option><option value="48">48 ducks</option><option value="96">96 ducks</option><option value="200">200 ducks</option><option value="500">500 ducks</option></select></div>
+        <div class="pond-control"><label for="population">Population size</label><select id="population"><option value="6" selected>6 ducks</option><option value="12">12 ducks</option><option value="24">24 ducks</option><option value="48">48 ducks</option><option value="96">96 ducks</option><option value="200">200 ducks</option><option value="500">500 ducks</option></select></div>
         <div class="pond-control"><label for="frequency">Starting teal share<output id="frequency-label" for="frequency">50%</output></label><input id="frequency" type="range" min="0" max="100" step="5" value="50"><div class="range-ends"><span>All coral</span><span>All teal</span></div><p id="starting-count" class="control-note"></p></div>
         <p class="setup-note">These two settings start a fresh pond.</p>
-        <div class="pond-control speed-control"><label for="speed">Generation speed<output id="speed-label" for="speed">1 every 6 s</output></label><input id="speed" type="range" min="0" max="6" step="1" value="0"><div class="range-ends"><span>Watch a family</span><span>Fast-forward</span></div><p id="speed-note" class="control-note">Follow a courtship and a duckling. Turn up the speed to watch many generations.</p></div>
-        <section class="frequency-panel" aria-labelledby="frequency-title"><h3 id="frequency-title">The colours through time</h3><div class="allele-totals"><div><i class="allele-swatch teal"></i><strong id="total-A">50%</strong><span id="copies-A">12 copies</span></div><div><i class="allele-swatch coral"></i><strong id="total-a">50%</strong><span id="copies-a">12 copies</span></div></div><div class="frequency-bar" aria-hidden="true"><span id="bar-A"></span><span id="bar-a"></span></div><div id="frequency-chart" class="frequency-chart"></div><p class="chart-note">Neither colour has an advantage.</p></section>
+        <div class="pond-control speed-control"><label for="speed">Generation speed<output id="speed-label" for="speed">1 every 2 s</output></label><input id="speed" type="range" min="0" max="6" step="1" value="0"><div class="range-ends"><span>Watch a family</span><span>Fast-forward</span></div><p id="speed-note" class="control-note">Follow a courtship and a duckling. Turn up the speed to watch many generations.</p></div>
+        <section class="frequency-panel" aria-labelledby="frequency-title"><h3 id="frequency-title">The colours through time</h3><div class="allele-totals"><div><i class="allele-swatch teal"></i><strong id="total-A">50%</strong><span id="copies-A">6 copies</span></div><div><i class="allele-swatch coral"></i><strong id="total-a">50%</strong><span id="copies-a">6 copies</span></div></div><div class="frequency-bar" aria-hidden="true"><span id="bar-A"></span><span id="bar-a"></span></div><div id="frequency-chart" class="frequency-chart"></div><p class="chart-note">Neither colour has an advantage.</p></section>
       </aside>
     </div>
     <section class="inheritance-panel" aria-labelledby="inheritance-title"><div class="inheritance-heading"><div><span class="eyebrow">Two little dots, one family</span><h2 id="inheritance-title">A duck's little story</h2></div><div class="duck-picker"><label for="duck-select">Follow a duck</label><select id="duck-select"></select></div></div><div class="inheritance-content"><div id="inheritance" class="inheritance"></div><p id="inheritance-note" class="inheritance-note"></p></div></section>

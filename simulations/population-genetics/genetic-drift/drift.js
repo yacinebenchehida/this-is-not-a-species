@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   try {
     const { createPopulation, nextGeneration, countAlleles } = window.DriftModel;
-    const rates = [1 / 6, .5, 1, 3, 10, 30, 100];
+    const rates = [.5, .75, 1, 3, 10, 30, 100];
     const modelLimit = 100000;
     const scene = new window.PondScene($('pond-canvas'), chooseDuck);
     let population, previous = null, parents = null, generation = 0, history = [], selected = 0;
@@ -99,8 +99,8 @@
       $('duck-select').value = String(index); renderInheritance();
     }
     function speedLabel() {
-      const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(1 / r)} s` : `${r} / second`;
-      $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(1 / r)} seconds` : `${r} generations per second`);
+      const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
+      $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
       $('speed-note').textContent = r <= 1 ? 'Follow a courtship and a duckling. Turn up the speed to watch many generations.' : 'Fast-forward: courtship is skipped so generations can move quickly.';
     }
     function restart() {
@@ -147,7 +147,7 @@
         }
         const label = phaseLabel(); if ($('scene-phase').textContent !== label) $('scene-phase').textContent = label;
         if (dirty && (now - lastUI > 100 || !running)) { renderUI(); lastUI = now; }
-        if (now - lastPaint >= 1000 / 30) { scene.render(Math.min(.1, (now - lastPaint) / 1000)); lastPaint = now; }
+        if (now - lastPaint >= 1000 / 30) { scene.render(Math.min(.5, (now - lastPaint) / 1000)); lastPaint = now; }
       }
       requestAnimationFrame(frame);
     }

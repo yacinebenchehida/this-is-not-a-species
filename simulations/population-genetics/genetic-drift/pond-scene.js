@@ -7,45 +7,21 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
   const lerp = (a, b, t) => a + (b - a) * t;
-  function seeded(seed) { return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
   function ellipse(c, x, y, rx, ry, fill, rotation = 0) {
     c.beginPath(); c.ellipse(x, y, rx, ry, rotation, 0, Math.PI * 2); c.fillStyle = fill; c.fill();
   }
-  function gradient(c, x, y, radius, stops) {
-    const g = c.createRadialGradient(x - radius * .3, y - radius * .4, 1, x, y, radius);
-    stops.forEach(([stop, colour]) => g.addColorStop(stop, colour)); return g;
-  }
-  function duckShape(c, alleles, blink = false) {
+  function duckShape(c, alleles, blink = false, cream = false) {
     c.save();
-    const silhouette = new Path2D('M-28 6C-38-5-39-17-35-23Q-29-12-17-11Q-5-17 4-15C-6-29 0-49 17-52C36-56 49-36 38-21C50-7 37 13 15 20C-4 27-24 22-28 6Z');
-    c.shadowColor = '#b8732440'; c.shadowBlur = 4; c.shadowOffsetY = 2;
-    c.fillStyle = gradient(c, 2, -15, 64, [[0, '#fff8c4'], [.32, '#ffe779'], [.74, '#f4ca4d'], [1, '#d99a29']]);
-    c.fill(silhouette); c.shadowColor = 'transparent'; c.strokeStyle = '#b68e37'; c.lineWidth = .85; c.stroke(silhouette);
-    c.save(); c.clip(silhouette);
-    ellipse(c, -4, 15, 33, 11, '#b7782527');
-    ellipse(c, 10, -41, 15, 8, '#fffce872', -.35);
-    ellipse(c, -18, -7, 15, 5, '#fff9c258', -.3);
-    c.restore();
-    c.save(); c.translate(-9, 2); c.rotate(-.16);
-    c.shadowColor = '#b3793038'; c.shadowBlur = 3; c.shadowOffsetY = 2;
-    ellipse(c, 0, 0, 19, 12, gradient(c, -2, -2, 23, [[0, '#fff0a3'], [.65, '#f7d261'], [1, '#dfac38']]));
-    c.shadowColor = 'transparent'; c.strokeStyle = '#d5a33b'; c.lineWidth = .7;
-    c.beginPath(); c.ellipse(0, 0, 19, 12, 0, -.2, 2.8); c.stroke();
-    c.restore();
-    c.fillStyle = gradient(c, 42, -29, 15, [[0, '#ffc77c'], [.6, '#ed9341'], [1, '#cc6628']]);
-    const beak = new Path2D('M33-33Q44-38 52-29Q56-24 46-21Q39-19 32-25Q36-28 33-33Z'); c.fill(beak);
-    c.strokeStyle = '#bd702b'; c.lineWidth = .7; c.stroke(beak);
-    c.beginPath(); c.moveTo(37, -26); c.quadraticCurveTo(44, -24, 50, -26); c.strokeStyle = '#b87931'; c.lineWidth = .75; c.stroke();
-    ellipse(c, 45, -30, .9, .65, '#985a29');
-    if (blink) { c.beginPath(); c.moveTo(24, -35); c.quadraticCurveTo(28, -32, 31, -35); c.strokeStyle = '#423b28'; c.lineWidth = 2.2; c.stroke(); }
-    else { ellipse(c, 27, -35, 3.5, 4.8, '#342f24', .07); ellipse(c, 28, -36.7, 1.2, 1.5, '#fffdf0'); }
-    ellipse(c, 30, -24, 5.5, 3.7, '#ed9e5359');
-    alleles.forEach((a, i) => {
-      const x = i ? 4 : -11, y = i ? 7 : 3;
-      c.shadowColor = '#6f642c3b'; c.shadowBlur = 2; c.shadowOffsetY = 1.5;
-      ellipse(c, x, y, 6.5, 6.5, gradient(c, x, y, 8, a ? [[0, '#75d0bd'], [.45, '#3b9c94'], [1, '#22676f']] : [[0, '#ffa886'], [.45, '#eb795d'], [1, '#bb4d38']]));
-      c.shadowColor = 'transparent'; ellipse(c, x - 1.8, y - 2, 2.2, 1.3, '#ffffff65', -.5);
-    });
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    const silhouette = new Path2D('M-30 7C-39-3-40-16-35-19Q-29-12-20-12Q-10-17-2-15C-14-29-8-53 13-57C34-62 49-41 38-23Q53-12 39 7C28 26-15 31-30 7Z');
+    c.fillStyle = cream ? '#fff0bd' : '#ffdb63'; c.fill(silhouette);
+    c.strokeStyle = '#286f75'; c.lineWidth = 2.6; c.stroke(silhouette);
+    const beak = new Path2D('M36-31Q44-34 49-29Q53-23 46-20Q39-17 34-23Q33-27 36-31Z');
+    c.fillStyle = '#f59b60'; c.fill(beak); c.lineWidth = 2.3; c.stroke(beak);
+    if (blink) {
+      c.beginPath(); c.moveTo(20, -35); c.quadraticCurveTo(24, -32, 28, -35); c.strokeStyle = '#153f4b'; c.lineWidth = 2.5; c.stroke();
+    } else ellipse(c, 24, -35, 3.8, 5, '#153f4b');
+    alleles.forEach((allele, i) => ellipse(c, i ? 12 : -10, 6, 9, 9, allele ? '#57a9ac' : '#f77e5b'));
     c.restore();
   }
 
@@ -58,11 +34,11 @@
       this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
       this.sprites = {}; this.thumbnails = {};
       for (const pair of [[0, 0], [0, 1], [1, 0], [1, 1]]) {
-        for (const blink of [false, true]) {
+        for (const cream of [false, true]) for (const blink of [false, true]) {
           const sprite = document.createElement('canvas'); sprite.width = 288; sprite.height = 288;
-          const c = sprite.getContext('2d'); c.scale(2.5, 2.5); c.translate(55, 70); duckShape(c, pair, blink);
-          this.sprites[`${pair.join('')}${blink ? 'b' : ''}`] = sprite;
-          if (!blink) this.thumbnails[pair.join('')] = sprite.toDataURL();
+          const c = sprite.getContext('2d'); c.scale(2.5, 2.5); c.translate(55, 70); duckShape(c, pair, blink, cream);
+          this.sprites[`${pair.join('')}${cream ? 'c' : ''}${blink ? 'b' : ''}`] = sprite;
+          if (!blink && !cream) this.thumbnails[pair.join('')] = sprite.toDataURL();
         }
       }
       this.background = document.createElement('canvas'); this.background.width = W * 1.5; this.background.height = H * 1.5;
@@ -82,21 +58,25 @@
     }
     thumbnail(alleles) { return this.thumbnails[alleles.join('')]; }
     makeDucks(population) {
-      const result = [], spacing = 78 * this.scale;
+      const result = [], spacing = 84 * this.scale;
       population.forEach((alleles, i) => {
         let x, y;
         for (let attempt = 0; attempt < 45; attempt++) {
           const theta = Math.random() * Math.PI * 2, radius = Math.sqrt(Math.random());
           x = 500 + Math.cos(theta) * radius * 324; y = 315 + Math.sin(theta) * radius * 153;
-          if (result.every(d => Math.hypot(d.x - x, (d.y - y) * 1.5) > spacing)) break;
+          if (result.every(d => Math.hypot(d.x - x, (d.y - y) * .9) > spacing)) break;
         }
-        result.push({ x, y, vx: (Math.random() - .5) * 14, vy: (Math.random() - .5) * 8,
-          phase: Math.random() * 50, facing: i % 2 ? 1 : -1, alleles, wake: Math.random(), blink: Math.random() * 8 });
+        const target = this.swimTarget(x, y, i % 2 ? 1 : -1);
+        const angle = Math.atan2(target.y - y, target.x - x);
+        const speed = (58 + Math.random() * 26) * (.8 + this.scale * .2);
+        result.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          targetX: target.x, targetY: target.y, speed, orbit: i % 2 ? 1 : -1, cream: i % 3 === 1,
+          phase: Math.random() * 50, facing: Math.cos(angle) >= 0 ? 1 : -1, alleles, wake: Math.random(), blink: Math.random() * 8 });
       });
       return result;
     }
     keepSpace(dt) {
-      const spacing = 73 * this.scale, grid = new Map();
+      const spacing = 82 * this.scale, grid = new Map();
       this.ducks.forEach((d, i) => {
         const key = `${Math.floor(d.x / spacing)},${Math.floor(d.y / spacing)}`;
         if (!grid.has(key)) grid.set(key, []); grid.get(key).push(i);
@@ -106,19 +86,19 @@
         for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
           for (const j of grid.get(`${gx + dx},${gy + dy}`) || []) {
             if (j <= i) continue;
-            const other = this.ducks[j], x = d.x - other.x, y = (d.y - other.y) * 1.5;
+            const other = this.ducks[j], x = d.x - other.x, y = (d.y - other.y) * .9;
             const distance = Math.hypot(x, y);
             if (distance > .1 && distance < spacing) {
               const force = (spacing - distance) * Math.min(dt * 2.5, .18);
               d.x += x / distance * force; other.x -= x / distance * force;
-              d.y += y / distance * force / 1.5; other.y -= y / distance * force / 1.5;
+              d.y += y / distance * force / .9; other.y -= y / distance * force / .9;
             }
           }
         }
       });
     }
     setPopulation(population, newborn = false) {
-      this.population = population; this.scale = Math.max(.19, Math.min(.96, 2.5 / Math.pow(population.length, .43)));
+      this.population = population; this.scale = Math.max(.19, Math.min(1.15, 2.5 / Math.pow(population.length, .43)));
       if (this.ducks.length !== population.length) this.ducks = this.makeDucks(population);
       this.ducks.forEach((d, i) => { d.alleles = population[i]; });
       this.growth = newborn ? .65 : 1; this.birth = null;
@@ -134,45 +114,12 @@
       this.setPopulation(population, true);
     }
     drawGround(c) {
-      const rng = seeded(871923);
       c.clearRect(0, 0, W, H);
-      c.shadowColor = '#555f4234'; c.shadowBlur = 22; c.shadowOffsetY = 16;
-      c.fillStyle = gradient(c, 490, 290, 520, [[0, '#bac58b'], [.6, '#a9b97d'], [1, '#7f9c69']]); c.fill(this.ground);
-      c.shadowColor = 'transparent';
-      c.strokeStyle = '#6e8e5840'; c.lineWidth = 2; c.stroke(this.ground);
-      c.save(); c.clip(this.ground);
-      for (let i = 0; i < 1700; i++) {
-        const x = rng() * W, y = rng() * H;
-        ellipse(c, x, y, .5 + rng(), .3 + rng(), i % 2 ? '#eaf0bc45' : '#4c743b24');
-      }
-      c.restore();
-      c.lineJoin = 'round';
-      c.shadowColor = '#3d563b35'; c.shadowBlur = 7; c.shadowOffsetY = 5;
-      c.strokeStyle = '#b19d6b'; c.lineWidth = 48; c.stroke(this.water); c.shadowColor = 'transparent';
-      const sand = c.createLinearGradient(0, 90, 0, 530); sand.addColorStop(0, '#f1dfaa'); sand.addColorStop(.5, '#e9d49b'); sand.addColorStop(1, '#c6b47d');
-      c.strokeStyle = sand; c.lineWidth = 40; c.stroke(this.water);
-      c.strokeStyle = '#fff0c447'; c.lineWidth = 3; c.stroke(new Path2D('M78 296C53 193 183 111 299 113C358 54 480 75 556 99C705 54 879 140 898 245'));
-      c.save(); const ring = new Path2D(GROUND + WATER); c.clip(ring, 'evenodd');
-      for (let i = 0; i < 2400; i++) { const x = rng() * W, y = rng() * H; ellipse(c, x, y, rng() * 1.4 + .35, rng() * .7 + .25, i % 3 ? '#8e875334' : '#fff4c98c'); }
-      c.restore();
-      c.fillStyle = '#4c8477'; c.fill(this.water);
-      const water = c.createLinearGradient(0, 110, 0, 520); water.addColorStop(0, '#b5ddc7'); water.addColorStop(.35, '#8bcbbd'); water.addColorStop(1, '#5da99f');
-      c.fillStyle = water; c.fill(this.water);
-      c.save(); c.clip(this.water); c.strokeStyle = '#e5edb940'; c.lineWidth = 29; c.stroke(this.water);
-      const glow = gradient(c, 360, 250, 380, [[0, '#e2f3cc49'], [.6, '#bddfc813'], [1, '#a4c4ae00']]); c.fillStyle = glow; c.fillRect(0, 0, W, H);
-      c.strokeStyle = '#f7efd36a'; c.lineWidth = 2; c.stroke(this.water); c.restore();
-      const rocks = [[113, 253, 14], [108, 274, 9], [124, 282, 7], [798, 493, 16], [822, 483, 10], [812, 511, 7], [601, 101, 10], [620, 104, 7], [298, 524, 10], [881, 216, 9]];
-      rocks.forEach(([x, y, size]) => {
-        c.shadowColor = '#3c5b3e45'; c.shadowBlur = 4; c.shadowOffsetY = 3;
-        ellipse(c, x, y, size, size * .65, gradient(c, x, y, size * 1.3, [[0, '#e8e3c4'], [.6, '#bab9a1'], [1, '#8b967e']]), -.3);
-        c.shadowColor = 'transparent'; c.beginPath(); c.ellipse(x - 2, y - 2, size * .6, size * .29, -.3, 3.4, 5.7); c.strokeStyle = '#f8f2db9c'; c.lineWidth = 1; c.stroke();
-      });
-      this.grass(c, 170, 139, 43, -1); this.grass(c, 900, 371, 49, 1); this.grass(c, 653, 532, 33, -1); this.grass(c, 325, 109, 23, 1); this.grass(c, 194, 481, 21, -1);
-      [[275, 95], [286, 105], [873, 191], [350, 551], [364, 545]].forEach(([x, y]) => {
-        c.strokeStyle = '#6f8d52'; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y + 12); c.lineTo(x, y); c.stroke();
-        for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; ellipse(c, x + Math.cos(a) * 3, y + Math.sin(a) * 3, 3.5, 2, '#fff6df', a); }
-        ellipse(c, x, y, 2, 2, '#eac65d');
-      });
+      c.fillStyle = '#bed0a0'; c.fill(this.ground); c.strokeStyle = '#91ad86'; c.lineWidth = 2; c.stroke(this.ground);
+      c.lineJoin = 'round'; c.strokeStyle = '#cabf8d'; c.lineWidth = 36; c.stroke(this.water);
+      c.strokeStyle = '#f3e2b6'; c.lineWidth = 29; c.stroke(this.water);
+      c.fillStyle = '#a3dcda'; c.fill(this.water); c.strokeStyle = '#5caaa7'; c.lineWidth = 2; c.stroke(this.water);
+      this.grass(c, 170, 139, 43, -1); this.grass(c, 900, 371, 49, 1); this.grass(c, 653, 532, 33, -1);
     }
     grass(c, x, y, height, direction) {
       c.save(); c.translate(x, y); c.scale(direction, 1);
@@ -191,28 +138,13 @@
       c.restore();
     }
     lily(c, x, y, size, flower, phase) {
-      c.save(); c.translate(x, y + Math.sin(this.time * .6 + phase) * 1.5); c.rotate(Math.sin(this.time * .18 + phase) * .035);
-      ellipse(c, 0, 5, size * 1.08, size * .52, '#226b6840');
-      c.save(); c.scale(1, .64);
-      c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, size, .2, Math.PI * 1.93); c.closePath();
-      c.fillStyle = gradient(c, -3, -3, size * 1.2, [[0, '#c6d68b'], [.5, '#8aaf69'], [1, '#4d855c']]); c.fill(); c.strokeStyle = '#5c8a5b'; c.lineWidth = 1; c.stroke();
-      c.strokeStyle = '#d4e4a760'; c.lineWidth = .7;
-      for (let i = 1; i < 8; i++) { const a = i * .8; c.beginPath(); c.moveTo(-3, 0); c.lineTo(Math.cos(a) * size * .85, Math.sin(a) * size * .85); c.stroke(); }
-      c.restore();
-      if (flower) {
-        c.translate(-3, -9);
-        for (let layer = 0; layer < 2; layer++) for (let i = 0; i < 7; i++) {
-          const a = i * Math.PI * 2 / 7 + layer * .4, radius = layer ? 8 : 13;
-          c.save(); c.rotate(a); c.beginPath(); c.moveTo(0, 2); c.bezierCurveTo(-8, -radius * .4, -5, -radius * 1.7, 0, -radius * 1.9); c.bezierCurveTo(5, -radius * 1.7, 8, -radius * .4, 0, 2);
-          c.fillStyle = gradient(c, 0, -radius, radius * 1.4, [[0, '#fff6ec'], [.6, '#f4bbc0'], [1, '#d9859f']]); c.fill(); c.restore();
-        }
-        ellipse(c, 0, -2, 4.5, 3.3, '#eac762');
-      }
-      c.restore();
+      c.save(); c.translate(x, y + Math.sin(this.time * .8 + phase) * 2); c.rotate(Math.sin(this.time * .25 + phase) * .04);
+      c.beginPath(); c.ellipse(0, 0, size, size * .49, -.15, .3, Math.PI * 1.94); c.lineTo(-3, -1); c.closePath();
+      c.fillStyle = '#93b06f'; c.fill(); c.strokeStyle = '#28777b'; c.lineWidth = 2.4; c.stroke(); c.restore();
     }
     drawDuck(c, d, alpha = 1, size = 1, selected = false) {
       const depth = .9 + (d.y - 160) / 1600, s = this.scale * size * depth;
-      const bob = this.reduced.matches ? 0 : Math.sin(this.time * 2.7 + d.phase) * 1.25;
+      const bob = this.reduced.matches ? 0 : Math.sin(this.time * 4.8 + d.phase) * 1.6;
       c.save(); c.globalAlpha = alpha;
       ellipse(c, d.x, d.y + 8 * s, 34 * s, 8.5 * s, '#265b5833');
       c.strokeStyle = '#e3f4dc95'; c.lineWidth = 1.4;
@@ -221,26 +153,39 @@
       c.translate(d.x, d.y + bob);
       const turnWidth = .72 + Math.min(1, Math.abs(d.facing)) * .28;
       c.scale(s * (d.facing >= 0 ? 1 : -1) * turnWidth, s);
-      if (!this.reduced.matches) c.rotate(Math.sin(this.time * 1.8 + d.phase) * .025);
+      if (!this.reduced.matches) c.rotate(Math.sin(this.time * 3.5 + d.phase) * .035);
       const blink = !this.reduced.matches && (this.time + d.blink) % 6.5 < .13;
-      const sprite = this.sprites[d.alleles.join('') + (blink ? 'b' : '')];
+      const sprite = this.sprites[d.alleles.join('') + (d.cream ? 'c' : '') + (blink ? 'b' : '')];
       c.drawImage(sprite, -55, -70, 115.2, 115.2);
       c.restore();
     }
+    swimTarget(x, y, direction = 1) {
+      const currentAngle = Math.atan2((y - 315) / 153, (x - 500) / 324);
+      const angle = currentAngle + direction * (.8 + Math.random() * .6);
+      const r = .6 + Math.random() * .32;
+      return { x: 500 + Math.cos(angle) * r * 324, y: 315 + Math.sin(angle) * r * 153 };
+    }
     updateDuck(d, dt, i) {
-      const dx = (d.x - 500) / 324, dy = (d.y - 315) / 153, radius = Math.hypot(dx, dy);
-      d.vx += (Math.sin(this.time * .55 + d.phase) * 2 - d.vx * .055) * dt;
-      d.vy += (Math.cos(this.time * .37 + d.phase) * 1.2 - d.vy * .06) * dt;
-      if (radius > .92) { d.vx -= dx * 30 * dt; d.vy -= dy * 17 * dt; }
-      d.vx = clamp(d.vx, -17, 17); d.vy = clamp(d.vy, -9, 9);
+      let dx = d.targetX - d.x, dy = d.targetY - d.y;
+      if (Math.hypot(dx, dy) < 35) {
+        const target = this.swimTarget(d.x, d.y, d.orbit); d.targetX = target.x; d.targetY = target.y;
+        dx = d.targetX - d.x; dy = d.targetY - d.y;
+      }
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const steering = Math.min(1, dt * 3.2);
+      d.vx = lerp(d.vx, dx / distance * d.speed, steering);
+      d.vy = lerp(d.vy, dy / distance * d.speed, steering);
       d.x += d.vx * dt; d.y += d.vy * dt;
-      // Keep every actor inside the swimmable area even after long unattended runs.
+      // Swimming follows destinations inside a convex safe area; guard the bank after spacing adjustments.
       const r = Math.hypot((d.x - 500) / 340, (d.y - 315) / 164);
-      if (r > 1) { d.x = 500 + (d.x - 500) / r; d.y = 315 + (d.y - 315) / r; }
-      const facing = d.vx > .8 ? 1 : d.vx < -.8 ? -1 : Math.sign(d.facing) || 1;
-      d.facing = lerp(d.facing, facing, Math.min(1, dt * 2.5));
+      if (r > 1) {
+        d.x = 500 + (d.x - 500) / r; d.y = 315 + (d.y - 315) / r;
+        const target = this.swimTarget(d.x, d.y, d.orbit); d.targetX = target.x; d.targetY = target.y;
+      }
+      const facing = d.vx > 2 ? 1 : d.vx < -2 ? -1 : Math.sign(d.facing) || 1;
+      d.facing = lerp(d.facing, facing, Math.min(1, dt * 5));
       d.wake += dt;
-      if (d.wake > .6 && i % Math.max(1, Math.ceil(this.ducks.length / 36)) === 0) {
+      if (d.wake > .22 && i % Math.max(1, Math.ceil(this.ducks.length / 36)) === 0) {
         this.wakes.push({ x: d.x - Math.sign(d.facing) * 20 * this.scale, y: d.y + 5 * this.scale, age: 0, size: this.scale }); d.wake = 0;
       }
     }
@@ -264,9 +209,14 @@
         c.beginPath(); c.ellipse(w.x, w.y, (22 + w.age * 18) * w.size, (5 + w.age * 5) * w.size, 0, .15, 2.95);
         c.strokeStyle = `rgba(237,249,218,${.38 * (1 - w.age / 2.4)})`; c.lineWidth = 1.2; c.stroke();
       });
-      this.lily(c, 246, 212, 26, true, 1); this.lily(c, 279, 223, 18, false, 3);
+      this.lily(c, 246, 212, 32, false, 1);
       this.growth = Math.min(1, this.growth + dt * .24);
-      if (!this.reduced.matches) { this.ducks.forEach((d, i) => this.updateDuck(d, dt, i)); this.keepSpace(dt); }
+      if (!this.reduced.matches) {
+        const steps = Math.max(1, Math.ceil(dt / .04));
+        for (let step = 0; step < steps; step++) {
+          this.ducks.forEach((d, i) => this.updateDuck(d, dt / steps, i)); this.keepSpace(dt / steps);
+        }
+      }
       const birth = this.birth, p = birth ? birth.progress : 0;
       const oldAlpha = birth ? 1 - smooth((p - .83) / .17) : 1;
       const moving = new Map();
@@ -295,7 +245,7 @@
       if (birth && p > .83) {
         birth.next.forEach(d => this.drawDuck(c, d, smooth((p - .83) / .17), .65, false));
       }
-      this.lily(c, 780, 410, 30, true, 4); this.lily(c, 738, 422, 20, false, 2);
+      this.lily(c, 780, 410, 36, false, 4);
       c.restore();
     }
   }

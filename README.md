@@ -1,6 +1,6 @@
 # This is not a species.
 
-A personal playground for exploring evolution, population genetics, ecology, genomics and bioinformatics through illustrated, interactive experiments.
+A personal playground for exploring evolution, population genetics, ecology, genomics and bioinformatics through playful, interactive illustrations.
 
 **[Visit the website](https://yacinebenchehida.github.io/this-is-not-a-species/)**
 

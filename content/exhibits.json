@@ -1,0 +1,360 @@
+[
+  {
+    "theme": "population-genetics",
+    "slug": "genetic-drift",
+    "title": "The Duck Pond",
+    "concept": "Genetic drift",
+    "themes": [
+      "population-genetics",
+      "evolution"
+    ],
+    "art": "cartoons/duck-pond.webp",
+    "description": "Follow colourful ducks across generations as chance changes the frequencies of their alleles.",
+    "detail": "Each duck carries two alleles, shown as coloured circles. Explore how random inheritance can make an allele disappear or become the only one left in a population.",
+    "controls": [
+      "Population size",
+      "Initial allele frequency",
+      "Generation speed"
+    ]
+  },
+  {
+    "theme": "evolution",
+    "slug": "natural-selection",
+    "title": "The Peppered Moth Forest",
+    "concept": "Natural selection",
+    "themes": [
+      "evolution"
+    ],
+    "art": "cartoons/moth-forest.webp",
+    "description": "Explore how camouflage and hungry birds change the balance of light and dark moths.",
+    "detail": "Light and dark moths settle on different tree backgrounds. Birds are more likely to catch conspicuous individuals, changing the frequencies of colour morphs over generations.",
+    "controls": [
+      "Predation intensity",
+      "Background colour",
+      "Dominance",
+      "Starting frequencies"
+    ]
+  },
+  {
+    "theme": "population-genetics",
+    "slug": "gene-flow",
+    "title": "The Butterfly Islands",
+    "concept": "Migration and gene flow",
+    "themes": [
+      "population-genetics",
+      "evolution"
+    ],
+    "art": "cartoons/butterfly-islands.webp",
+    "description": "Follow butterflies between islands and explore how migration changes their genetic composition.",
+    "detail": "Islands begin with different allele frequencies. Migrating butterflies carry alleles between populations, connecting their evolutionary histories.",
+    "controls": [
+      "Migration rate",
+      "Population sizes",
+      "Island connectivity"
+    ]
+  },
+  {
+    "theme": "population-genetics",
+    "slug": "founder-effects",
+    "title": "Island Colonisation",
+    "concept": "Founder effects and bottlenecks",
+    "themes": [
+      "population-genetics",
+      "evolution"
+    ],
+    "art": "cartoons/birds.webp",
+    "description": "Discover how a small founding population can carry a different slice of genetic diversity.",
+    "detail": "A handful of individuals colonise a new island. Compare the genetic diversity of the founders with their source population, and explore what happens during a bottleneck and subsequent growth.",
+    "controls": [
+      "Number of founders",
+      "Bottleneck duration",
+      "Subsequent growth rate"
+    ]
+  },
+  {
+    "theme": "population-genetics",
+    "slug": "mutation-selection",
+    "title": "The Butterfly Garden",
+    "concept": "Mutation–selection balance",
+    "themes": [
+      "population-genetics",
+      "evolution"
+    ],
+    "art": "cartoons/butterfly-garden.webp",
+    "description": "Explore the balance between mutations introducing a colour variant and selection removing it.",
+    "detail": "New mutations continually introduce a disadvantageous colour variant. Explore how mutation, fitness effects and dominance shape the balance between its introduction and removal.",
+    "controls": [
+      "Mutation rate",
+      "Fitness effects",
+      "Dominance"
+    ]
+  },
+  {
+    "theme": "population-genetics",
+    "slug": "recombination",
+    "title": "The Chromosome Mixer",
+    "concept": "Recombination and linkage",
+    "themes": [
+      "population-genetics",
+      "genomics"
+    ],
+    "art": "cartoons/recombination.svg",
+    "description": "Mix parental chromosomes and explore how crossing-over reshuffles combinations of alleles.",
+    "detail": "Two parental chromosomes carry differently coloured genetic segments. Explore how crossing-over creates recombinant chromosomes and can gradually reduce associations between markers, known as linkage disequilibrium.",
+    "controls": [
+      "Recombination rate",
+      "Marker distance",
+      "Number of generations"
+    ]
+  },
+  {
+    "theme": "evolution",
+    "slug": "chromosomal-inversions",
+    "title": "The Recombination Trap",
+    "concept": "Chromosomal inversions",
+    "themes": [
+      "evolution",
+      "population-genetics",
+      "genomics"
+    ],
+    "art": "cartoons/inversions.svg",
+    "description": "Compare chromosome arrangements and explore why inversions can preserve combinations of alleles.",
+    "detail": "Compare pairing and recombination in standard arrangements and inversion heterozygotes. Explore how an inversion can suppress the recovery of recombinant haplotypes.",
+    "controls": [
+      "Inversion length",
+      "Recombination frequency",
+      "Genotype"
+    ]
+  },
+  {
+    "theme": "population-genetics",
+    "slug": "coalescent",
+    "title": "Tracing Ancestors",
+    "concept": "Coalescent theory",
+    "themes": [
+      "population-genetics",
+      "evolution"
+    ],
+    "art": "cartoons/coalescent.svg",
+    "description": "Follow sampled genetic lineages backwards in time as they meet in shared ancestors.",
+    "detail": "Begin with sampled gene copies and trace their ancestral lineages backwards until they reach a common ancestor. Explore how population size and demographic history change the pattern of ancestry.",
+    "controls": [
+      "Effective population size",
+      "Sample size",
+      "Demographic history"
+    ]
+  },
+  {
+    "theme": "ecology",
+    "slug": "predator-prey",
+    "title": "Foxes and Rabbits",
+    "concept": "Predator–prey dynamics",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/fox-rabbits.webp",
+    "description": "Explore the changing fortunes of rabbits and foxes through their connected population cycles.",
+    "detail": "Rabbits reproduce and foxes consume them. Follow their populations alongside synchronised graphs to explore how prey availability and predator mortality shape their dynamics.",
+    "controls": [
+      "Birth rates",
+      "Predation rates",
+      "Predator mortality"
+    ]
+  },
+  {
+    "theme": "ecology",
+    "slug": "competition",
+    "title": "The Food Fight",
+    "concept": "Interspecific competition",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/birds.webp",
+    "description": "Explore whether two species sharing a limited resource can coexist.",
+    "detail": "Two species compete for the same limited resource. Explore competitive exclusion, coexistence and the effects of competition within and between species.",
+    "controls": [
+      "Carrying capacities",
+      "Competition coefficients",
+      "Growth rates"
+    ]
+  },
+  {
+    "theme": "ecology",
+    "slug": "population-growth",
+    "title": "The Petri Dish",
+    "concept": "Population growth",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/petri-dish.webp",
+    "description": "Compare rapid population growth with the slowdown caused by limited resources.",
+    "detail": "A bacterial population expands across a dish. Compare exponential and logistic growth, and explore how a carrying capacity limits continued expansion.",
+    "controls": [
+      "Growth rate",
+      "Carrying capacity",
+      "Starting population"
+    ]
+  },
+  {
+    "theme": "ecology",
+    "slug": "island-biogeography",
+    "title": "Building an Island Community",
+    "concept": "Island biogeography",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/butterfly-islands.webp",
+    "description": "Explore how island size and isolation influence the richness of an island community.",
+    "detail": "Species arrive from a mainland and occasionally go extinct. Explore how island area, distance and the balance of immigration and extinction influence the number of species present.",
+    "controls": [
+      "Island area",
+      "Mainland distance",
+      "Immigration rate",
+      "Extinction rate"
+    ]
+  },
+  {
+    "theme": "ecology",
+    "slug": "succession",
+    "title": "From Bare Ground to Forest",
+    "concept": "Ecological succession",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/succession.webp",
+    "description": "Follow a landscape recovering from disturbance as plant communities change.",
+    "detail": "Pioneer plants establish on disturbed ground and are gradually joined or replaced by other species. Explore how disturbance, colonisation and environmental conditions influence succession.",
+    "controls": [
+      "Disturbance severity",
+      "Colonisation rates",
+      "Environmental conditions"
+    ]
+  },
+  {
+    "theme": "bioinformatics",
+    "slug": "sequencing-zoom",
+    "title": "The Sequencing Zoom",
+    "concept": "Inside an Illumina sequencer",
+    "themes": [
+      "bioinformatics",
+      "genomics"
+    ],
+    "art": "cartoons/sequencer.webp",
+    "description": "Travel from a sequencing instrument to the microscopic features inside its flow cell.",
+    "detail": "Explore the instrument, flow cell and the regions where sequencing takes place at successive scales. Follow the terminology and sequencing process through labelled layers.",
+    "controls": [
+      "Zoom",
+      "Sequencing cycle",
+      "Labelled layers"
+    ]
+  },
+  {
+    "theme": "bioinformatics",
+    "slug": "read-mapping",
+    "title": "Where Does This Read Belong?",
+    "concept": "Read mapping",
+    "themes": [
+      "bioinformatics",
+      "genomics"
+    ],
+    "art": "cartoons/read-mapping.svg",
+    "description": "Find a home for short DNA reads and discover why some alignments are ambiguous.",
+    "detail": "Align short DNA sequences against a reference genome. Explore how mismatches, insertions, deletions and repetitive regions complicate the search for a read's origin.",
+    "controls": [
+      "Read length",
+      "Error rate",
+      "Reference complexity"
+    ]
+  },
+  {
+    "theme": "bioinformatics",
+    "slug": "genome-assembly",
+    "title": "The DNA Puzzle",
+    "concept": "Genome assembly",
+    "themes": [
+      "bioinformatics",
+      "genomics"
+    ],
+    "art": "cartoons/genome-assembly.svg",
+    "description": "Piece together sequencing reads and explore the puzzles created by repeated DNA.",
+    "detail": "Fragment a short genome into sequencing reads, then explore reconstruction through overlapping fragments or a de Bruijn graph. Discover how repeats can create ambiguous assemblies.",
+    "controls": [
+      "Read length",
+      "Coverage",
+      "Repeat content",
+      "k-mer size"
+    ]
+  },
+  {
+    "theme": "genomics",
+    "slug": "variant-calling",
+    "title": "Finding the SNP",
+    "concept": "Sequencing depth and variant calling",
+    "themes": [
+      "genomics",
+      "bioinformatics"
+    ],
+    "art": "cartoons/variant-calling.svg",
+    "description": "Explore how sequencing depth, errors and allele fractions affect confidence in a genotype.",
+    "detail": "Sequencing reads accumulate at a genomic position. Compare the evidence for different genotypes as depth, error rate, ploidy and the true genotype change.",
+    "controls": [
+      "Sequencing depth",
+      "Error rate",
+      "Ploidy",
+      "True genotype"
+    ]
+  },
+  {
+    "theme": "genomics",
+    "slug": "ancient-dna",
+    "title": "The Molecular Time Machine",
+    "concept": "Ancient DNA degradation",
+    "themes": [
+      "genomics",
+      "bioinformatics"
+    ],
+    "art": "cartoons/ancient-dna.svg",
+    "description": "Explore what fragmented and damaged DNA can tell us about the past.",
+    "detail": "DNA molecules fragment and accumulate characteristic damage over time. Explore how short fragments, damage, sequencing errors and low coverage complicate the interpretation of historical genomes.",
+    "controls": [
+      "Fragment-length distribution",
+      "Damage rate",
+      "Sequencing depth"
+    ]
+  },
+  {
+    "theme": "evolution",
+    "slug": "phylogenetic-evolution",
+    "title": "Growing the Tree of Life",
+    "concept": "Phylogenetic evolution",
+    "themes": [
+      "evolution"
+    ],
+    "art": "cartoons/tree-of-life.webp",
+    "description": "Follow branching lineages as they split, change and sometimes disappear.",
+    "detail": "Start with a common ancestor and follow lineages as they split, accumulate mutations and occasionally go extinct. Explore the relationships represented by a phylogenetic tree.",
+    "controls": [
+      "Speciation rate",
+      "Extinction rate",
+      "Mutation rate"
+    ]
+  },
+  {
+    "theme": "evolution",
+    "slug": "mimicry",
+    "title": "The Mimicry Game",
+    "concept": "Müllerian and Batesian mimicry",
+    "themes": [
+      "evolution"
+    ],
+    "art": "cartoons/butterfly-garden.webp",
+    "description": "Explore how warning patterns, edible mimics and predator learning interact.",
+    "detail": "Predators learn to avoid warning patterns associated with unpalatable prey. Explore how the abundance of defended models and edible mimics influences the survival of different colour morphs.",
+    "controls": [
+      "Model abundance",
+      "Mimic abundance",
+      "Predator learning",
+      "Palatability"
+    ]
+  }
+]

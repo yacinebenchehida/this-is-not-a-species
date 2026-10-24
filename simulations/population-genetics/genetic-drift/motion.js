@@ -4,6 +4,7 @@
   try {
     const canvas = $('family-canvas'), c = canvas.getContext('2d');
     if (!c) throw new Error('Canvas is unavailable');
+    canvas.dataset.characterRenderer = window.DuckCharacter.renderer || 'canvas-2d';
     const { draw: drawDuck, palette, oval } = window.DuckCharacter;
     const W = 1000, H = 460, duration = 6.4;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -19,7 +20,7 @@
       return { x: 500 + Math.cos(angle) * radius * 305, y: 265 + Math.sin(angle) * radius * 87 };
     }
     function actor(x, y, i) {
-      return { x, y, vx: i ? -78 : 80, vy: i ? -9 : 12, target: i ? { x: 290, y: 240 } : { x: 740, y: 285 }, facing: i ? -1 : 1, phase: i * 2.1, scale: 1.6, cream: Boolean(i), alleles: parentAlleles[i], wake: 0, headingTimer: 2.5 };
+      return { x, y, vx: i ? -78 : 80, vy: i ? -9 : 12, target: i ? { x: 290, y: 240 } : { x: 740, y: 285 }, facing: i ? -1 : 1, yaw: i ? -1.16 : 1.16, phase: i * 2.1, scale: 1.6, cream: Boolean(i), alleles: parentAlleles[i], wake: 0, headingTimer: 2.5 };
     }
     const adults = [actor(270, 235, 0), actor(740, 300, 1)];
     let baby = { ...actor(500, 285, 0), scale: 1.03, baby: true };
@@ -51,7 +52,7 @@
     new ResizeObserver(resize).observe(canvas); resize();
     function makeRun() {
       const meeting = { x: clamp((adults[0].x + adults[1].x) / 2 + (Math.random() - .5) * 160, 350, 670), y: clamp((adults[0].y + adults[1].y) / 2, 240, 315) };
-      run = { meeting, starts: adults.map(d => ({ x: d.x, y: d.y, facing: d.facing })),
+      run = { meeting, starts: adults.map(d => ({ x: d.x, y: d.y, facing: d.facing, yaw: d.yaw })),
         swimEnds: adults.map((d, i) => ({ x: clamp(d.x + (i ? -145 : 145), 220, 780), y: clamp(d.y + (i ? -45 : 45), 190, 335) })),
         controls: [{ x: 530, y: 175 }, { x: 475, y: 350 }] };
       baby.alleles = family.alleles; baby.target = target();
@@ -70,6 +71,9 @@
       const r = Math.hypot((d.x - 500) / 325, (d.y - 265) / 100);
       if (r > 1) { d.x = 500 + (d.x - 500) / r; d.y = 265 + (d.y - 265) / r; d.target = target(); }
       if (Math.abs(d.vx) > 8) d.facing = d.vx > 0 ? 1 : -1;
+      const desiredYaw = Math.atan2(d.vx, d.vy / .55);
+      const turn = Math.atan2(Math.sin(desiredYaw - d.yaw), Math.cos(desiredYaw - d.yaw));
+      d.yaw += turn * Math.min(1, dt * 3.5);
     }
     function arcPoint(a, b, control, t) {
       const u = 1 - t; return { x: u * u * a.x + 2 * u * t * control.x + t * t * b.x, y: u * u * a.y + 2 * u * t * control.y + t * t * b.y };
@@ -146,6 +150,11 @@
           pose.alpha = adultAlpha;
           if (p >= .5) pose.highlight = family.sourceCopies[i];
         }
+        if (started) {
+          const facingYaw = i ? -1.16 : 1.16;
+          const turn = Math.atan2(Math.sin(facingYaw - run.starts[i].yaw), Math.cos(facingYaw - run.starts[i].yaw));
+          display.yaw = run.starts[i].yaw + turn * between(p, 0, .22);
+        }
         const dots = drawDuck(c, display, reduced.matches ? 1 : time, pose); markers.push(dots[family.sourceCopies[i]]);
         wake(display, dt, !started || (running && p < .34), d);
       });
@@ -170,6 +179,7 @@
         const reveal = between(p, .79, .88), exit = between(p, .88, 1);
         const destination = { x: m.x > 500 ? 300 : 720, y: m.y > 280 ? 210 : 325 };
         let display = { ...baby, x: lerp(m.x, destination.x, exit), y: lerp(m.y + 15 - Math.sin(reveal * Math.PI) * 14, destination.y, exit), scale: (0.55 + reveal * .5) * (1 + Math.sin(reveal * Math.PI) * .12), facing: destination.x > m.x ? 1 : -1 };
+        display.yaw = display.facing * 1.16;
         if (progress >= 1 && endSwimming && !reduced.matches) display = baby;
         drawDuck(c, display, reduced.matches ? 1 : time, { alpha: reveal, still: reduced.matches }); wake(display, dt, p > .88 && (running || endSwimming), baby);
       }
@@ -220,7 +230,7 @@
         if (running) {
           const old = progress; progress = Math.min(1, progress + dt * Number($('story-tempo').value) / duration);
           if (old < 1 && progress >= 1) {
-            running = false; endSwimming = true; const m = run.meeting; baby.x = m.x > 500 ? 300 : 720; baby.y = m.y > 280 ? 210 : 325; baby.facing = m.x > 500 ? -1 : 1; baby.target = target(); baby.headingTimer = 2;
+            running = false; endSwimming = true; const m = run.meeting; baby.x = m.x > 500 ? 300 : 720; baby.y = m.y > 280 ? 210 : 325; baby.facing = m.x > 500 ? -1 : 1; baby.yaw = baby.facing * 1.16; baby.target = target(); baby.headingTimer = 2;
           }
         }
         if (progress >= 1 && endSwimming && !reduced.matches) wander(baby, dt);

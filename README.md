@@ -1,29 +1,31 @@
 # This is not a species
 
-A playful collection of interactive scientific illustrations for evolution, population genetics, ecology, genomics and bioinformatics.
+A personal, playful collection of interactive illustrations for evolution, population genetics, ecology, genomics and bioinformatics.
 
-**Current status: Website prototype.** The featured simulation pages are placeholders, not functional numerical simulations yet.
+## Live website
 
-## Website
+**https://yacinebenchehida.github.io/this-is-not-a-species/**
 
-After GitHub Pages is enabled, visit https://yacinebenchehida.github.io/this-is-not-a-species/
+GitHub Pages is already enabled and deploying from the `main` branch.
 
-To enable it: Settings → Pages → Source: Deploy from a branch → Branch: main → Folder: /(root) → Save.
+## Current status
 
-## Repository organisation
+**Early prototype — not the approved visual design yet.** The website's structure, navigation, five theme pages and three simulation placeholders are in place, but most illustrations are temporary. No working simulations have been published.
 
-- `index.html`: gallery homepage
-- `shared/`: shared styling and lightweight JavaScript
-- `assets/`: graphics and mascot
-- `simulations/evolution/`: evolution
-- `simulations/population-genetics/`: population genetics
-- `simulations/ecology/`: ecology
-- `simulations/genomics/`: genomics
-- `simulations/bioinformatics/`: bioinformatics
-- `AGENTS.md`: guidance for future AI coding sessions
+The butterfly–mule remains the small site logo. The homepage hero uses a smaller multicoloured evolutionary tree, based on the original logo-sheet concept. The artwork is a simplified reconstruction, not a faithful extraction of the approved illustration.
 
-The current mascot is a simple original SVG approximation of the butterfly–mule concept. It is not an exact reconstruction of the approved mockup. Artwork and design remain provisional.
+## Structure
+
+- `index.html` — homepage
+- `shared/` — shared styles and JS
+- `assets/` — illustrations and icons
+- `simulations/evolution/` — evolution
+- `simulations/population-genetics/` — population genetics
+- `simulations/ecology/` — ecology
+- `simulations/genomics/` — genomics
+- `simulations/bioinformatics/` — bioinformatics
+- `AGENTS.md` — guidance for future AI development
 
 ## Disclaimer
 
-This is a personal hobby project using AI-generated or AI-assisted code and artwork. The code has not been independently audited. The owner may inspect scientific behaviour interactively, but scientific correctness is not guaranteed. These illustrations are for exploration and teaching, not research analysis.
+This is a hobby project using AI-generated or AI-assisted code and artwork, without manual source-code auditing. Interactive scientific behaviour may be inspected, but scientific correctness is not guaranteed. These illustrations are intended for exploration and teaching, not research analysis.

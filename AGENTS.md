@@ -58,5 +58,5 @@ This is a personal, playful, non-research science illustration website. Prioriti
 ## Editorial scope
 - Write the root README and website for visitors: explain the project, what they can explore, and relevant limitations.
 - Keep architecture, publishing instructions, asset preparation and maintenance guidance in developer documentation.
-- Public copy should describe the project itself, without narrating design approvals, implementation history or conversations with the owner.
+- Public copy should describe the project itself, without narrating design approvals, implementation history or conversations with the owner. Do not add progress reports about galleries being available or features being built. Put availability labels beside the affected illustrations; the About page explains purpose, not project status.
 - Describe unfinished functionality clearly when it affects a visitor's expectations. Keep code comments focused on behavior, assumptions and reasons for non-obvious choices.

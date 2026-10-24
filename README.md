@@ -16,12 +16,12 @@ This project brings scientific ideas to life through small, playful illustration
 - [Genomics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/genomics/)
 - [Bioinformatics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/bioinformatics/)
 
-The first interactive illustrations are in development. Previews marked **Coming soon** are not yet interactive.
+Illustrations marked **Coming soon** are not yet interactive.
 
 ## About
 
 The name nods to René Magritte's *The Treachery of Images*: an illustration or a model represents something about life, without being life itself.
 
-This is a hobby project made for curiosity and enjoyment, using AI-generated or AI-assisted artwork and code. The code has not undergone independent human review. The applications are intended for illustrative and educational exploration rather than scientific research.
+This is a hobby project made for curiosity and enjoyment, using AI-generated or AI-assisted artwork and code. The code has not undergone independent human review. The illustrations are intended for educational exploration rather than scientific research.
 
 [More about the project](https://yacinebenchehida.github.io/this-is-not-a-species/about/) · [Development guidance](AGENTS.md)

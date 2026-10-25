@@ -70,7 +70,7 @@
       // Expected share of mixed ducks: 2p0(1 − p0)(1 − 1/2N)^(t − 1) from generation 1 on.
       const p0 = history[0], N2 = population.length * 2, expected = [];
       for (let t = 1; t <= extent; t += Math.max(1, Math.floor(extent / 120))) expected.push(`${x(t).toFixed(1)},${ym(2 * p0 * (1 - p0) * Math.pow(1 - 1 / N2, t - 1)).toFixed(1)}`);
-      $('frequency-chart').innerHTML = `<svg viewBox="0 0 310 ${mBottom + 34}" role="img" aria-label="La proportion de turquoise était de ${percent(p0)} et vaut ${percent(last)} à la génération ${generation}. ${ghosts.length} expériences précédentes avec les mêmes réglages sont représentées en traits pâles. En dessous : la proportion de canards portant les deux couleurs (hétérozygotes).">
+      $('frequency-chart').innerHTML = `<svg viewBox="0 0 310 ${mBottom + 34}" role="img" aria-label="La proportion de turquoise était de ${percent(p0)} et vaut ${percent(last)} à la génération ${generation}. ${ghosts.length} ${ghosts.length === 1 ? 'expérience précédente avec les mêmes réglages est représentée' : 'expériences précédentes avec les mêmes réglages sont représentées'} en traits pâles. En dessous : la proportion de canards portant les deux couleurs (hétérozygotes).">
         <text class="chart-title" x="${left}" y="6">Proportion de copies turquoise</text>
         ${grid}<line x1="${left}" x2="${right}" y1="${y(p0)}" y2="${y(p0)}" stroke="#7d8a78" stroke-dasharray="4 4"/>
         ${ghostLines}
@@ -172,9 +172,9 @@
       history = [countAlleles(population) / (2 * size)]; mixed = [mixedShare(population)];
       scene.ducks = []; scene.setPopulation(population);
       $('fixed-card').hidden = true;
-      $('frequency-label').textContent = `${Math.round(p * 100)}%`;
+      $('frequency-label').textContent = percent(p);
       $('frequency').setAttribute('aria-valuetext', `${Math.round(p * 100)} pour cent de turquoise`);
-      $('starting-count').textContent = `Au départ : ${countAlleles(population)} copies turquoise sur ${size * 2} (${percent(history[0])}).`;
+      $('starting-count').textContent = `Au départ : ${countAlleles(population)} ${countAlleles(population) === 1 ? 'copie' : 'copies'} turquoise sur ${size * 2} (${percent(history[0])}).`;
       $('pond-message').textContent = isFixed() ? fixedMessage() : size >= 200 ? 'Une mare bien peuplée ! Sélectionnez un canard pour observer ses deux perles de près.' : 'Tous les canards ont les mêmes chances. Laissons l’histoire se dérouler.';
       $('scene-phase').textContent = 'Un moment paisible au bord de la mare'; speedLabel(); renderUI(true);
     }

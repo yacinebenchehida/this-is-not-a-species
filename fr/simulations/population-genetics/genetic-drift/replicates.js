@@ -74,7 +74,7 @@
     $('rep-count').disabled = $('rep-size').disabled = mode !== 'many';
     $('rep-share-label').textContent = percent(share());
     const teal = ponds.filter(p => p.fixedTo === 1).length, coral = ponds.filter(p => p.fixedTo === 0).length, open = ponds.length - teal - coral;
-    $('replicate-summary').textContent = `Génération ${generation} : le turquoise est fixé dans ${teal} sur ${ponds.length} mares, le corail dans ${coral}${open ? `, ${open} encore mélangées` : ''}. Résultat attendu : le turquoise se fixe dans environ ${percent(start)} des mares, soit sa proportion initiale (${Math.round(start * 2 * ponds[0].size)} sur ${2 * ponds[0].size} copies).`;
+    $('replicate-summary').textContent = `Génération ${generation} : le turquoise est fixé dans ${teal} sur ${ponds.length} mares, le corail dans ${coral}${open ? `, ${open} ${open === 1 ? 'encore mélangée' : 'encore mélangées'}` : ''}. Résultat attendu : le turquoise se fixe dans environ ${percent(start)} des mares, soit sa proportion initiale (${Math.round(start * 2 * ponds[0].size)} sur ${2 * ponds[0].size} copies).`;
     $('rep-tally-teal').style.width = `${teal + coral ? teal / (teal + coral) * 100 : 0}%`;
     $('rep-tally').classList.toggle('empty', !(teal + coral));
     $('rep-tally-mark').style.left = `${start * 100}%`;
@@ -109,7 +109,7 @@
       c.font = compact ? '600 11px Georgia,serif' : '600 13.5px Georgia,serif';
       c.fillText(compact ? `Mare ${pond.label}` : `Mare ${pond.label} · ${pond.size} canards`, P.cx, base + (compact ? 15 : 22));
       c.font = compact ? '10.5px system-ui,sans-serif' : '12.5px system-ui,sans-serif'; c.fillStyle = pond.fixedTo === null ? '#37514f' : pond.fixedTo ? '#2a7c76' : '#b9573d';
-      const status = pond.fixedAt !== null ? (compact ? `${pond.fixedTo ? 'turquoise' : 'corail'} fixed` : `${pond.fixedTo ? 'Turquoise' : 'Corail'} fixé à la génération ${pond.fixedAt}`) : `${Math.round(value * 100)}% turquoise`;
+      const status = pond.fixedAt !== null ? (compact ? `${pond.fixedTo ? 'turquoise' : 'corail'} fixé` : `${pond.fixedTo ? 'Turquoise' : 'Corail'} fixé à la génération ${pond.fixedAt}`) : `${percent(value)} de turquoise`;
       c.fillText(status, P.cx, base + (compact ? 29 : 41));
       const width = P.rx * 1.3, x0 = P.cx - width / 2, by = base + (compact ? 35 : 50);
       c.fillStyle = CORAL; c.beginPath(); c.roundRect(x0, by, width, compact ? 4 : 6, 3); c.fill();
@@ -133,7 +133,7 @@
       pts.push(`${x(h.length - 1).toFixed(1)},${y(h[h.length - 1]).toFixed(1)}`);
       return `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-opacity="${opacity}" stroke-width="1.8" stroke-linejoin="round"/>`;
     }).join('');
-    $('replicate-chart').innerHTML = `<svg viewBox="0 0 980 205" role="img" aria-label="Proportion de turquoise dans chacune des ${ponds.length} mares sur ${generation} générations, toutes avec une proportion initiale de ${percent(start)}."><text class="chart-title" x="${left}" y="8">Proportion de turquoise dans chaque mare</text>${gridLines}<line x1="${left}" x2="${right}" y1="${y(start)}" y2="${y(start)}" stroke="#7d8a78" stroke-dasharray="4 4"/>${ticks}${lines}<text class="chart-label" x="${(left + right) / 2}" y="${bottom + 32}" text-anchor="middle">Génération</text></svg>`;
+    $('replicate-chart').innerHTML = `<svg viewBox="0 0 980 205" role="img" aria-label="Proportion de turquoise dans chacune des ${ponds.length} mares sur ${generation} ${generation === 1 ? 'génération' : 'générations'}, toutes avec une proportion initiale de ${percent(start)}."><text class="chart-title" x="${left}" y="8">Proportion de turquoise dans chaque mare</text>${gridLines}<line x1="${left}" x2="${right}" y1="${y(start)}" y2="${y(start)}" stroke="#7d8a78" stroke-dasharray="4 4"/>${ticks}${lines}<text class="chart-label" x="${(left + right) / 2}" y="${bottom + 32}" text-anchor="middle">Génération</text></svg>`;
   }
   function frame(now) {
     const dt = last === null ? 0 : Math.min(.1, (now - last) / 1000); last = now;

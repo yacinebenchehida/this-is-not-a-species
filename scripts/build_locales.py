@@ -51,7 +51,9 @@ class Page(HTMLParser):
      new=posixpath.relpath(dest, 'fr/'+str(self.path.parent))
      if u.path.endswith('/') and not new.endswith('/'):new+='/'
      # Refresh previously cached SVGs whose viewBox was lost by the old localizer.
-     query=(u.query+'&' if u.query else '')+'v=svg-xml-1' if target.endswith('.svg') else u.query
+     query=u.query
+     if target.endswith('.svg'):query=(query+'&' if query else '')+'v=svg-xml-1'
+     elif localized and target.endswith('.js'):query=(query+'&' if query else '')+'locale=fr-2'
      v=urlunsplit(('', '',new,query,u.fragment))
    out.append(f'{k}="{escape(v,quote=True)}"')
   self.out.append('<'+t+(' '+' '.join(out) if out else '')+'>')
@@ -115,7 +117,15 @@ def localize_js(s,name):
  s=s.replace("colourLabel(value) + ' allèle'", "'allèle ' + colourLabel(value)")
  if name=='drift.js':
   s=s.replace("const percent = value => `${(value * 100).toFixed(1).replace(/\\.0$/, '')}%`;", "const percent = value => new Intl.NumberFormat('fr-FR', {style:'percent',maximumFractionDigits:1}).format(value);")
+  s=s.replace("$('frequency-label').textContent = `${Math.round(p * 100)}%`;", "$('frequency-label').textContent = percent(p);")
+  s=s.replace('${countAlleles(population)} copies turquoise', "${countAlleles(population)} ${countAlleles(population) === 1 ? 'copie' : 'copies'} turquoise")
+  s=s.replace('${ghosts.length} expériences précédentes avec les mêmes réglages sont représentées', "${ghosts.length} ${ghosts.length === 1 ? 'expérience précédente avec les mêmes réglages est représentée' : 'expériences précédentes avec les mêmes réglages sont représentées'}")
  if name=='replicates.js':s=s.replace("const percent = v => `${Math.round(v * 100)}%`;", "const percent = v => new Intl.NumberFormat('fr-FR', {style:'percent',maximumFractionDigits:0}).format(v);")
+ if name=='replicates.js':
+  s=s.replace('} fixed`', '} fixé`')
+  s=s.replace('${Math.round(value * 100)}% turquoise', '${percent(value)} de turquoise')
+  s=s.replace('${open} encore mélangées', "${open} ${open === 1 ? 'encore mélangée' : 'encore mélangées'}")
+  s=s.replace('${generation} générations, toutes', "${generation} ${generation === 1 ? 'génération' : 'générations'}, toutes")
  s=s.replace('}%</text>', '} %</text>')
  return s
 

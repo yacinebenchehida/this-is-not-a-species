@@ -3,13 +3,15 @@
   'use strict';
   const body = new Path2D('M-31 8C-40-2-40-18-34-18Q-26-10-19-11C-3-18 24-16 32-5C45 11 28 27 4 27C-15 29-28 24-31 8Z');
   const head = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10Z');
-  const headEdge = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24');
+  const headEdge = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10');
   const beak = new Path2D('M35-31Q44-34 49-29Q53-23 46-20Q38-17 33-23Q32-27 35-31Z');
   // The wing holds the two allele beads, as the page text describes.
   const wing = new Path2D('M-25 1C-16-12 13-12 21 0C16 13-13 16-25 1Z');
   const palette = ['#f57d5b', '#59a8aa'];
   const shine = ['#ffc2ab', '#a6dedb'];
   const markerSpots = [[-9, 2], [9, 2]];
+  // A touch wider and less tall than the reference drawing, with the head sitting a little lower.
+  const shape = { x: 1.08, y: .93, headDrop: 2.5 };
   function oval(c, x, y, rx, ry, fill, rotation = 0) {
     c.beginPath(); c.ellipse(x, y, rx, ry, rotation, 0, 2 * Math.PI); c.fillStyle = fill; c.fill();
   }
@@ -68,7 +70,7 @@
         c.beginPath(); c.ellipse(duck.x, duck.y + 16 * scale, 55 * scale, 12 * scale, 0, .2, Math.PI - .2); c.stroke();
       }
     }
-    c.translate(duck.x, duck.y + bob); c.scale(scale * face, scale); c.rotate(roll);
+    c.translate(duck.x, duck.y + bob); c.scale(scale * face * shape.x, scale * shape.y); c.rotate(roll);
     c.lineJoin = 'round'; c.lineCap = 'round';
     const tone = pose.tone || (duck.cream ? 'cream' : 'yellow');
     if (!beadsOnly) {
@@ -91,7 +93,7 @@
       c.strokeStyle = tone === 'grey' ? '#b7ad8f' : '#c2952b'; c.lineWidth = 1.4; c.stroke(wing);
       c.restore();
       c.restore();
-      c.save(); c.translate(3, -13 - puff * 2); c.rotate(nod); c.translate(-3, 13);
+      c.save(); c.translate(3, -13 + shape.headDrop - puff * 2); c.rotate(nod); c.translate(-3, 13);
       if (duck.baby) { c.translate(8, -21); c.scale(1.1, 1.1); c.translate(-8, 21); }
       c.fillStyle = wash(c, tone, 'head'); c.fill(head); c.strokeStyle = '#34777b'; c.lineWidth = 2.25; c.stroke(headEdge);
       // An ochre bill keeps coral meaning only one thing: an allele.
@@ -113,7 +115,7 @@
     });
     c.restore();
     const cos = Math.cos(roll), sin = Math.sin(roll);
-    return localMarkers.map(m => ({ x: duck.x + (m.x * cos - m.y * sin) * scale * face, y: duck.y + bob + (m.x * sin + m.y * cos) * scale, allele: m.allele }));
+    return localMarkers.map(m => ({ x: duck.x + (m.x * cos - m.y * sin) * scale * face * shape.x, y: duck.y + bob + (m.x * sin + m.y * cos) * scale * shape.y, allele: m.allele }));
   }
-  window.DuckCharacter = { draw, bead, palette, oval, markerSpots, renderer: 'reference-volume' };
+  window.DuckCharacter = { draw, bead, palette, oval, markerSpots, shape, renderer: 'reference-volume' };
 })();

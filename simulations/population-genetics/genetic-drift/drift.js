@@ -65,13 +65,13 @@
       // Expected share of mixed ducks: 2p0(1 − p0)(1 − 1/2N)^(t − 1) from generation 1 on.
       const p0 = history[0], N2 = population.length * 2, expected = [];
       for (let t = 1; t <= extent; t += Math.max(1, Math.floor(extent / 120))) expected.push(`${x(t).toFixed(1)},${ym(2 * p0 * (1 - p0) * Math.pow(1 - 1 / N2, t - 1)).toFixed(1)}`);
-      $('frequency-chart').innerHTML = `<svg viewBox="0 0 310 ${mBottom + 34}" role="img" aria-label="Teal share started at ${percent(p0)} and is ${percent(last)} at generation ${generation}. ${ghosts.length} earlier runs with the same settings are shown as faint lines. Below, the share of mixed ducks.">
+      $('frequency-chart').innerHTML = `<svg viewBox="0 0 310 ${mBottom + 34}" role="img" aria-label="Teal share started at ${percent(p0)} and is ${percent(last)} at generation ${generation}. ${ghosts.length} earlier runs with the same settings are shown as faint lines. Below, the share of ducks with both colours (heterozygotes).">
         <text class="chart-title" x="${left}" y="6">Teal share of gene copies</text>
         ${grid}<line x1="${left}" x2="${right}" y1="${y(p0)}" y2="${y(p0)}" stroke="#7d8a78" stroke-dasharray="4 4"/>
         ${ghostLines}
         <polyline points="${thin(history, x, y)}" fill="none" stroke="#399b94" stroke-width="3" stroke-linejoin="round"/>
         <circle cx="${x(generation)}" cy="${y(last)}" r="4" fill="#399b94" stroke="#fffaf0" stroke-width="1.5"/>
-        <text class="chart-title" x="${left}" y="${mTop - 10}">Mixed ducks (one bead of each colour)</text>
+        <text class="chart-title" x="${left}" y="${mTop - 10}">Ducks with both colours (heterozygotes)</text>
         ${mgrid}<polyline points="${expected.join(' ')}" fill="none" stroke="#c98a1e" stroke-width="1.6" stroke-dasharray="4 4"/>
         <polyline points="${thin(mixed, x, ym)}" fill="none" stroke="#2f4a46" stroke-width="2" stroke-linejoin="round"/>
         ${ticks}<text class="chart-label" x="${(left + right) / 2}" y="${mBottom + 31}" text-anchor="middle">Generation</text></svg>`;

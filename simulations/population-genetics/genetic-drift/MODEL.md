@@ -46,7 +46,7 @@ All ducks share one yellow body, a teal outline and an ochre bill, so coral appe
 
 Restarting with the same settings keeps up to 12 earlier frequency trajectories as faint lines (compactly stored, keeping each run's extremes). When an allele fixes, a card reports the generation and the run is added to a tally of fixed outcomes for the current settings; a mark on the tally bar shows the realised starting teal share, which is the expected long-run fraction of teal fixations. Changing the population size or starting share clears the earlier runs and the tally.
 
-A second panel plots the share of mixed ducks (one copy of each allele). Its dashed line is the expectation 2p₀(1 − p₀)(1 − 1/(2N))^(t − 1) for generations t ≥ 1, because each new duck's two copies are independent draws from the previous generation's copies.
+A second panel, "Ducks with both colours (heterozygotes)", plots the share of ducks carrying one copy of each allele. Its dashed line is the expectation 2p₀(1 − p₀)(1 − 1/(2N))^(t − 1) for generations t ≥ 1, because each new duck's two copies are independent draws from the previous generation's copies.
 
 ## Many ponds
 

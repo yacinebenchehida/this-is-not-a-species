@@ -50,7 +50,7 @@ A second panel, "Ducks with both colours (heterozygotes)", plots the share of du
 
 ## Many ponds
 
-`replicates.js` runs independent copies of the same model side by side, at 10 generations per second, all starting at exactly 50% teal: either five ponds of 12 ducks, or three ponds of 6 against three of 96. Each mini pond shows every duck's two beads; the chart shows each pond's teal share until fixation. Replicates use `DriftModel` directly and share no state with the main pond.
+`replicates.js` runs independent copies of the same model side by side. In "Many ponds" mode the visitor chooses 5, 10 or 20 ponds, 6, 12, 24 or 96 ducks per pond, and a starting teal share from 10% to 90%; each pond starts with exactly round(2N × share) teal copies, shuffled. "6 ducks vs 96 ducks" runs three ponds of each size at the chosen share. Ponds run at 10 generations per second, or N/4 per second for larger ponds, until fixation. A summary counts teal and coral fixations, and a bar compares the split of finished ponds with the starting share, which is each pond's probability of teal fixation under this model; with few ponds the split varies around it. Chart lines turn teal or coral when a pond fixes. Each mini pond shows every duck's two beads. Replicates use `DriftModel` directly and share no state with the main pond.
 
 ## Validation
 

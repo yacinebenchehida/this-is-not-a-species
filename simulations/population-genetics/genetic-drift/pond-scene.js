@@ -5,7 +5,7 @@
   const WATER = 'M98 299C73 209 181 138 299 133C360 76 477 96 552 120C691 77 849 146 878 248C953 320 903 414 809 457C718 529 565 484 492 520C350 551 240 498 194 451C93 446 45 365 98 299Z';
   const GROUND = 'M58 282C18 166 143 83 277 80C353 14 480 38 555 65C713 16 921 100 926 242C1000 341 949 469 830 504C722 590 560 542 492 569C328 611 202 551 159 498C36 493 4 371 58 282Z';
   // Birth timeline, as fractions of one generation's playback.
-  const FEATURE_END = .42, MATING_END = .84, DOZE_END = .94, BORN_AT = .9;
+  const FEATURE_END = .42, MATING_END = .84, DOZE_END = .94, BORN_AT = .9, MEET_PART = .35;
   const PANEL = { w: 1000, h: 160, labelEnd: 118, pool: [8, 62], nest: [84, 154] };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -147,11 +147,13 @@
       const from = sources.map(i => ({ x: this.ducks[i].x, y: this.ducks[i].y }));
       const meeting = { x: clamp((from[0].x + from[1].x) / 2, 340, 660), y: clamp((from[0].y + from[1].y) / 2, 280, 370) };
       const rest = next.map((_, i) => i).filter(i => i !== featured);
-      const start = featured >= 0 ? FEATURE_END : .04, span = MATING_END - start;
-      const length = clamp(span * 3 / Math.max(1, rest.length), .025, .2), gap = rest.length > 1 ? (span - length) / (rest.length - 1) : 0;
+      const start = featured >= 0 ? FEATURE_END : .04, span = MATING_END - start, beak = this.beakToBeak();
+      // Beak-to-beak meetings run one at a time so no two pairs travel at once; otherwise they overlap.
+      const length = beak ? span / Math.max(1, rest.length) : clamp(span * 3 / Math.max(1, rest.length), .025, .2);
+      const gap = beak ? length : rest.length > 1 ? (span - length) / (rest.length - 1) : 0;
       const used = new Set(parents.flat().map(copy => Math.floor(copy / 2)));
       // The complete cohort is already sampled by the model. These events never draw genes.
-      this.birth = { sources, copies: parents[child].map(source => source % 2), alleles: next[child], child, featured,
+      this.birth = { sources, copies: parents[child].map(source => source % 2), alleles: next[child], child, featured, beak,
         progress: 0, next: this.makeDucks(next), parents, from, meeting,
         events: rest.map((i, k) => ({ child: i, start: start + k * gap, length, sources: parents[i].map(c => Math.floor(c / 2)), copies: parents[i] })),
         unused: previous.map((_, i) => i).filter(i => !used.has(i)),
@@ -162,15 +164,18 @@
       const birth = this.birth;
       if (child === birth.featured) return FEATURE_END * .86;
       const event = birth.events.find(e => e.child === child);
-      return event.start + event.length * BORN_AT;
+      return event.start + event.length * this.bornFraction();
     }
     bornCount() {
       if (!this.birth) return 0;
       const p = this.birth.progress;
       let count = this.birth.featured >= 0 && p >= FEATURE_END * .86 ? 1 : 0;
-      for (const e of this.birth.events) if (p >= e.start + e.length * BORN_AT) count++;
+      for (const e of this.birth.events) if (p >= e.start + e.length * this.bornFraction()) count++;
       return count;
     }
+    // In beak-to-beak mode the first 35% of each mating is the swim to meet; the story follows.
+    storyQ(q) { return this.birth && this.birth.beak ? (q - MEET_PART) / (1 - MEET_PART) : q; }
+    bornFraction() { return this.birth && this.birth.beak ? MEET_PART + (1 - MEET_PART) * BORN_AT : BORN_AT; }
     unusedCount() { return this.birth ? this.birth.unused.length : 0; }
     storyLabel(running) {
       const size = this.population.length, birth = this.birth;
@@ -206,7 +211,9 @@
     drawMatings(c) {
       let shown = 0;
       const heartScale = clamp(this.scale * .75, .28, .66), small = this.population.length <= 48;
-      for (const { e, q } of this.activeEvents()) {
+      for (const { e, q: raw } of this.activeEvents()) {
+        const q = this.storyQ(raw);
+        if (q <= 0) continue; // still swimming to meet
         const alpha = Math.min(1, q * 6, (1 - q) * 5), link = Math.min(1, q * 6) * (1 - smooth((q - .5) / .12));
         const [a, b] = e.sources, pa = this.ducks[a], pb = this.ducks[b], same = a === b;
         const mid = same ? { x: pa.x, y: pa.y } : { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
@@ -216,7 +223,7 @@
             c.beginPath(); c.ellipse(d.x, d.y + 2, 46 * this.scale, 13 * this.scale, 0, 0, Math.PI * 2); c.stroke(); c.restore();
           }
         }
-        if (!same && link > 0) {
+        if (!same && link > 0 && !this.birth.beak) {
           c.save(); c.globalAlpha = link * .85; c.setLineDash([5, 6]); c.lineCap = 'round'; c.strokeStyle = '#d7768f'; c.lineWidth = small ? 2.4 : 1.4;
           c.beginPath(); c.moveTo(pa.x, pa.y - 22 * this.scale * Y); c.lineTo(pb.x, pb.y - 22 * this.scale * Y); c.stroke(); c.restore();
         }
@@ -434,6 +441,7 @@
       return this.inWater(x, y) ? { x, y, linger: true } : this.randomSpot();
     }
     updateDuck(d, dt, i) {
+      if (d.held) return;
       d.headingTimer -= dt;
       let dx = d.targetX - d.x, dy = d.targetY - d.y;
       if (!d.meeting && ((Math.hypot(dx, dy) < 35 && !d.lingering) || d.headingTimer <= 0)) {
@@ -471,10 +479,36 @@
         this.wakes.push({ x: d.x - Math.sign(d.facing) * 20 * this.scale, y: d.y + 5 * this.scale, age: 0, size: this.scale }); d.wake = 0;
       }
     }
-    // Paired parents drift towards each other while their duckling is made. Cosmetic only.
+    // Beak-to-beak meetings only where they stay readable: few ducks and slow playback.
+    beakToBeak() { return !this.reduced.matches && this.population.length <= 6 && (this.genSeconds || 8) >= 16; }
+    // Paired parents come together while their duckling is made. Cosmetic only: the pairs are
+    // already drawn by the model, from anywhere in the pond.
     steerPairs() {
-      this.ducks.forEach(d => { d.meeting = false; });
-      // In bigger ponds, pulling pairs together would herd everyone into the middle.
+      this.ducks.forEach(d => { d.meeting = false; d.held = false; });
+      if (!this.birth) return;
+      if (this.birth.beak) {
+        const p = this.birth.progress;
+        for (const e of this.birth.events) {
+          const q = (p - e.start) / e.length;
+          if (q <= 0 || e.sources[0] === e.sources[1]) continue;
+          if (this.storyQ(q) >= .62) { if (e.meet && !e.released) { e.released = true; e.sources.forEach(i => { this.ducks[i].headingTimer = 0; this.ducks[i].lingering = false; }); } continue; }
+          const [ia, ib] = e.sources, A = this.ducks[ia], B = this.ducks[ib];
+          if (!e.meet) {
+            const m = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+            for (let k = 0; k < 12 && !this.inWater(m.x, m.y); k++) { m.x += (500 - m.x) * .15; m.y += (315 - m.y) * .15; }
+            e.meet = { ...m, from: [{ x: A.x, y: A.y }, { x: B.x, y: B.y }], leftIsA: A.x <= B.x };
+          }
+          const s = smooth(q / MEET_PART), gap = 40 * this.scale;
+          [ia, ib].forEach((i, k) => {
+            const d = this.ducks[i], left = (k === 0) === e.meet.leftIsA, from = e.meet.from[k];
+            const to = { x: e.meet.x + (left ? -gap : gap), y: e.meet.y };
+            d.x = lerp(from.x, to.x, s); d.y = lerp(from.y, to.y, s); d.vx = d.vy = 0; d.targetX = d.x; d.targetY = d.y;
+            d.facing = s < .92 ? Math.sign(to.x - from.x) || d.facing : left ? 1 : -1; d.held = true;
+          });
+        }
+        return;
+      }
+      // In bigger ponds or faster playback, pulling pairs together would herd everyone into the middle.
       if (this.population.length > 24) return;
       for (const { e, q } of this.activeEvents(.7)) {
         if (q > .62 || e.sources[0] === e.sources[1]) continue;
@@ -561,6 +595,7 @@
         for (let step = 0; step < steps; step++) {
           this.ducks.forEach((d, i) => this.updateDuck(d, dt / steps, i)); this.keepSpace(dt / steps);
         }
+        this.steerPairs(); // keep meeting pairs exactly in place after spacing nudges
       }
       const birth = this.birth, p = birth ? birth.progress : 0;
       const oldAlpha = birth ? 1 - smooth((p - DOZE_END) / (1 - DOZE_END)) : 1;

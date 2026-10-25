@@ -105,3 +105,24 @@ test('fast-forward shows no matings and the panel has a seat for every copy and 
     for (const cell of [...scene.pool.cells, ...scene.nest.cells]) assert(cell.x > 100 && cell.x < 1000 && cell.y > 0 && cell.y < 160);
   }
 });
+
+test('beak-to-beak meetings only in small, slow ponds, with parents face to face when the heart appears', () => {
+  const cases = [[6, 16, true], [6, 8, false], [12, 16, false], [24, 16, false], [48, 16, false]];
+  for (const [size, seconds, expected] of cases) {
+    const scene = sceneFixture(); scene.genSeconds = seconds; scene.setPopulation(model.createPopulation(size, .5));
+    assert.equal(scene.beakToBeak(), expected, `${size} ducks at ${seconds} s`);
+  }
+  const scene = sceneFixture(); scene.genSeconds = 16;
+  const previous = model.createPopulation(6, .5); scene.setPopulation(previous);
+  // Duckling 1 has two distinct parents (ducks 0 and 1); every other duckling comes from duck 5 alone.
+  const parents = previous.map((_, i) => i === 1 ? [0, 2] : [10, 11]);
+  const next = { parents, population: parents.map(pair => pair.map(copy => previous[Math.floor(copy / 2)][copy % 2])) };
+  scene.beginBirth(previous, next.population, next.parents, 0);
+  const e = scene.birth.events.find(ev => ev.child === 1);
+  for (const other of scene.birth.events) assert(other === e || other.start >= e.start + e.length - 1e-9 || other.start + other.length <= e.start + 1e-9, 'meetings never overlap');
+  scene.birth.progress = e.start + e.length * .4; scene.steerPairs();
+  const [a, b] = e.sources.map(i => scene.ducks[i]), left = a.x < b.x ? a : b, right = left === a ? b : a;
+  assert(left.facing > 0 && right.facing < 0, 'parents face each other');
+  assert(Math.abs(right.x - left.x - 80 * scene.scale) < 1e-6 && Math.abs(a.y - b.y) < 1e-6, 'parents meet side by side');
+  assert.equal(JSON.stringify(scene.birth.parents), JSON.stringify(next.parents), 'meeting never changes the recorded parents');
+});

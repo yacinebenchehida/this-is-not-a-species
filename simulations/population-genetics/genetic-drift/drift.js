@@ -148,7 +148,7 @@
       const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
       $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
       $('speed-note').textContent = r <= 1 ? 'Slow speeds show every duckling being made. With up to 24 ducks, one family gets a close-up first.' : 'Fast-forward: the chart and gene pool record every generation; the matings are skipped.';
-      scene.fast = r > 1;
+      scene.fast = r > 1; scene.genSeconds = 1 / r;
     }
     // A fresh pond. Same settings keep earlier runs as faint lines; new settings clear them.
     function restart(sameSettings = false) {

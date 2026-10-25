@@ -49,13 +49,17 @@ test('a family with both copies from one parent transfers the recorded copies wi
   scene.finishBirth(next); assert.equal(scene.population.length, 2); assert.equal(JSON.stringify(scene.population), JSON.stringify(next));
 });
 
-test('swimming destinations include the pond centre and remain inside the safe area', () => {
-  const scene = sceneFixture(); let central = 0;
-  for (let i = 0; i < 1200; i++) {
-    const p = scene.swimTarget(200, 250), radius = Math.hypot((p.x - 500) / 324, (p.y - 315) / 153);
-    assert(radius <= 1.000001); if (radius < .3) central++;
+test('a duck hopping between destinations covers the centre and the edges and stays inside the safe area', () => {
+  const scene = sceneFixture(); let x = 200, y = 300, central = 0, outer = 0;
+  for (let i = 0; i < 4000; i++) {
+    const next = scene.swimTarget(x, y); x = next.x; y = next.y;
+    const radius = Math.hypot((x - 500) / 340, (y - 315) / 164);
+    assert(radius <= 1.000001);
+    if (radius < .3) central++; if (radius > .8) outer++;
   }
-  assert(central > 30, 'ducks should frequently choose destinations in the centre');
+  // A uniform spread puts about 9% of stops within 0.3 of the centre and 36% beyond 0.8.
+  assert(central > 200, 'ducks should regularly visit the centre');
+  assert(outer > 1100, 'ducks should not crowd into the centre');
 });
 
 test('dense ponds swim more slowly and all bodies use the same colour', () => {

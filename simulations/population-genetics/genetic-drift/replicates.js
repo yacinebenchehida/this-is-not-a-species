@@ -28,7 +28,7 @@
       for (let y = cy - ry; y <= cy + ry; y += gap) {
         const row = Math.round((y - cy) / gap);
         for (let x = cx - rx; x <= cx + rx; x += gap * 1.45) {
-          const px = x + (Math.abs(row) % 2) * gap * .72, u = (px - cx) / (rx * .8), v = (y - cy) / (ry * .78);
+          const px = x + (Math.abs(row) % 2) * gap * .72, u = (px - cx) / (rx * .9), v = (y - cy) / (ry * .88);
           if (u * u + v * v <= 1) points.push({ x: px, y, d: u * u + v * v });
         }
       }

@@ -72,8 +72,7 @@
       population.forEach((alleles, i) => {
         let x, y;
         for (let attempt = 0; attempt < 45; attempt++) {
-          const theta = Math.random() * Math.PI * 2, radius = Math.sqrt(Math.random());
-          x = 500 + Math.cos(theta) * radius * 324; y = 315 + Math.sin(theta) * radius * 153;
+          ({ x, y } = this.randomSpot());
           if (result.every(d => Math.hypot(d.x - x, (d.y - y) * .9) > spacing)) break;
         }
         const target = this.swimTarget(x, y);
@@ -110,7 +109,9 @@
       });
     }
     setPopulation(population, newborn = false) {
-      this.population = population; this.scale = Math.max(.19, Math.min(1.15, 2.5 / Math.pow(population.length, .43)));
+      const scale = Math.max(.19, Math.min(1.15, 2.5 / Math.pow(population.length, .43)));
+      if (scale !== this.scale || this.mask === undefined) this.mask = this.buildMask(18 + 42 * scale);
+      this.population = population; this.scale = scale;
       if (this.ducks.length !== population.length) this.ducks = this.makeDucks(population);
       this.ducks.forEach((d, i) => { d.alleles = population[i]; });
       this.growth = newborn ? .65 : 1; this.birth = null;
@@ -389,32 +390,79 @@
       }
       c.restore();
     }
-    swimTarget(x, y) {
-      let target;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const angle = Math.random() * Math.PI * 2, radius = Math.sqrt(Math.random());
-        target = { x: 500 + Math.cos(angle) * radius * 324, y: 315 + Math.sin(angle) * radius * 153 };
-        if (Math.hypot(target.x - x, target.y - y) > 150) break;
+    // The swimmable area is the real pond outline, shrunk by a margin that grows with duck size.
+    // Without a pixel mask (for example in tests) it falls back to a central ellipse.
+    buildMask(margin) {
+      try {
+        const m = document.createElement('canvas'); m.width = 250; m.height = 155;
+        const c = m.getContext('2d'); c.scale(.25, .25);
+        c.fillStyle = '#000'; c.fill(this.water);
+        c.globalCompositeOperation = 'destination-out'; c.lineJoin = 'round'; c.lineWidth = margin * 2; c.stroke(this.water);
+        const data = c.getImageData(0, 0, 250, 155).data;
+        if (!data || !data.length) return null;
+        const alpha = new Uint8Array(250 * 155);
+        for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4 + 3];
+        return alpha;
+      } catch (error) { return null; }
+    }
+    inWater(x, y) {
+      if (!this.mask) return Math.hypot((x - 500) / 340, (y - 315) / 164) <= 1;
+      const head = y - 40 * (this.scale || 1) * Y, test = (px, py) => {
+        const i = Math.floor(py / 4) * 250 + Math.floor(px / 4);
+        return px >= 0 && py >= 0 && px < 1000 && py < 620 && this.mask[i] > 128;
+      };
+      return test(x, y) && test(x, head);
+    }
+    randomSpot() {
+      if (this.mask) {
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const spot = { x: 60 + Math.random() * 900, y: 70 + Math.random() * 500 };
+          if (this.inWater(spot.x, spot.y)) return spot;
+        }
       }
-      return target;
+      const angle = Math.random() * Math.PI * 2, radius = Math.sqrt(Math.random());
+      return { x: 500 + Math.cos(angle) * radius * 324, y: 315 + Math.sin(angle) * radius * 153 };
+    }
+    // Short hops in a random direction. Crossing the whole pond to random destinations would
+    // send most paths through the middle and slowly herd every duck into the centre.
+    swimTarget(x, y) {
+      // A hop that would land on the bank is simply not taken: the duck lingers and tries again
+      // later. Redrawing until a hop points inwards would bias ducks towards the middle.
+      const angle = Math.random() * Math.PI * 2, hop = 90 + Math.random() * 170;
+      const target = { x: x + Math.cos(angle) * hop, y: y + Math.sin(angle) * hop * .55 };
+      if (this.inWater(target.x, target.y)) return target;
+      return this.inWater(x, y) ? { x, y, linger: true } : this.randomSpot();
     }
     updateDuck(d, dt, i) {
       d.headingTimer -= dt;
       let dx = d.targetX - d.x, dy = d.targetY - d.y;
-      if (!d.meeting && (Math.hypot(dx, dy) < 35 || d.headingTimer <= 0)) {
-        const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y; d.headingTimer = (2 + Math.random() * 2) * d.wanderTime;
+      if (!d.meeting && ((Math.hypot(dx, dy) < 35 && !d.lingering) || d.headingTimer <= 0)) {
+        const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y;
+        d.headingTimer = target.linger ? .3 + Math.random() * .5 : (2 + Math.random() * 2) * d.wanderTime;
+        d.lingering = Boolean(target.linger);
         dx = d.targetX - d.x; dy = d.targetY - d.y;
       }
       const distance = Math.max(1, Math.hypot(dx, dy));
       const steering = Math.min(1, dt * 3.2), speed = d.meeting && distance < 40 * this.scale ? d.speed * .15 : d.speed;
       d.vx = lerp(d.vx, dx / distance * speed, steering);
       d.vy = lerp(d.vy, dy / distance * speed, steering);
+      const fromX = d.x, fromY = d.y;
       d.x += d.vx * dt; d.y += d.vy * dt;
       // Swimming follows destinations inside a convex safe area; guard the bank after spacing adjustments.
-      const r = Math.hypot((d.x - 500) / 340, (d.y - 315) / 164);
-      if (r > 1) {
-        d.x = 500 + (d.x - 500) / r; d.y = 315 + (d.y - 315) / r;
-        const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y;
+      if (this.mask) {
+        if (!this.inWater(d.x, d.y)) {
+          // Step back off the bank (only a little, so crowding never pumps ducks into the middle).
+          if (this.inWater(fromX, fromY)) { d.x = fromX; d.y = fromY; }
+          else { const L = Math.hypot(500 - d.x, 315 - d.y) || 1; d.x += (500 - d.x) / L * 2; d.y += (315 - d.y) / L * 2; }
+          d.vx *= -.3; d.vy *= -.3;
+          if (!d.meeting) { const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y; }
+        }
+      } else {
+        const r = Math.hypot((d.x - 500) / 340, (d.y - 315) / 164);
+        if (r > 1) {
+          d.x = 500 + (d.x - 500) / r; d.y = 315 + (d.y - 315) / r;
+          const target = this.swimTarget(d.x, d.y); d.targetX = target.x; d.targetY = target.y;
+        }
       }
       const facing = d.vx > 2 ? 1 : d.vx < -2 ? -1 : Math.sign(d.facing) || 1;
       d.facing = lerp(d.facing, facing, Math.min(1, dt * 5));
@@ -426,7 +474,8 @@
     // Paired parents drift towards each other while their duckling is made. Cosmetic only.
     steerPairs() {
       this.ducks.forEach(d => { d.meeting = false; });
-      if (this.population.length > 48) return;
+      // In bigger ponds, pulling pairs together would herd everyone into the middle.
+      if (this.population.length > 24) return;
       for (const { e, q } of this.activeEvents(.7)) {
         if (q > .62 || e.sources[0] === e.sources[1]) continue;
         const [a, b] = e.sources.map(i => this.ducks[i]), gap = 70 * this.scale;

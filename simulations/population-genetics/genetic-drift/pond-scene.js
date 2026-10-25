@@ -273,7 +273,8 @@
     // being chosen often is luck, not merit.
     drawCounters(c) {
       const birth = this.birth;
-      if (!birth || this.population.length > 48 || birth.progress >= birth.tl.doze) return;
+      // Counters belong to the "Watch every mating" mode only.
+      if (!birth || !birth.beak || birth.progress >= birth.tl.doze) return;
       const counts = new Map(), p = birth.progress;
       for (const child of birth.order) {
         if (p < this.bornAt(child)) continue;

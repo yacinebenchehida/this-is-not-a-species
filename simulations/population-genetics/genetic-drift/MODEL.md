@@ -40,7 +40,7 @@ Pause freezes reproductive progress; the pond's ambient movement continues. Hidi
 
 ## Counters and decorations
 
-For ponds of up to 48 ducks, a small number over each adult counts the ducklings it has had so far in the current generation, from the recorded parents. The counts are deliberately neutral, with no prizes, because being chosen often is luck rather than merit. In the nest panel, each new duckling's lines to its source copies stay highlighted for about 1.4 seconds. Dozing ducks snore a little louder towards the end of the dozing phase, ducklings waddle on their way to the nest, and a frog on a lily pad watches the latest mating, blinks and puffs its throat. These touches are purely decorative and never affect inheritance.
+In "Watch every mating" mode only, a small number over each adult counts the ducklings it has had so far in the current generation, from the recorded parents. The counts are deliberately neutral, with no prizes, because being chosen often is luck rather than merit. In the nest panel, each new duckling's lines to its source copies stay highlighted for about 1.4 seconds. Dozing ducks snore a little louder towards the end of the dozing phase, ducklings waddle on their way to the nest, and a frog on a lily pad watches the latest mating, blinks and puffs its throat. These touches are purely decorative and never affect inheritance.
 
 ## Duck character
 

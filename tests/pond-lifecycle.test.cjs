@@ -106,13 +106,20 @@ test('fast-forward shows no matings and the panel has a seat for every copy and 
   }
 });
 
-test('beak-to-beak meetings only in small, slow ponds, with parents face to face when the heart appears', () => {
-  const cases = [[6, 16, true], [6, 8, false], [12, 16, false], [24, 16, false], [48, 16, false]];
-  for (const [size, seconds, expected] of cases) {
-    const scene = sceneFixture(); scene.genSeconds = seconds; scene.setPopulation(model.createPopulation(size, .5));
-    assert.equal(scene.beakToBeak(), expected, `${size} ducks at ${seconds} s`);
+test('watch-every-mating mode: beak-to-beak meetings one at a time, for up to 24 ducks, with parents face to face', () => {
+  for (const [size, slow, expected] of [[6, true, true], [12, true, true], [24, true, true], [48, true, false], [12, false, false]]) {
+    const scene = sceneFixture(); scene.slow = slow; scene.setPopulation(model.createPopulation(size, .5));
+    assert.equal(scene.beakToBeak(), expected, `${size} ducks, slow ${slow}`);
   }
-  const scene = sceneFixture(); scene.genSeconds = 16;
+  const timing = sceneFixture();
+  assert.deepEqual([6, 12, 24].map(n => Math.round(timing.slowSeconds(n))), [20, 33, 60]);
+  for (const size of [6, 12, 24]) {
+    const scene = sceneFixture(); scene.slow = true; const pop = model.createPopulation(size, .5), next = model.nextGeneration(pop);
+    scene.setPopulation(pop); scene.beginBirth(pop, next.population, next.parents, 0);
+    const seconds = scene.slowSeconds(size);
+    for (const e of scene.birth.events) assert(e.length * seconds > 2, 'each meeting gets more than two seconds');
+  }
+  const scene = sceneFixture(); scene.slow = true; scene.genSeconds = 20;
   const previous = model.createPopulation(6, .5); scene.setPopulation(previous);
   // Duckling 1 has two distinct parents (ducks 0 and 1); every other duckling comes from duck 5 alone.
   const parents = previous.map((_, i) => i === 1 ? [0, 2] : [10, 11]);

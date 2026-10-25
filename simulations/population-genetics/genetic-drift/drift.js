@@ -16,6 +16,10 @@
     const isFixed = () => { const n = countAlleles(population); return n === 0 || n === population.length * 2; };
     const mixedShare = pop => pop.filter(duck => duck[0] !== duck[1]).length / pop.length;
     const rate = () => rates[Number($('speed').value)];
+    // "Watch every mating" gives each duckling its own beak-to-beak meeting (ponds of up to 24 ducks).
+    const slow = () => $('slow-mode').checked && population.length <= 24;
+    const fastMode = () => !slow() && rate() > 1;
+    const generationSeconds = () => slow() ? scene.slowSeconds(population.length) : 1 / rate();
     const portrait = duck => `<img src="${scene.thumbnail(duck)}" alt="" width="120" height="120">`;
 
     function renderInheritance() {
@@ -135,7 +139,7 @@
       // Feature an actual family with two distinct parents where the sampled cohort has one.
       let child = next.parents.findIndex(pair => Math.floor(pair[0] / 2) !== Math.floor(pair[1] / 2));
       if (child < 0) child = 0;
-      pending = { next, elapsed: 0, duration: scene.reduced.matches ? .15 : 1 / rate(), child, singleStep };
+      pending = { next, elapsed: 0, duration: scene.reduced.matches ? .15 : generationSeconds(), child, singleStep };
       scene.beginBirth(population, next.population, next.parents, child);
       updateButtons();
     }
@@ -145,10 +149,17 @@
       $('duck-select').value = String(index); renderInheritance();
     }
     function speedLabel() {
-      const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
+      const small = population && population.length <= 24;
+      $('slow-mode').disabled = !small; if (!small) $('slow-mode').checked = false;
+      $('speed').disabled = slow();
+      const r = rate(), seconds = slow() ? Math.round(scene.slowSeconds(population.length)) : null;
+      $('speed-label').textContent = seconds ? `1 every ${seconds} s` : r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
       $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
-      $('speed-note').textContent = r <= 1 ? 'Slow speeds show every duckling being made. With up to 24 ducks, one family gets a close-up first.' : 'Fast-forward: the chart and gene pool record every generation; the matings are skipped.';
-      scene.fast = r > 1; scene.genSeconds = 1 / r;
+      $('speed-note').textContent = seconds ? `Each duckling's parents meet one pair at a time, so one generation takes about ${seconds} seconds.`
+        : r > 1 ? 'Fast-forward: the chart and gene pool record every generation; the matings are skipped.'
+        : small ? 'Slow speeds show every duckling being made. One family gets a close-up first.'
+        : 'Slow speeds show every duckling being made. Watch every mating works with up to 24 ducks.';
+      scene.slow = slow(); scene.fast = fastMode(); scene.genSeconds = generationSeconds();
     }
     // A fresh pond. Same settings keep earlier runs as faint lines; new settings clear them.
     function restart(sameSettings = false) {
@@ -184,7 +195,7 @@
               if (finished.singleStep) { stepping = false; running = false; if (!isFixed()) $('pond-message').textContent = `${population.length} new ducks replace ${population.length} adults. Follow their families below, or take another step.`; }
               updateButtons();
             }
-          } else if (rate() <= 1) beginFamily(stepping);
+          } else if (!fastMode()) beginFamily(stepping);
           else {
             accumulator += elapsed * rate();
             const steps = Math.min(200, Math.floor(accumulator)); accumulator -= steps;
@@ -211,7 +222,7 @@
     });
     $('step').addEventListener('click', () => {
       if (pending || isFixed() || generation >= modelLimit) return;
-      if (rate() > 1) { commit(nextGeneration(population)); renderUI(); }
+      if (fastMode()) { commit(nextGeneration(population)); renderUI(); }
       else { stepping = true; beginFamily(true); }
     });
     $('restart').addEventListener('click', () => restart(true));
@@ -222,9 +233,14 @@
       speedLabel(); accumulator = 0;
       if (pending) {
         const fraction = pending.elapsed / pending.duration;
-        pending.duration = scene.reduced.matches || rate() > 1 ? .15 : 1 / rate();
+        pending.duration = scene.reduced.matches || fastMode() ? .15 : generationSeconds();
         pending.elapsed = fraction * pending.duration;
       }
+      updateButtons();
+    });
+    $('slow-mode').addEventListener('change', () => {
+      speedLabel(); accumulator = 0;
+      if (pending) { const fraction = pending.elapsed / pending.duration; pending.duration = scene.reduced.matches ? .15 : generationSeconds(); pending.elapsed = fraction * pending.duration; }
       updateButtons();
     });
     $('duck-select').addEventListener('change', () => chooseDuck(Number($('duck-select').value)));

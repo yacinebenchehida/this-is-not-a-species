@@ -1,9 +1,9 @@
-<link rel="stylesheet" href="./drift.css?v=pond-13">
-<script src="./model.js?v=pond-13" defer></script>
-<script src="./duck-character.js?v=pond-13" defer></script>
-<script src="./pond-scene.js?v=pond-13" defer></script>
-<script src="./drift.js?v=pond-13" defer></script>
-<script src="./replicates.js?v=pond-13" defer></script>
+<link rel="stylesheet" href="./drift.css?v=pond-14">
+<script src="./model.js?v=pond-14" defer></script>
+<script src="./duck-character.js?v=pond-14" defer></script>
+<script src="./pond-scene.js?v=pond-14" defer></script>
+<script src="./drift.js?v=pond-14" defer></script>
+<script src="./replicates.js?v=pond-14" defer></script>
 <div class="subpage drift-page">
   <div class="pond-topline"><a class="back-link" href="../">← Population Genetics</a><span class="eyebrow">Genetic drift</span></div>
   <section class="pond-intro" aria-labelledby="pond-title"><div><h1 id="pond-title">The Duck Pond</h1><p>A little world, left to chance.</p></div><p class="pond-lede">Swim, meet, hatch. Which colours will the next generation carry?</p></section>
@@ -23,7 +23,7 @@
         <div class="pond-control"><label for="population">Population size</label><select id="population"><option value="6" selected>6 ducks</option><option value="12">12 ducks</option><option value="24">24 ducks</option><option value="48">48 ducks</option><option value="96">96 ducks</option><option value="200">200 ducks</option><option value="500">500 ducks</option></select></div>
         <div class="pond-control"><label for="frequency">Starting teal share<output id="frequency-label" for="frequency">50%</output></label><input id="frequency" type="range" min="0" max="100" step="5" value="50"><div class="range-ends"><span>All coral</span><span>All teal</span></div><p id="starting-count" class="control-note"></p></div>
         <p class="setup-note">These two settings start a fresh pond.</p>
-        <div class="pond-control speed-control"><label for="speed">Generation speed<output id="speed-label" for="speed">1 every 8 s</output></label><input id="speed" type="range" min="0" max="7" step="1" value="1"><div class="range-ends"><span>Watch a family</span><span>Fast-forward</span></div><p id="speed-note" class="control-note">Slow speeds show every duckling being made. With up to 24 ducks, one family gets a close-up first.</p></div>
+        <div class="pond-control speed-control"><label for="speed">Generation speed<output id="speed-label" for="speed">1 every 8 s</output></label><input id="speed" type="range" min="0" max="7" step="1" value="1"><div class="range-ends"><span>Watch a family</span><span>Fast-forward</span></div><label class="slow-toggle" for="slow-mode"><input id="slow-mode" type="checkbox"> Watch every mating <span>up to 24 ducks</span></label><p id="speed-note" class="control-note">Slow speeds show every duckling being made. With up to 24 ducks, one family gets a close-up first.</p></div>
         <section class="frequency-panel" aria-labelledby="frequency-title"><h3 id="frequency-title">The colours through time</h3><div class="allele-totals"><div><i class="allele-swatch teal"></i><strong id="total-A">50%</strong><span id="copies-A">6 copies</span></div><div><i class="allele-swatch coral"></i><strong id="total-a">50%</strong><span id="copies-a">6 copies</span></div></div><div class="frequency-bar" aria-hidden="true"><span id="bar-A"></span><span id="bar-a"></span></div><p class="mixed-line">Ducks with both colours <strong id="mixed-count">3 of 6</strong></p><div id="frequency-chart" class="frequency-chart"></div><p id="ghost-note" class="chart-note">Neither colour has an advantage.</p><div class="tally"><p id="tally-count" class="tally-count"></p><div id="tally-bar" class="tally-bar" aria-hidden="true"><span id="tally-teal"></span><i id="tally-mark"></i></div><p id="tally-note" class="tally-note"></p></div></section>
       </aside>
     </div>
@@ -37,7 +37,7 @@
   <section class="pond-explainer" aria-labelledby="drift-title"><h2 id="drift-title">That's genetic drift.</h2><p>Every duck carries two copies of a gene: the two coloured dots on its wing. Teal and coral are different versions of that gene, called <strong>alleles</strong>. Neither gives a duck an advantage. Yet, by chance, their shares can change from one generation to the next.</p><p>Try a small pond, then a large one. Start again with the same settings: earlier runs stay on the chart as faint lines. Does chance tell the same story?</p><details><summary>A little more about this pond</summary><div>
     <h3>What the hearts mean</h3>
     <p>Each heart links the two parents of one duckling. As the heart appears, one bead flies from each parent into the nest: those are the two gene copies the duckling receives. A heart over a single duck means both copies came from that duck, which this simple model allows. Some ducks are chosen many times; others are never chosen, and doze off before the ducklings take over. At fast speeds the matings are skipped, but every generation is still counted.</p>
-    <p>At slow speeds in a small pond, one family gets a close-up first, then every other duckling is made in turn. The gene pool above the nest shows all the copies in the pond; lines link each duckling to the copies it received. Once the nest is full, the ducklings replace the adults: the number of ducks stays the same. Every duck is drawn; choose one to see its two gene copies and, after a generation has passed, its parents.</p>
+    <p>At slow speeds in a small pond, one family gets a close-up first, then every other duckling is made in turn. With <em>Watch every mating</em> (up to 24 ducks), each pair swims to meet one at a time, and a number over each duck counts its ducklings so far: some ducks have several, others none. The gene pool above the nest shows all the copies in the pond; lines link each duckling to the copies it received. Once the nest is full, the ducklings replace the adults: the number of ducks stays the same. Every duck is drawn; choose one to see its two gene copies and, after a generation has passed, its parents.</p>
     <h3>Anyone can mate with anyone</h3>
     <p>In this pond, mating is completely random: any two ducks are equally likely to become the parents of a duckling, wherever they happen to be swimming. That is why a heart sometimes links two ducks on opposite sides of the pond. Where a duck swims never affects whether it becomes a parent. Biologists call this kind of fully random mating <strong>panmixia</strong>.</p>
     <h3>The starting share matters</h3>

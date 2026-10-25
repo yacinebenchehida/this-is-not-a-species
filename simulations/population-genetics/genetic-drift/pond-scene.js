@@ -5,7 +5,11 @@
   const WATER = 'M98 299C73 209 181 138 299 133C360 76 477 96 552 120C691 77 849 146 878 248C953 320 903 414 809 457C718 529 565 484 492 520C350 551 240 498 194 451C93 446 45 365 98 299Z';
   const GROUND = 'M58 282C18 166 143 83 277 80C353 14 480 38 555 65C713 16 921 100 926 242C1000 341 949 469 830 504C722 590 560 542 492 569C328 611 202 551 159 498C36 493 4 371 58 282Z';
   // Birth timeline, as fractions of one generation's playback.
-  const FEATURE_END = .42, MATING_END = .84, DOZE_END = .94, BORN_AT = .9, MEET_PART = .35;
+  const BORN_AT = .9, MEET_PART = .35;
+  // Normal playback: shares of one generation for the close-up, the other matings and the dozing.
+  const TIMELINE = { feature: .42, mating: .84, doze: .94 };
+  // "Watch every mating" playback, in seconds: close-up, each beak-to-beak mating, dozing, swap.
+  const SLOW = { feature: 6, mating: 2.2, doze: 2, swap: 1, maxDucks: 24 };
   const PANEL = { w: 1000, h: 160, labelEnd: 118, pool: [8, 62], nest: [84, 154] };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -146,14 +150,15 @@
       const sources = parents[child].map(source => Math.floor(source / 2));
       const from = sources.map(i => ({ x: this.ducks[i].x, y: this.ducks[i].y }));
       const meeting = { x: clamp((from[0].x + from[1].x) / 2, 340, 660), y: clamp((from[0].y + from[1].y) / 2, 280, 370) };
-      const rest = next.map((_, i) => i).filter(i => i !== featured);
-      const start = featured >= 0 ? FEATURE_END : .04, span = MATING_END - start, beak = this.beakToBeak();
+      const rest = next.map((_, i) => i).filter(i => i !== featured), beak = this.beakToBeak();
+      const tl = beak ? this.slowTimeline(next.length) : TIMELINE;
+      const start = featured >= 0 ? tl.feature : .04, span = tl.mating - start;
       // Beak-to-beak meetings run one at a time so no two pairs travel at once; otherwise they overlap.
       const length = beak ? span / Math.max(1, rest.length) : clamp(span * 3 / Math.max(1, rest.length), .025, .2);
       const gap = beak ? length : rest.length > 1 ? (span - length) / (rest.length - 1) : 0;
       const used = new Set(parents.flat().map(copy => Math.floor(copy / 2)));
       // The complete cohort is already sampled by the model. These events never draw genes.
-      this.birth = { sources, copies: parents[child].map(source => source % 2), alleles: next[child], child, featured, beak,
+      this.birth = { sources, copies: parents[child].map(source => source % 2), alleles: next[child], child, featured, beak, tl,
         progress: 0, next: this.makeDucks(next), parents, from, meeting,
         events: rest.map((i, k) => ({ child: i, start: start + k * gap, length, sources: parents[i].map(c => Math.floor(c / 2)), copies: parents[i] })),
         unused: previous.map((_, i) => i).filter(i => !used.has(i)),
@@ -162,14 +167,14 @@
     // Progress at which each duckling settles in the nest.
     bornAt(child) {
       const birth = this.birth;
-      if (child === birth.featured) return FEATURE_END * .86;
+      if (child === birth.featured) return birth.tl.feature * .86;
       const event = birth.events.find(e => e.child === child);
       return event.start + event.length * this.bornFraction();
     }
     bornCount() {
       if (!this.birth) return 0;
       const p = this.birth.progress;
-      let count = this.birth.featured >= 0 && p >= FEATURE_END * .86 ? 1 : 0;
+      let count = this.birth.featured >= 0 && p >= this.birth.tl.feature * .86 ? 1 : 0;
       for (const e of this.birth.events) if (p >= e.start + e.length * this.bornFraction()) count++;
       return count;
     }
@@ -181,13 +186,13 @@
       const size = this.population.length, birth = this.birth;
       if (!birth) return this.fast ? 'Fast-forward: every generation still counts' : running ? 'The generations are flowing' : 'A quiet moment at the pond';
       const p = birth.progress, born = this.bornCount();
-      if (p >= DOZE_END) return `${size} adults → ${size} new adults`;
-      if (p >= MATING_END) {
+      if (p >= birth.tl.doze) return `${size} adults → ${size} new adults`;
+      if (p >= birth.tl.mating) {
         const n = this.unusedCount();
         return n ? `${n} ${n === 1 ? 'duck' : 'ducks'} passed on no copies this time` : 'Every duck passed on at least one copy';
       }
-      if (birth.featured >= 0 && p < FEATURE_END) {
-        const story = p / FEATURE_END;
+      if (birth.featured >= 0 && p < birth.tl.feature) {
+        const story = p / birth.tl.feature;
         if (story < .34) return 'A chance meeting…';
         if (story < .51) return 'A chest puff, a wing wiggle…';
         if (story < .7) return 'One gene copy from each parent';
@@ -243,12 +248,34 @@
         if (q > .48) {
           const grow = smooth((q - .48) / .1), go = smooth((q - .62) / .3), alleles = this.birth.next[e.child].alleles;
           const x = lerp(meet.x, slot.x, go), y = lerp(meet.y, 655, go), s = this.scale * (.35 + grow * .25) * (1 - go * .3);
-          c.save(); c.globalAlpha = grow * (1 - smooth((q - .9) / .1)); c.translate(x, y); c.scale(s * (slot.x >= meet.x ? 1 : -1), s * Y);
+          const waddle = this.reduced.matches || go <= 0 ? 0 : Math.sin(this.time * 16 + e.child) * .16, hopY = waddle ? Math.abs(Math.sin(this.time * 16 + e.child)) * -4 : 0;
+          c.save(); c.globalAlpha = grow * (1 - smooth((q - .9) / .1)); c.translate(x, y + hopY); c.rotate(waddle); c.scale(s * (slot.x >= meet.x ? 1 : -1), s * Y);
           c.drawImage(this.sprites[alleles.join('')], -55, -70, 115.2, 115.2); c.restore();
         }
         shown++;
       }
       this.canvas.dataset.matingHearts = String(shown);
+    }
+    // How many ducklings each adult has had so far this generation. Neutral counts, no prizes:
+    // being chosen often is luck, not merit.
+    drawCounters(c) {
+      const birth = this.birth;
+      if (!birth || this.population.length > 48 || birth.progress >= birth.tl.doze) return;
+      const counts = new Map(), p = birth.progress;
+      for (const child of birth.order) {
+        if (p < this.bornAt(child)) continue;
+        for (const parent of new Set(birth.parents[child].map(copy => Math.floor(copy / 2)))) counts.set(parent, (counts.get(parent) || 0) + 1);
+      }
+      const r = clamp(13 * this.scale, 8, 13);
+      c.save(); c.font = `700 ${Math.round(r * 1.15)}px system-ui,sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      for (const [index, n] of counts) {
+        const d = this.ducks[index], depth = .9 + (d.y - 160) / 1600, s = this.scale * depth;
+        const x = d.x - 26 * s * Math.sign(d.facing || 1), y = d.y - 78 * s * Y;
+        ellipse(c, x, y, r, r, '#fffaf0'); c.lineWidth = 1.5; c.strokeStyle = '#34777b'; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.stroke();
+        c.fillStyle = '#1d3f3d'; c.fillText(String(n), x, y + .5);
+      }
+      c.restore();
+      this.canvas.dataset.counters = String(counts.size);
     }
     drawPanel() {
       const c = this.nc, n = this.population.length, birth = this.birth;
@@ -270,11 +297,11 @@
       if (birth) {
         for (const child of birth.order) if (p >= this.bornAt(child)) { bornSet.add(child); birth.parents[child].forEach(copy => counts[copy]++); }
       }
-      const dozing = birth && p >= MATING_END;
+      const dozing = birth && p >= birth.tl.mating;
       // Lines from pool copies to ducklings
       if (birth) {
         for (const child of bornSet) {
-          const age = p - this.bornAt(child), fresh = age < .08;
+          const age = (p - this.bornAt(child)) * (this.genSeconds || 8), fresh = age < 1.4;
           if (!fresh && n > 24) continue;
           birth.parents[child].forEach((copy, i) => {
             const a = this.poolBead(copy), b = this.nestBead(child, i), allele = this.population[copy >> 1][copy % 2];
@@ -300,7 +327,7 @@
         }
       });
       // Ducklings in the nest
-      const fade = birth ? 1 - smooth((p - DOZE_END) / (1 - DOZE_END)) : 1, s = this.nestScale();
+      const fade = birth ? 1 - smooth((p - birth.tl.doze) / (1 - birth.tl.doze)) : 1, s = this.nestScale();
       for (let i = 0; i < n; i++) {
         const cell = this.nest.cells[i];
         if (bornSet.has(i)) {
@@ -351,10 +378,36 @@
       }
       c.restore();
     }
-    lily(c, x, y, size, flower, phase) {
+    lily(c, x, y, size, frog, phase) {
       c.save(); c.translate(x, y + Math.sin(this.time * .8 + phase) * 2); c.rotate(Math.sin(this.time * .25 + phase) * .04);
       c.beginPath(); c.ellipse(0, 0, size, size * .49, -.15, .3, Math.PI * 1.94); c.lineTo(-3, -1); c.closePath();
-      c.fillStyle = '#93b06f'; c.fill(); c.strokeStyle = '#28777b'; c.lineWidth = 2.4; c.stroke(); c.restore();
+      c.fillStyle = '#93b06f'; c.fill(); c.strokeStyle = '#28777b'; c.lineWidth = 2.4; c.stroke();
+      if (frog) this.frog(c, x, y);
+      c.restore();
+    }
+    // A frog watches from its lily pad: its eyes follow the latest mating, it blinks and now and
+    // then puffs its throat. Purely decorative.
+    frog(c, wx, wy) {
+      let look = { x: 500, y: 315 };
+      const active = this.activeEvents();
+      if (active.length) {
+        const e = active[active.length - 1].e, [a, b] = e.sources.map(i => this.ducks[i]);
+        look = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      } else if (this.ducks.length) look = this.ducks[0];
+      const ang = Math.atan2(look.y - (wy - 20), look.x - wx), still = this.reduced.matches;
+      const croak = still ? 0 : Math.max(0, Math.sin(this.time * 1.1)) ** 12, blink = !still && this.time % 4.3 < .14;
+      c.save(); c.translate(2, -10); c.scale(1.3, 1.3); c.lineJoin = 'round';
+      ellipse(c, 0, 4, 19, 12, '#7fb35a'); c.strokeStyle = '#28777b'; c.lineWidth = 2; c.beginPath(); c.ellipse(0, 4, 19, 12, 0, 0, Math.PI * 2); c.stroke();
+      ellipse(c, -13, 13, 7, 4, '#6a9e4a'); ellipse(c, 13, 13, 7, 4, '#6a9e4a');
+      if (croak > .02) { ellipse(c, 0, 11, 9 * croak + 3, 6 * croak + 2, '#e9f2c6'); }
+      for (const side of [-1, 1]) {
+        const ex = side * 8, ey = -6;
+        ellipse(c, ex, ey, 6.5, 6.5, '#7fb35a'); c.beginPath(); c.arc(ex, ey, 6.5, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+        if (blink) { c.beginPath(); c.moveTo(ex - 4, ey); c.lineTo(ex + 4, ey); c.strokeStyle = '#174551'; c.lineWidth = 1.8; c.stroke(); c.strokeStyle = '#28777b'; c.lineWidth = 2; }
+        else { ellipse(c, ex, ey, 4.2, 4.2, '#fffaf0'); ellipse(c, ex + Math.cos(ang) * 1.8, ey + Math.sin(ang) * 1.6, 2.1, 2.1, '#174551'); }
+      }
+      c.beginPath(); c.moveTo(-6, 4); c.quadraticCurveTo(0, 8, 6, 4); c.strokeStyle = '#2e5e45'; c.lineWidth = 1.5; c.stroke();
+      c.restore();
     }
     duckTransform(c, d, size) {
       const depth = .9 + (d.y - 160) / 1600, s = this.scale * size * depth;
@@ -387,11 +440,11 @@
         c.globalAlpha = alpha; c.drawImage(this.sprites[key + 'o'], -55, -70, 115.2, 115.2);
       } else c.drawImage(sprite, -55, -70, 115.2, 115.2);
       c.restore();
-      if (look.grey && !this.reduced.matches) this.zzz(c, d.x + 22 * s * Math.sign(d.facing || 1), d.y - 64 * s * Y, Math.max(.6, s * 1.3), alpha);
+      if (look.grey && !this.reduced.matches) this.zzz(c, d.x + 22 * s * Math.sign(d.facing || 1), d.y - 64 * s * Y, Math.max(.6, s * 1.3) * (1 + (look.sleepiness || 0) * .7), alpha, look.sleepiness || 0);
     }
-    zzz(c, x, y, s, alpha) {
+    zzz(c, x, y, s, alpha, sleepiness = 0) {
       c.save(); c.fillStyle = '#37636a';
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 3 + Math.round(sleepiness * 2); i++) {
         const k = (this.time * .6 + i / 3) % 1; c.globalAlpha = alpha * .8 * (1 - k);
         c.font = `600 ${(9 + i * 3) * s}px Georgia,serif`; c.fillText('z', x + i * 7 * s + k * 6 * s, y - i * 9 * s - k * 10 * s);
       }
@@ -480,7 +533,13 @@
       }
     }
     // Beak-to-beak meetings only where they stay readable: few ducks and slow playback.
-    beakToBeak() { return !this.reduced.matches && this.population.length <= 6 && (this.genSeconds || 8) >= 16; }
+    beakToBeak() { return Boolean(this.slow) && !this.reduced.matches && this.population.length <= SLOW.maxDucks; }
+    // Length of one generation in "Watch every mating" mode: every duckling gets its own meeting.
+    slowSeconds(size) { return SLOW.feature + (size - 1) * SLOW.mating + SLOW.doze + SLOW.swap; }
+    slowTimeline(size) {
+      const total = this.slowSeconds(size);
+      return { feature: SLOW.feature / total, mating: (total - SLOW.doze - SLOW.swap) / total, doze: (total - SLOW.swap) / total };
+    }
     // Paired parents come together while their duckling is made. Cosmetic only: the pairs are
     // already drawn by the model, from anywhere in the pond.
     steerPairs() {
@@ -536,7 +595,7 @@
       ellipse(c, x, y - 27, 63, 40, fill); c.restore();
     }
     drawFamily(c, birth) {
-      const p = Math.min(1, birth.progress / FEATURE_END), m = birth.meeting;
+      const p = Math.min(1, birth.progress / birth.tl.feature), m = birth.meeting;
       const between = (a, b) => smooth((p - a) / (b - a));
       const same = birth.sources[0] === birth.sources[1], focusScale = Math.max(1.12, this.scale * 1.08);
       const markers = [], drawn = new Map();
@@ -598,10 +657,11 @@
         this.steerPairs(); // keep meeting pairs exactly in place after spacing nudges
       }
       const birth = this.birth, p = birth ? birth.progress : 0;
-      const oldAlpha = birth ? 1 - smooth((p - DOZE_END) / (1 - DOZE_END)) : 1;
-      const focus = birth && birth.featured >= 0 && p < FEATURE_END;
+      const tl = birth ? birth.tl : TIMELINE;
+      const oldAlpha = birth ? 1 - smooth((p - tl.doze) / (1 - tl.doze)) : 1;
+      const focus = birth && birth.featured >= 0 && p < tl.feature;
       const focusIndices = new Set(focus ? birth.sources : []);
-      const dozing = new Set(birth && p >= MATING_END ? birth.unused : []);
+      const dozing = new Set(birth && p >= tl.mating ? birth.unused : []);
       c.save(); c.clip(this.water);
       for (let i = 0; i < 19; i++) {
         const x = 150 + i * 39, y = 190 + Math.sin(i * 3.7) * 90 + (i % 3) * 70;
@@ -619,12 +679,14 @@
       this.ducks.forEach((d, i) => { if (!focusIndices.has(i)) this.drawReflection(c, d, oldAlpha, this.growth); });
       c.restore();
       const others = this.ducks.map((d, i) => ({ d, i })).filter(({ i }) => !focusIndices.has(i)).sort((a, b) => a.d.y - b.d.y);
-      const dim = focus ? 1 - .5 * smooth(p / FEATURE_END / .15) * (1 - smooth((p / FEATURE_END - .7) / .1)) : 1;
-      others.forEach(({ d, i }) => this.drawDuck(c, d, oldAlpha, this.growth, i === this.selected, { dim, grey: dozing.has(i) }));
+      const dim = focus ? 1 - .5 * smooth(p / tl.feature / .15) * (1 - smooth((p / tl.feature - .7) / .1)) : 1;
+      const sleepiness = birth ? clamp((p - tl.mating) / Math.max(.001, tl.doze - tl.mating), 0, 1) : 0;
+      others.forEach(({ d, i }) => this.drawDuck(c, d, oldAlpha, this.growth, i === this.selected, { dim, grey: dozing.has(i), sleepiness }));
       if (focus) this.drawFamily(c, birth);
       this.drawMatings(c);
-      if (birth && p > DOZE_END) birth.next.forEach(d => this.drawDuck(c, d, smooth((p - DOZE_END) / (1 - DOZE_END)), .65, false));
-      this.lily(c, 780, 410, 36, false, 4);
+      if (!focus) this.drawCounters(c);
+      if (birth && p > tl.doze) birth.next.forEach(d => this.drawDuck(c, d, smooth((p - tl.doze) / (1 - tl.doze)), .65, false));
+      this.lily(c, 780, 410, 36, true, 4);
       this.drawPanel();
     }
   }

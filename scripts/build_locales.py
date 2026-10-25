@@ -7,6 +7,7 @@ from pathlib import Path
 from html.parser import HTMLParser
 from html import escape,unescape
 import json,re,posixpath
+import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit,urlunsplit
 from locale_source import js_parts
 ROOT=Path(__file__).resolve().parents[1]
@@ -127,6 +128,17 @@ def language_links(html,path,lang):
  alternates=f'<link rel="alternate" hreflang="en" href="{origin}{path}"><link rel="alternate" hreflang="fr" href="{origin}fr/{path}">'
  return html.replace('</head>',alternates+'</head>')
 
+def localize_svg(source):
+ # SVG is XML: HTMLParser lowercases viewBox and other case-sensitive names.
+ ET.register_namespace('', 'http://www.w3.org/2000/svg')
+ root=ET.fromstring(source)
+ for element in root.iter():
+  if element.text:element.text=text(element.text,True)
+  if element.tail:element.tail=text(element.tail,True)
+  for name in ['alt','title','aria-label']:
+   if name in element.attrib:element.set(name,text(element.get(name),True))
+ return ET.tostring(root,encoding='unicode')+'\n'
+
 def build():
  pages=[p for p in ROOT.rglob('*.html') if not any(x in p.relative_to(ROOT).parts for x in ['fr','.preview','.git']) and p.name not in ['illustration.html','motion-fragment.html'] and (p.relative_to(ROOT).parts[0] in ['about','simulations'] or p.relative_to(ROOT).as_posix()=='index.html')]
  for p in pages:
@@ -140,7 +152,7 @@ def build():
   dest=ROOT/'fr'/p.relative_to(ROOT);dest.write_text(localize_js(p.read_text(),p.name))
  for p in (ROOT/'assets/illustrations').rglob('*.svg'):
   # DNA letters stay unchanged; captions and accessible descriptions are translated.
-  rel=p.relative_to(ROOT);parser=Page(rel);parser.feed(p.read_text());dest=ROOT/'fr'/rel;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(''.join(parser.out))
+  rel=p.relative_to(ROOT);dest=ROOT/'fr'/rel;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(localize_svg(p.read_text()))
  if missing:
   (ROOT/'content/locales/missing-fr.json').write_text(json.dumps(sorted(missing),ensure_ascii=False,indent=2))
   raise RuntimeError(f'{len(missing)} untranslated page strings; see content/locales/missing-fr.json')

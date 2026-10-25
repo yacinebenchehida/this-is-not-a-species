@@ -40,4 +40,13 @@ class Locales(unittest.TestCase):
     self.assertTrue(target.is_relative_to(ROOT/'fr'),link)
  def test_french_schematics_are_valid_svg(self):
   for p in (ROOT/'fr/assets').rglob('*.svg'):ET.parse(p)
+ def test_translation_preserves_svg_geometry_and_case_sensitive_attributes(self):
+  for source in (ROOT/'assets/illustrations').rglob('*.svg'):
+   english=list(ET.parse(source).getroot().iter())
+   french=list(ET.parse(ROOT/'fr'/source.relative_to(ROOT)).getroot().iter())
+   self.assertEqual(len(english),len(french),str(source))
+   for en,fr in zip(english,french):
+    self.assertEqual(en.tag,fr.tag,str(source))
+    visual=lambda e:{k:v for k,v in e.attrib.items() if k not in ['alt','title','aria-label']}
+    self.assertEqual(visual(en),visual(fr),f'{source}: {en.tag}')
 if __name__=='__main__':unittest.main()

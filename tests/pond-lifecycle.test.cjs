@@ -65,27 +65,39 @@ test('dense ponds swim more slowly and all bodies use the same colour', () => {
   assert([...small.ducks, ...large.ducks].every(d => d.cream === false));
 });
 
-test('small hearts cover every sampled parent and never mark an unused duck', () => {
-  const scene = sceneFixture();
-  const parents = [[0, 3], [3, 0], [6, 6], [0, 6], [3, 6], [6, 0]];
-  const plan = scene.planMatings(parents), seen = new Set();
-  for (let p = 0; p <= 1; p += .005) {
-    for (const [index, pulse] of scene.matingHearts(plan, p)) {
-      assert([0, 1, 3].includes(index)); assert(pulse.alpha > 0 && pulse.alpha <= 1); seen.add(index);
+test('every duckling gets one mating event linking its two recorded parents', () => {
+  for (const size of [6, 24, 48, 500]) {
+    const scene = sceneFixture(), previous = model.createPopulation(size, .5), next = model.nextGeneration(previous);
+    scene.setPopulation(previous); scene.beginBirth(previous, next.population, next.parents, 0);
+    const birth = scene.birth, children = birth.events.map(e => e.child);
+    if (birth.featured >= 0) children.push(birth.featured);
+    assert.equal(children.length, size); assert.equal(new Set(children).size, size);
+    assert.equal(birth.featured >= 0, size <= 24, 'only small ponds get the close-up family');
+    for (const e of birth.events) {
+      assert.deepEqual(e.sources, next.parents[e.child].map(copy => Math.floor(copy / 2)));
+      assert(e.start >= 0 && e.start + e.length <= .84 + 1e-9);
     }
   }
-  assert.deepEqual([...seen].sort(), [0, 1, 3]);
-  assert.equal(plan[2].sources.length, 1, 'one-parent draws have one heart, not two overlapping copies');
 });
 
-test('fast mating cues retain one recorded generation while other numerical generations continue', () => {
-  const scene = sceneFixture(), initial = model.createPopulation(6, .5);
-  const first = model.nextGeneration(initial); scene.setPopulation(initial);
-  scene.setPopulation(first.population, false, first.parents); const retained = scene.fastMatings;
-  const next = model.nextGeneration(first.population); scene.time = .3;
-  scene.setPopulation(next.population, false, next.parents);
-  assert.equal(scene.population, next.population); assert.equal(scene.fastMatings, retained);
-  scene.time = 1.2; scene.setPopulation(first.population, false, first.parents);
-  assert.notEqual(scene.fastMatings, retained);
-  scene.setPopulation(initial); assert.equal(scene.fastMatings, null, 'restart clears the previous run’s cues');
+test('one-parent draws get a single heart and dozing ducks are exactly those that passed on nothing', () => {
+  const scene = sceneFixture(), previous = [[1, 0], [0, 1], [1, 1]];
+  const next = [[1, 0], [0, 0], [1, 1]], parents = [[0, 1], [1, 1], [0, 4]];
+  scene.setPopulation(previous); scene.beginBirth(previous, next, parents, 0);
+  assert.deepEqual(scene.birth.unused, [1], 'duck 2 was never drawn');
+  const selfed = scene.birth.events.find(e => e.child === 1);
+  assert.deepEqual(selfed.sources, [0, 0]);
+  scene.birth.progress = selfed.start + selfed.length / 2; scene.render(1 / 30);
+  assert(Number(scene.canvas.dataset.matingHearts) >= 1);
+  scene.birth.progress = .9; assert.match(scene.storyLabel(true), /1 duck passed on no copies/);
+});
+
+test('fast-forward shows no matings and the panel has a seat for every copy and duckling', () => {
+  for (const size of [6, 96, 500]) {
+    const scene = sceneFixture(), population = model.createPopulation(size, .5);
+    scene.fast = true; scene.setPopulation(population); scene.render(1 / 30);
+    assert.equal(scene.activeEvents().length, 0); assert.match(scene.storyLabel(true), /Fast-forward/);
+    assert.equal(scene.pool.cells.length, size); assert.equal(scene.nest.cells.length, size);
+    for (const cell of [...scene.pool.cells, ...scene.nest.cells]) assert(cell.x > 100 && cell.x < 1000 && cell.y > 0 && cell.y < 160);
+  }
 });

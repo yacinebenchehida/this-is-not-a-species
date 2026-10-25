@@ -356,7 +356,6 @@
   "These parents made one duckling": "Ces parents ont produit un caneton",
   "These two settings start a fresh pond.": "Ces deux réglages créent une nouvelle mare.",
   "This illustration is not interactive yet.": "Cette animation n’est pas encore interactive.",
-  "This is a hobby project about evolution, population genetics, ecology, genomics and bioinformatics. The idea is simple: small, playful interactive illustrations that make scientific ideas enjoyable to explore.": "Ce projet personnel explore l’évolution, la génétique des populations, l’écologie, la génomique et la bioinformatique. L’idée est simple : de petites animations interactives et ludiques pour découvrir les mécanismes du vivant.",
   "This is a personal project without institutional affiliation.": "Il s’agit d’un projet personnel sans affiliation institutionnelle.",
   "This is not a species. — Home": "This is not a species. — Accueil",
   "Tracing Ancestors": "Sur les traces des ancêtres",
@@ -543,5 +542,6 @@
   "“Loss of heterozygosity due to drift”": "la perte d’hétérozygotie due à la dérive",
   "(UC Davis).": "(UC Davis ; en anglais).",
   "html:drift-further-reading": "Pour une introduction plus formelle, consultez le <a href=\"http://raphael.leblois.free.fr/ressources/cours/Cours_DeriveMigrationMetapopFstat_ENS_2009.pdf#page=50\">cours de Raphaël Leblois, pages 50–73</a>.",
-  "50%": "50 %"
+  "50%": "50 %",
+  "This personal project illustrates concepts in evolution, population genetics, ecology, genomics and bioinformatics in playful, concrete ways. The idea is simple: small interactive animations to explore the mechanisms behind the complexity of life.": "Ce projet personnel illustre des concepts d’évolution, de génétique des populations, d’écologie, de génomique et de bioinformatique de façon ludique et concrète. L’idée est simple : de petites animations interactives pour découvrir les mécanismes qui se cachent derrière la complexité du vivant."
 }

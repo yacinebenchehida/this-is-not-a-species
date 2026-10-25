@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   try {
     const { createPopulation, nextGeneration, countAlleles } = window.DriftModel;
-    const rates = [.125, .25, .5, 3, 10, 30, 100];
+    const rates = [.0625, .125, .25, .5, 3, 10, 30, 100];
     const modelLimit = 100000, ghostLimit = 12;
     const scene = new window.PondScene($('pond-canvas'), chooseDuck, $('brood-canvas'));
     let population, previous = null, parents = null, generation = 0, history = [], mixed = [], selected = 0;

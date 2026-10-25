@@ -541,5 +541,6 @@
   "Genetic Drift and Neutral Diversity": "la dérive génétique et la diversité neutre",
   ", especially": ", en particulier la section sur",
   "“Loss of heterozygosity due to drift”": "la perte d’hétérozygotie due à la dérive",
-  "(UC Davis).": "(UC Davis ; en anglais)."
+  "(UC Davis).": "(UC Davis ; en anglais).",
+  "html:drift-further-reading": "Pour une introduction plus formelle, consultez le <a href=\"http://raphael.leblois.free.fr/ressources/cours/Cours_DeriveMigrationMetapopFstat_ENS_2009.pdf#page=50\">cours de Raphaël Leblois, pages 50–73</a>."
 }

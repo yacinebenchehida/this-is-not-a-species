@@ -131,6 +131,8 @@ def build():
  pages=[p for p in ROOT.rglob('*.html') if not any(x in p.relative_to(ROOT).parts for x in ['fr','.preview','.git']) and p.name not in ['illustration.html','motion-fragment.html'] and (p.relative_to(ROOT).parts[0] in ['about','simulations'] or p.relative_to(ROOT).as_posix()=='index.html')]
  for p in pages:
   rel=p.relative_to(ROOT);parser=Page(rel);parser.feed(p.read_text());out=''.join(parser.out)
+  # A language can recommend a different reference while retaining the English source.
+  out=re.sub(r'<p data-localized-fragment="([^"]+)">.*?</p>', lambda m: '<p data-localized-fragment="'+m[1]+'">'+D['html:'+m[1]]+'</p>', out, flags=re.S)
   dest=ROOT/'fr'/rel;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(language_links(out,rel,'fr'))
   p.write_text(language_links(p.read_text(),rel,'en'))
  for p in (ROOT/'simulations/population-genetics/genetic-drift').glob('*.js'):

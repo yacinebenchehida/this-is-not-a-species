@@ -50,7 +50,9 @@ class Page(HTMLParser):
      dest=('fr/'+target) if localized else target
      new=posixpath.relpath(dest, 'fr/'+str(self.path.parent))
      if u.path.endswith('/') and not new.endswith('/'):new+='/'
-     v=urlunsplit(('', '',new,u.query,u.fragment))
+     # Refresh previously cached SVGs whose viewBox was lost by the old localizer.
+     query=(u.query+'&' if u.query else '')+'v=svg-xml-1' if target.endswith('.svg') else u.query
+     v=urlunsplit(('', '',new,query,u.fragment))
    out.append(f'{k}="{escape(v,quote=True)}"')
   self.out.append('<'+t+(' '+' '.join(out) if out else '')+'>')
  def handle_startendtag(self,t,attrs):

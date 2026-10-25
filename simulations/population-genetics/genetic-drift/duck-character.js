@@ -3,7 +3,7 @@
   'use strict';
   const body = new Path2D('M-31 8C-40-2-40-18-34-18Q-26-10-19-11C-3-18 24-16 32-5C45 11 28 27 4 27C-15 29-28 24-31 8Z');
   const head = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10Z');
-  const headEdge = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24');
+  const headEdge = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10');
   const beak = new Path2D('M35-31Q44-34 49-29Q53-23 46-20Q38-17 33-23Q32-27 35-31Z');
   // The wing holds the two allele beads, as the page text describes.
   const wing = new Path2D('M-25 1C-16-12 13-12 21 0C16 13-13 16-25 1Z');

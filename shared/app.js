@@ -20,3 +20,10 @@ if (menu && nav) {
     if (!event.target.closest('.header-inner')) closeMenu();
   });
 }
+
+// Language links preserve the current animation's cache version and section anchor.
+for (const link of document.querySelectorAll('.language-switch a')) {
+  const target = new URL(link.href, location.href);
+  target.search = location.search; target.hash = location.hash;
+  link.href = target.href;
+}

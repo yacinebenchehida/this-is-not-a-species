@@ -1,14 +1,20 @@
 # This is not a species.
 
-A personal playground for exploring evolution, population genetics, ecology, genomics and bioinformatics through playful, interactive illustrations.
+[Français](README.fr.md) · **[Open the website](https://yacinebenchehida.github.io/this-is-not-a-species/)**
 
-**[Visit the website](https://yacinebenchehida.github.io/this-is-not-a-species/)**
+A personal playground for exploring evolution, population genetics, ecology, genomics and bioinformatics through playful **interactive animations**.
 
-## Explore
+## Start with the Duck Pond
 
-How does chance change a population? What connects predators and prey? What happens inside a DNA sequencer?
+**[Play the Duck Pond](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/population-genetics/genetic-drift/play.html)** · [How it works](simulations/population-genetics/genetic-drift/README.md)
 
-This project brings scientific ideas to life through small, playful illustrations. Browse five themes:
+Every duck carries two coloured beads representing copies of a gene. Watch random inheritance change their proportions, sometimes leaving only one colour. Follow every mating, trace a duckling's copies back to its parents, compare previous runs, or explore many ponds together. The number of ducks stays constant from one generation to the next.
+
+The pond includes populations of 6–500 ducks, adjustable starting shares and playback speed, a detailed mating mode for small populations, and comparisons between small and large ponds. Hearts identify the parents of one duckling; sleeping grey ducks passed on no gene copies that generation. Neither allele has an advantage.
+
+## Explore the collection
+
+Browse five themes and 20 animation ideas:
 
 - [Evolution](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/evolution/)
 - [Population Genetics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/population-genetics/)
@@ -16,12 +22,12 @@ This project brings scientific ideas to life through small, playful illustration
 - [Genomics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/genomics/)
 - [Bioinformatics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/bioinformatics/)
 
-Illustrations marked **Coming soon** are not yet interactive.
+The Duck Pond is playable; the other entries are previews marked **Coming soon**. The website is available in English and French: the **EN / FR** links open the same page in the other language, including animation controls and explanations.
 
 ## About
 
-The name nods to René Magritte's *The Treachery of Images*: an illustration or a model represents something about life, without being life itself.
+The name nods to René Magritte's *The Treachery of Images*: an image or a model represents something about life, without being life itself.
 
-This is a hobby project made for curiosity and enjoyment, using AI-generated or AI-assisted artwork and code. The code has not undergone independent human review. The illustrations are intended for educational exploration rather than scientific research.
+This is a hobby project without institutional affiliation, made with AI-generated or AI-assisted artwork and code. The code has not undergone independent human review. The animations are for educational exploration rather than scientific research.
 
-[More about the project](https://yacinebenchehida.github.io/this-is-not-a-species/about/) · [Development guidance](AGENTS.md)
+[About the project](https://yacinebenchehida.github.io/this-is-not-a-species/about/) · [Development guidance](AGENTS.md)

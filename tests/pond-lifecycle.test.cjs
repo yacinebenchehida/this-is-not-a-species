@@ -16,7 +16,7 @@ function sceneFixture() {
     document: { createElement: element }, Path2D: class {}, ResizeObserver: class { observe() {} } };
   vm.createContext(sandbox);
   for (const file of ['duck-character.js', 'pond-scene.js']) {
-    vm.runInContext(fs.readFileSync(`${__dirname}/../simulations/population-genetics/genetic-drift/${file}`, 'utf8'), sandbox);
+    vm.runInContext(fs.readFileSync(`${__dirname}/../${process.env.POND_LOCALE === 'fr' && file === 'pond-scene.js' ? 'fr/' : ''}simulations/population-genetics/genetic-drift/${file}`, 'utf8'), sandbox);
   }
   return new sandbox.window.PondScene(element(), () => {}, element());
 }
@@ -93,14 +93,14 @@ test('one-parent draws get a single heart and dozing ducks are exactly those tha
   assert.deepEqual(selfed.sources, [0, 0]);
   scene.birth.progress = selfed.start + selfed.length / 2; scene.render(1 / 30);
   assert(Number(scene.canvas.dataset.matingHearts) >= 1);
-  scene.birth.progress = .9; assert.match(scene.storyLabel(true), /1 duck passed on no copies/);
+  scene.birth.progress = .9; assert.match(scene.storyLabel(true), process.env.POND_LOCALE === 'fr' ? /1 canard n’a transmis aucune copie/ : /1 duck passed on no copies/);
 });
 
 test('fast-forward shows no matings and the panel has a seat for every copy and duckling', () => {
   for (const size of [6, 96, 500]) {
     const scene = sceneFixture(), population = model.createPopulation(size, .5);
     scene.fast = true; scene.setPopulation(population); scene.render(1 / 30);
-    assert.equal(scene.activeEvents().length, 0); assert.match(scene.storyLabel(true), /Fast-forward/);
+    assert.equal(scene.activeEvents().length, 0); assert.match(scene.storyLabel(true), process.env.POND_LOCALE === 'fr' ? /En accéléré/ : /Fast-forward/);
     assert.equal(scene.pool.cells.length, size); assert.equal(scene.nest.cells.length, size);
     for (const cell of [...scene.pool.cells, ...scene.nest.cells]) assert(cell.x > 100 && cell.x < 1000 && cell.y > 0 && cell.y < 160);
   }

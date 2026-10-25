@@ -54,7 +54,7 @@ This is a personal, playful, non-research science illustration website. Prioriti
 
 ## Duck family motion study
 - `motion.html` is an isolated two-parent inheritance story, generated from `motion-fragment.html`. It does not replace the population illustration.
-- `duck-character.js` preserves the original rounded cartoon silhouette, proportions, small bill, dot eye and teal outline. Use the same yellow body for all ducks so colour cannot imply male/female classes; only the two allele dots encode genetic information. Add gentle volume with soft lighting within that outline; do not substitute rubber-duck ellipsoids or change the reference character. Chest, head and wing poses remain articulated. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
+- `duck-character.js` preserves the original rounded cartoon silhouette and proportions (a flatter, wider version was tried and rejected), with a short rounded bill, a dot eye with a white sparkle, a soft cheek blush, a head outline that continues under the bill to the chest, and a teal outline. Use the same yellow body for all ducks so colour cannot imply male/female classes; only the two allele dots encode genetic information. Add gentle volume with soft lighting within that outline; do not substitute rubber-duck ellipsoids or change the reference character. Chest, head and wing poses remain articulated. `motion.js` owns wandering, courtship, copied allele trails, cloud overlap and offspring reveal.
 - `family-model.js` samples one copy independently from each specified diploid parent. Replay and scrubbing preserve the draw; Another duckling samples again. Run `node --test tests/duck-family.test.cjs` after changing inheritance.
 
 ## Exhibit catalogue

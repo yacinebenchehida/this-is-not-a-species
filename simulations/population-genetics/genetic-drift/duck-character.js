@@ -4,7 +4,8 @@
   const body = new Path2D('M-31 8C-40-2-40-18-34-18Q-26-10-19-11C-3-18 24-16 32-5C45 11 28 27 4 27C-15 29-28 24-31 8Z');
   const head = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10Z');
   const headEdge = new Path2D('M-3-10C-18-24-11-53 10-58C33-64 49-43 37-24C33-17 27-12 20-10');
-  const beak = new Path2D('M35-31Q44-34 49-29Q53-23 46-20Q38-17 33-23Q32-27 35-31Z');
+  // A slightly shorter, rounder bill than the reference drawing.
+  const beak = new Path2D('M35-31Q41.5-33.5 45.5-29.5Q48.5-24.5 43-21.5Q37.5-18.5 33.5-23Q32.5-27 35-31Z');
   // The wing holds the two allele beads, as the page text describes.
   const wing = new Path2D('M-25 1C-16-12 13-12 21 0C16 13-13 16-25 1Z');
   const palette = ['#f57d5b', '#59a8aa'];
@@ -97,10 +98,16 @@
       // An ochre bill keeps coral meaning only one thing: an allele.
       const bill = c.createLinearGradient(0, -33, 0, -19);
       bill.addColorStop(0, '#ffd27a'); bill.addColorStop(.6, '#f2ac3a'); bill.addColorStop(1, '#d08a22');
+      // A soft cheek blush; drawn under the bill so it never covers it.
+      if (tone !== 'grey') { c.save(); c.globalAlpha *= .55; oval(c, 25, -24.5, 5.2, 3.2, '#f49a9a'); c.restore(); }
       c.fillStyle = bill; c.fill(beak); c.strokeStyle = '#3c7b7d'; c.lineWidth = 1.9; c.stroke(beak);
       const blink = pose.sleep || pose.blink || (!pose.still && (time + phase) % 5.9 < .12);
-      if (blink) { c.beginPath(); c.moveTo(19.5, -35); c.quadraticCurveTo(23.5, -32, 27, -35); c.strokeStyle = '#174551'; c.lineWidth = 2.3; c.stroke(); }
-      else oval(c, 23.5, -35, 3.6, 4.9, '#174551');
+      if (blink) { c.beginPath(); c.moveTo(19, -35); c.quadraticCurveTo(23.5, -31.5, 28, -35); c.strokeStyle = '#174551'; c.lineWidth = 2.3; c.stroke(); }
+      else {
+        // A slightly larger eye with a white sparkle reads as friendly even at small sizes.
+        oval(c, 23.5, -35, 4.25, 5.8, '#174551');
+        oval(c, 21.8, -37.5, 1.7, 2.05, '#ffffff'); oval(c, 24.6, -32.8, .8, .8, '#ffffffcc');
+      }
       c.restore();
     }
     const localMarkers = markerSpots.map(([x], i) => ({ x: x * chestX, y: markerY, allele: duck.alleles[i] }));

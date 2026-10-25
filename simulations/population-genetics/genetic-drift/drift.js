@@ -101,7 +101,7 @@
     function speedLabel() {
       const r = rate(); $('speed-label').textContent = r < 1 ? `1 every ${Math.round(10 / r) / 10} s` : `${r} / second`;
       $('speed').setAttribute('aria-valuetext', r < 1 ? `One generation every ${Math.round(10 / r) / 10} seconds` : `${r} generations per second`);
-      $('speed-note').textContent = r <= 1 ? 'Small hearts mark the sampled parents. Up to 24 ducks, follow one family up close.' : 'Fast-forward: small hearts show matings from sampled generations; the close-up is skipped.';
+      $('speed-note').textContent = r <= 1 ? 'At slow speeds with up to 24 ducks, follow one family up close.' : 'Fast-forward: hearts show examples from a few generations; the close-up is skipped.';
     }
     function restart() {
       running = false; stepping = false; pending = null; accumulator = 0;

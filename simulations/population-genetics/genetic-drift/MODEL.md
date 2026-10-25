@@ -47,3 +47,13 @@ Lifecycle tests additionally cover nursery cardinality, complete replacement for
 Drawing is capped at 30 frames per second; the generation clock uses elapsed time independently of the drawing rate.
 
 The page generator embeds `illustration.html` inside the shared site shell. Local model and interface scripts and styles remain independent of the shared gallery templates. To edit the page, change the fragment and regenerate with `python3 scripts/build_pages.py`.
+
+## Visitor explanations
+
+The heart key means a duck was chosen as a parent. It does not mean that every duck reproduces; repeated and absent contributions are preserved. Fast heart pulses remain representative examples.
+
+Under this neutral, finite, constant-size model, an allele's eventual fixation probability equals its realised initial frequency. The explanation uses a 75% example, which is exactly representable at every offered population size, while retaining the rounding note for other percentages. Odds describe repeated runs and do not determine a single outcome.
+
+Comparisons of fixation timing hold the initial frequencies constant. Larger populations have smaller generation-to-generation frequency fluctuations and usually take more generations to reach fixation. The waiting time remains random. Cosmetic swimming speed and wall-clock playback speed do not determine the numerical process.
+
+Primary background: [Tomizawa, 2000, derivation of neutral fixation probability](https://pubmed.ncbi.nlm.nih.gov/10861006/); [Waxman, 2012, fixation times, including the constant-size result](https://pmc.ncbi.nlm.nih.gov/articles/PMC3374318/).

@@ -7,9 +7,9 @@
   // Birth timeline, as fractions of one generation's playback.
   const BORN_AT = .9, MEET_PART = .35;
   // Normal playback: shares of one generation for the close-up, the other matings and the dozing.
-  const TIMELINE = { feature: .42, mating: .84, doze: .94 };
+  const TIMELINE = { feature: .40, mating: .80, doze: .93 };
   // "Watch every mating" playback, in seconds: close-up, each beak-to-beak mating, dozing, swap.
-  const SLOW = { feature: 6, mating: 2.2, doze: 2, swap: 1, maxDucks: 24 };
+  const SLOW = { feature: 6, mating: 2.2, doze: 3.5, swap: 1, maxDucks: 24 };
   const PANEL = { w: 1000, h: 160, labelEnd: 118, pool: [8, 62], nest: [84, 154] };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -139,7 +139,8 @@
       const cell = this.nest.cells[child];
       if (this.nest.sprites) {
         const s = this.nestScale();
-        return { x: cell.x + window.DuckCharacter.markerSpots[copy][0] * s, y: cell.y + 14 * s + window.DuckCharacter.markerSpots[copy][1] * s, r: 7.2 * s };
+        const shape = window.DuckCharacter.shape || { x: 1, y: 1 };
+        return { x: cell.x + window.DuckCharacter.markerSpots[copy][0] * s * shape.x, y: cell.y + 14 * s + window.DuckCharacter.markerSpots[copy][1] * s * shape.y, r: 7.2 * s };
       }
       const r = Math.min(this.nest.cw * .17, this.nest.ch * .36, 9);
       return { x: cell.x + (copy ? 1 : -1) * r * 1.2, y: cell.y, r };
@@ -180,7 +181,10 @@
     }
     // In beak-to-beak mode the first 35% of each mating is the swim to meet; the story follows.
     storyQ(q) { return this.birth && this.birth.beak ? (q - MEET_PART) / (1 - MEET_PART) : q; }
-    bornFraction() { return this.birth && this.birth.beak ? MEET_PART + (1 - MEET_PART) * BORN_AT : BORN_AT; }
+    rawQ(story) { return this.birth && this.birth.beak ? MEET_PART + (1 - MEET_PART) * story : story; }
+    // In slow mode the duckling's walk to the nest carries on while the next pair meets.
+    walkEnd() { return this.birth && this.birth.beak ? 1.6 : 1; }
+    bornFraction() { return this.rawQ(this.walkEnd()); }
     unusedCount() { return this.birth ? this.birth.unused.length : 0; }
     storyLabel(running) {
       const size = this.population.length, birth = this.birth;
@@ -201,22 +205,26 @@
       }
       return size <= 48 ? `Duckling ${Math.min(size, born + 1)} of ${size}: one copy from each parent` : `Each heart links one duckling's two parents: ${born} of ${size}`;
     }
-    activeEvents(lead = 0) {
+    activeEvents(lead = 0, trail = 1) {
       if (!this.birth || this.reduced.matches) return [];
       const p = this.birth.progress;
-      return this.birth.events.map(e => ({ e, q: (p - e.start) / e.length })).filter(({ q }) => q > -lead && q < 1);
+      return this.birth.events.map(e => ({ e, q: (p - e.start) / e.length })).filter(({ q }) => q > -lead && q < trail);
     }
+    // Where a duckling leaves the pond: the bottom bank, below the place it will take in the nest.
+    bankSpot(child) { const slot = this.nest.cells[child]; return { x: 270 + (slot.x - PANEL.labelEnd) / (PANEL.w - PANEL.labelEnd) * 460, y: 548 }; }
     beadWorld(index, copy) {
       const d = this.ducks[index], depth = .9 + (d.y - 160) / 1600, s = this.scale * depth * this.growth;
       const spot = window.DuckCharacter.markerSpots[copy], face = d.facing >= 0 ? 1 : -1;
-      return { x: d.x + spot[0] * s * face, y: d.y + spot[1] * s * Y };
+      const shape = window.DuckCharacter.shape || { x: 1, y: 1 };
+      return { x: d.x + spot[0] * s * face * shape.x, y: d.y + spot[1] * s * Y * shape.y };
     }
     // One mating per duckling: the parents pair up under a heart, one bead flies from each
     // into a duckling that appears between them, and the duckling heads for the nest.
     drawMatings(c) {
       let shown = 0;
       const heartScale = clamp(this.scale * .75, .28, .66), small = this.population.length <= 48;
-      for (const { e, q: raw } of this.activeEvents()) {
+      const walkEnd = this.walkEnd();
+      for (const { e, q: raw } of this.activeEvents(0, this.rawQ(walkEnd))) {
         const q = this.storyQ(raw);
         if (q <= 0) continue; // still swimming to meet
         const alpha = Math.min(1, q * 6, (1 - q) * 5), link = Math.min(1, q * 6) * (1 - smooth((q - .5) / .12));
@@ -245,14 +253,19 @@
             ellipse(c, x, y, r + 2, r + 2, '#fffbe2'); window.DuckCharacter.bead(c, x, y, allele, r);
           });
         }
-        if (q > .48) {
-          const grow = smooth((q - .48) / .1), go = smooth((q - .62) / .3), alleles = this.birth.next[e.child].alleles;
-          const x = lerp(meet.x, slot.x, go), y = lerp(meet.y, 655, go), s = this.scale * (.35 + grow * .25) * (1 - go * .3);
-          const waddle = this.reduced.matches || go <= 0 ? 0 : Math.sin(this.time * 16 + e.child) * .16, hopY = waddle ? Math.abs(Math.sin(this.time * 16 + e.child)) * -4 : 0;
-          c.save(); c.globalAlpha = grow * (1 - smooth((q - .9) / .1)); c.translate(x, y + hopY); c.rotate(waddle); c.scale(s * (slot.x >= meet.x ? 1 : -1), s * Y);
-          c.drawImage(this.sprites[alleles.join('')], -55, -70, 115.2, 115.2); c.restore();
+        if (q > .48 && q < walkEnd) {
+          // The duckling appears, waddles to the bottom bank, then steps down towards the nest below.
+          const bank = this.bankSpot(e.child), span = walkEnd - .62;
+          const grow = smooth((q - .48) / .1), go = smooth((q - .62) / (span * .8)), down = smooth((q - .62 - span * .8) / (span * .2));
+          const alleles = this.birth.next[e.child].alleles;
+          const x = lerp(meet.x, bank.x, go), y = lerp(meet.y, bank.y, go) + down * 34, s = Math.max(.32, this.scale * .62) * (.6 + grow * .4);
+          const waddle = this.reduced.matches || go <= 0 || go >= 1 && down <= 0 ? 0 : Math.sin(this.time * 12 + e.child) * .15;
+          const hopY = waddle ? -Math.abs(Math.sin(this.time * 12 + e.child)) * 4 : 0;
+          c.save(); c.globalAlpha = grow * (1 - down); c.translate(x, y + hopY); c.rotate(waddle); c.scale(s * (bank.x >= meet.x ? 1 : -1), s * Y);
+          c.drawImage(this.sprites[alleles.join('') + (go > .9 ? 'n' : '')], -55, -70, 115.2, 115.2); c.restore();
+          if (down > 0 && down < 1) { c.save(); c.globalAlpha = (1 - down) * .8; c.fillStyle = '#5a6e56'; c.font = '600 18px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('↓', x, y + 24); c.restore(); }
         }
-        shown++;
+        if (raw < 1) shown++;
       }
       this.canvas.dataset.matingHearts = String(shown);
     }
@@ -266,13 +279,16 @@
         if (p < this.bornAt(child)) continue;
         for (const parent of new Set(birth.parents[child].map(copy => Math.floor(copy / 2)))) counts.set(parent, (counts.get(parent) || 0) + 1);
       }
-      const r = clamp(13 * this.scale, 8, 13);
-      c.save(); c.font = `700 ${Math.round(r * 1.15)}px system-ui,sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      const r = clamp(12 * this.scale, 8, 12);
+      c.save(); c.font = `700 ${Math.round(r * 1.2)}px system-ui,sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
       for (const [index, n] of counts) {
         const d = this.ducks[index], depth = .9 + (d.y - 160) / 1600, s = this.scale * depth;
-        const x = d.x - 26 * s * Math.sign(d.facing || 1), y = d.y - 78 * s * Y;
-        ellipse(c, x, y, r, r, '#fffaf0'); c.lineWidth = 1.5; c.strokeStyle = '#34777b'; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.stroke();
-        c.fillStyle = '#1d3f3d'; c.fillText(String(n), x, y + .5);
+        const x = d.x - 24 * s * Math.sign(d.facing || 1), y = d.y - 80 * s * Y, w = r * 3.1;
+        c.beginPath(); c.roundRect(x - w / 2, y - r, w, 2 * r, r); c.fillStyle = '#fffaf0'; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#34777b'; c.stroke();
+        // A tiny duckling, then the number of ducklings so far.
+        const dx = x - w / 2 + r * 1.05;
+        ellipse(c, dx, y + r * .2, r * .62, r * .42, '#f6c94a'); ellipse(c, dx + r * .28, y - r * .3, r * .34, r * .34, '#f6c94a'); ellipse(c, dx + r * .6, y - r * .28, r * .16, r * .1, '#e3962a');
+        c.fillStyle = '#1d3f3d'; c.fillText(String(n), x + r * .55, y + .5);
       }
       c.restore();
       this.canvas.dataset.counters = String(counts.size);
@@ -331,6 +347,13 @@
       for (let i = 0; i < n; i++) {
         const cell = this.nest.cells[i];
         if (bornSet.has(i)) {
+          const arrived = (p - this.bornAt(i)) * (this.genSeconds || 8);
+          if (arrived < 1.4 && !this.reduced.matches) {
+            // A soft glow marks the duckling that has just arrived from the pond.
+            const glow = 1 - arrived / 1.4, r = (this.nest.sprites ? 40 * s : this.nestBead(i, 0).r * 3.2) * (1 + (1 - glow) * .25);
+            const g = c.createRadialGradient(cell.x, cell.y, 0, cell.x, cell.y, r); g.addColorStop(0, `rgba(255,246,190,${.95 * glow})`); g.addColorStop(1, 'rgba(255,246,190,0)');
+            c.fillStyle = g; c.beginPath(); c.arc(cell.x, cell.y, r, 0, Math.PI * 2); c.fill();
+          }
           const alleles = birth.next[i].alleles; c.save(); c.globalAlpha = fade;
           if (this.nest.sprites) c.drawImage(this.sprites[alleles.join('') + 'n'], cell.x - 55 * s, cell.y + 14 * s - 70 * s, 115.2 * s, 115.2 * s);
           else {
@@ -440,7 +463,7 @@
         c.globalAlpha = alpha; c.drawImage(this.sprites[key + 'o'], -55, -70, 115.2, 115.2);
       } else c.drawImage(sprite, -55, -70, 115.2, 115.2);
       c.restore();
-      if (look.grey && !this.reduced.matches) this.zzz(c, d.x + 22 * s * Math.sign(d.facing || 1), d.y - 64 * s * Y, Math.max(.6, s * 1.3) * (1 + (look.sleepiness || 0) * .7), alpha, look.sleepiness || 0);
+      if (look.grey && !this.reduced.matches) this.zzz(c, d.x + 22 * s * Math.sign(d.facing || 1), d.y - 64 * s * Y, Math.max(.8, s * 1.7) * (1 + (look.sleepiness || 0) * .5), alpha, look.sleepiness || 0);
     }
     zzz(c, x, y, s, alpha, sleepiness = 0) {
       c.save(); c.fillStyle = '#37636a';

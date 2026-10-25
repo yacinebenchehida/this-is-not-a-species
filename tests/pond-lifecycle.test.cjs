@@ -112,7 +112,7 @@ test('watch-every-mating mode: beak-to-beak meetings one at a time, for up to 24
     assert.equal(scene.beakToBeak(), expected, `${size} ducks, slow ${slow}`);
   }
   const timing = sceneFixture();
-  assert.deepEqual([6, 12, 24].map(n => Math.round(timing.slowSeconds(n))), [20, 33, 60]);
+  assert.deepEqual([6, 12, 24].map(n => Math.round(timing.slowSeconds(n))), [22, 35, 61]);
   for (const size of [6, 12, 24]) {
     const scene = sceneFixture(); scene.slow = true; const pop = model.createPopulation(size, .5), next = model.nextGeneration(pop);
     scene.setPopulation(pop); scene.beginBirth(pop, next.population, next.parents, 0);

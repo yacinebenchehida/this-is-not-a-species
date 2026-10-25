@@ -537,7 +537,9 @@
   "Playful interactive explorations of evolution, population genetics, ecology, genomics and bioinformatics. A personal science project.": "Des animations interactives pour explorer l’évolution, la génétique des populations, l’écologie, la génomique et la bioinformatique. Un projet scientifique personnel.",
   "duck": "canard",
   " fixed": " fixé",
-  "For a mathematical treatment, see": "Pour une présentation mathématique, consultez la section sur",
-  "genetic drift and neutral diversity": "la dérive génétique et la diversité neutre",
-  "in Graham Coop’s population-genetics notes (UC Davis).": "des notes de génétique des populations de Graham Coop (UC Davis ; en anglais)."
+  "For a more formal introduction, see Graham Coop’s": "Pour une introduction plus formelle, consultez le chapitre de Graham Coop sur",
+  "Genetic Drift and Neutral Diversity": "la dérive génétique et la diversité neutre",
+  ", especially": ", en particulier la section sur",
+  "“Loss of heterozygosity due to drift”": "la perte d’hétérozygotie due à la dérive",
+  "(UC Davis).": "(UC Davis ; en anglais)."
 }

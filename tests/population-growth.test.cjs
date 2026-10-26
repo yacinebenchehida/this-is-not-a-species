@@ -108,3 +108,44 @@ test('crumbs: the lunchbox shows exactly its food left, and the buffet keeps its
   const buffet=new context.window.GrowthDish();buffet.start(M.schedule(4,r),{crumbs:48});
   for(let t=0;t<=200;t+=5){buffet.update(t,.5,1,0);assert.equal(buffet.crumbs.filter(c=>c.owner===null).length,48,'free crumbs stay constant');}
 });
+
+test('feeding mouth coordinates match the drawn jaw after rotation, scaling and squash',()=>{
+  const context={window:{DishScene:class{}}};
+  for(const file of ['bacterium-character.js','growth-scene.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth',file),'utf8'),context);
+  const C=context.window.BacteriumCharacter,scene=new context.window.GrowthDish();
+  for(const kind of ['rod','round','bean'])for(const size of [.5,1.3])for(const angle of [-1.1,.7]){
+    scene.size=size;const pose=context.window.FeedingAnimation.pose(.55),m=1.4,shape=C.mouthShape(m);
+    const cell={kind,base:23,radius:23*size,x:320,y:220,angle,colour:1,phase:0},faceScale=1.6,division=.64;
+    const expected=scene.mouthGeom(cell,m,faceScale,division,pose),centres=[];let matrix=[1,0,0,1,0,0],stack=[],contents=0;
+    const gradient={addColorStop(){}};
+    const c=new Proxy({
+      save(){stack.push([...matrix]);},restore(){matrix=stack.pop();},
+      translate(x,y){matrix[4]+=matrix[0]*x+matrix[2]*y;matrix[5]+=matrix[1]*x+matrix[3]*y;},
+      scale(x,y){matrix[0]*=x;matrix[1]*=x;matrix[2]*=y;matrix[3]*=y;},
+      rotate(t){const [a,b,d,e]=matrix,co=Math.cos(t),si=Math.sin(t);matrix[0]=a*co+d*si;matrix[1]=b*co+e*si;matrix[2]=-a*si+d*co;matrix[3]=-b*si+e*co;},
+      ellipse(x,y,w,h){if(Math.abs(w-shape.w)<1e-9&&Math.abs(h-shape.h)<1e-9)centres.push({x:matrix[0]*x+matrix[2]*y+matrix[4],y:matrix[1]*x+matrix[3]*y+matrix[5]});},
+      createLinearGradient:()=>gradient,createRadialGradient:()=>gradient
+    },{get:(o,k)=>o[k]||(()=>{})});
+    c.translate(cell.x,cell.y);c.scale(size,size);
+    C.draw(c,{...cell,...pose,x:0,y:0,radius:cell.base,mouth:m,faceScale},0,division,true,()=>contents++);
+    assert.equal(contents,1,'food is painted once within the mouth');assert.ok(centres.length>=2);
+    for(const actual of centres){close(actual.x,expected.x);close(actual.y,expected.y);}
+  }
+});
+
+test('animated gulps preserve food and population counts at slow, normal and fast playback',()=>{
+  const c=new Proxy({createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
+  const context={window:{DishScene:class{constructor(){this.canvas={dataset:{},width:1000,height:520};this.c=c;this.time=0;this.reduced={matches:false};}}}};
+  for(const file of ['bacterium-character.js','growth-scene.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth',file),'utf8'),context);
+  let sawGulp=false;
+  for(const speed of [2,4,18])for(const K of [4,52,Infinity]){
+    const scene=new context.window.GrowthDish(),schedule=M.schedule(4,Math.LN2/30,K);scene.start(schedule,{crumbs:24});scene.minutesPerSecond=speed;scene.sprite=()=>({});
+    for(let tick=0;tick<=Math.ceil(120/speed*30);tick++){
+      const t=Math.min(120,tick*speed/30);scene.update(t,.8,1);scene.render(1/30);
+      assert.equal(scene.cells.length,4+M.completed(schedule,t));
+      if(K!==Infinity)assert.equal(scene.crumbs.length,K-scene.cells.length);
+      for(const cell of scene.cells){assert.ok(Number.isFinite(cell.x)&&Number.isFinite(cell.y));if(cell.gulpAt!==undefined)sawGulp=true;}
+    }
+  }
+  assert.ok(sawGulp,'exercise the real feeding sequence as well as numerical births');
+});

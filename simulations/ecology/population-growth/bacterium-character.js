@@ -20,42 +20,58 @@
     c.bezierCurveTo(-end-r*1.33,r,-end-r*1.33,-r,-end,-r); c.closePath();
   }
   // mood 0 happy, 1 peckish (flat mouth), 2 hungry (heavy eyelids, small open mouth). Decorative only.
-  // Mouth size and position in face units; it grows downward so it never covers the eyes.
-  // Values above 1 stretch it wide enough to wrap around a sugar cube.
-  function mouthShape(m){return {w:2.6+m*6.2,h:.9+m*5.8,cy:3.1+m*5.2};}
-  function face(c,x,y,scale,time,phase,still,second=false,mood=0,mouth=0) {
+  // The face and the feeding scene share these exact coordinates.
+  function mouthShape(m){return {w:2.6+m*8.8,h:.9+m*7.6,cy:3.8+m*4.1};}
+  function faceFrame(cell,division=0){
+    const r=cell.radius,long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
+    const growth=Math.min(1,division/.65);
+    return {x:(cell.kind==='round'?0:long*.24)+growth*r*(cell.kind==='round'?1.3:1.8),y:-r*.13,scale:cell.faceScale||1};
+  }
+  function face(c,x,y,scale,time,phase,still,second=false,mood=0,mouth=0,palette=colours[0],contents=null,satisfied=0) {
     c.save(); c.translate(x,y); c.scale(scale,scale);
     const blink = !still && (time + phase * 3.7) % 5.2 < .13;
+    // A stretchy cheek-coloured jaw stays attached to the character as it opens.
+    if(mouth>0){
+      const {w,h,cy}=mouthShape(mouth);
+      if(mouth>.15){
+        const lip=c.createLinearGradient(0,cy-h,0,cy+h+3);lip.addColorStop(0,palette.light);lip.addColorStop(1,palette.base);
+        oval(c,0,cy,w+2.3,h+2.2,lip);c.strokeStyle=ink;c.lineWidth=1.25;c.stroke();
+      }
+      const dark=c.createLinearGradient(0,cy-h,0,cy+h);dark.addColorStop(0,'#123d49');dark.addColorStop(1,'#426473');
+      oval(c,0,cy,w,h,dark);
+      c.save();c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.clip();
+      oval(c,w*.12,cy+h*.85,w*.68,h*.36,'#ed9998');
+      // Food is painted inside the mouth before the teeth, using the same clip as the jaws.
+      if(contents)contents(c);
+      if(mouth>.18){
+        c.fillStyle='#fffdf0';c.strokeStyle='#b5c7bf';c.lineWidth=.35;
+        for(const side of [-1,1])for(const f of [-.72,-.24,.24,.72]){
+          const toothW=w*.25,edge=cy+side*h*Math.sqrt(1-f*f),tip=edge-side*h*(Math.abs(f)>.5?.58:.48);
+          c.beginPath();c.moveTo(f*w-toothW/2,edge+side*2);c.quadraticCurveTo(f*w-toothW*.12,tip+side*1.5,f*w+toothW*.12,tip);c.lineTo(f*w+toothW/2,edge+side*2);c.closePath();c.fill();c.stroke();
+        }
+      }
+      c.restore();c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.strokeStyle='#174b59';c.lineWidth=1.1;c.stroke();
+    }
+    const eyeY=-2-Math.max(0,mouth-.2)*3;
     for(const side of [-1,1]) {
-      if(blink){c.beginPath();c.moveTo(side*5-1.8,-2);c.quadraticCurveTo(side*5,-.5,side*5+1.8,-2);c.strokeStyle='#174b59';c.lineWidth=1.7;c.stroke();}
+      if(satisfied>.15){c.beginPath();c.moveTo(side*5-2,eyeY+.8);c.quadraticCurveTo(side*5,eyeY-2.8,side*5+2,eyeY+.8);c.strokeStyle='#174b59';c.lineWidth=1.7;c.lineCap='round';c.stroke();}
+      else if(blink){c.beginPath();c.moveTo(side*5-1.8,eyeY);c.quadraticCurveTo(side*5,eyeY+1.5,side*5+1.8,eyeY);c.strokeStyle='#174b59';c.lineWidth=1.7;c.stroke();}
       else if(mood===2){oval(c,side*5,-1.4,2.15,1.7,'#174b59');c.beginPath();c.moveTo(side*5-2.6,-2.7);c.lineTo(side*5+2.6,-2.7);c.strokeStyle='#174b59';c.lineWidth=1.5;c.stroke();oval(c,side*5-.6,-1.6,.5,.45,'#fffdf0');}
-      else {oval(c,side*5,-2,2.15,2.65,'#174b59');oval(c,side*5-.6,-2.9,.65,.75,'#fffdf0');}
+      else {oval(c,side*5,eyeY,2.15,2.65+mouth*.3,'#174b59');oval(c,side*5-.6,eyeY-.9,.65,.75,'#fffdf0');}
     }
     oval(c,-9,3,3.2,1.4,'#f6ae9a66'); oval(c,9,3,3.2,1.4,'#f6ae9a66');
-    // An open, chewing mouth while the cell nibbles a crumb.
-    if(mouth>0){
-      // A huge cartoon mouth with shark-like rows of pointed teeth and a pink tongue.
-      const {w,h,cy}=mouthShape(mouth);
-      c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#1f444b';c.fill();c.strokeStyle='#174b59';c.lineWidth=1.1;c.stroke();
-      if(mouth>.2){
-        c.save();c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.clip();oval(c,0,cy+h*.85,w*.65,h*.4,'#ee8f8b');
-        c.fillStyle='#fffdf3';c.strokeStyle='#8fa6a3';c.lineWidth=.4;
-        const n=4,tw=w*2/n,top=h*.62*Math.min(1,mouth*1.4),bottom=h*.5*Math.min(1,mouth*1.4);
-        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw;c.moveTo(x0,cy-h-1);c.lineTo(x0+tw/2,cy-h+top);c.lineTo(x0+tw,cy-h-1);}c.fill();c.stroke();
-        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw+tw/2;c.moveTo(x0-tw/2,cy+h+1);c.lineTo(x0,cy+h-bottom);c.lineTo(x0+tw/2,cy+h+1);}c.fill();c.stroke();
-        c.restore();
-      }
-    }
-    else if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
+    if(mouth<=0){
+    if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
     else if(mood===1){c.beginPath();c.moveTo(-2.8,4.9);c.lineTo(2.8,4.9);c.strokeStyle='#2d6870';c.lineWidth=1.6;c.lineCap='round';c.stroke();}
     else {c.beginPath();c.moveTo(-2.3,4);c.quadraticCurveTo(0,second?6.7:6,2.3,4);c.strokeStyle='#2d6870';c.lineWidth=1.05;c.stroke();}
+    }
     c.restore();
   }
-  function draw(c,cell,time,division=0,still=false) {
+  function draw(c,cell,time,division=0,still=false,mouthContents=null) {
     const p=colours[cell.colour], r=cell.radius, long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
     const growth=division<.65?division/.65:1, pinch=Math.max(0,(division-.57)/.43);
     const length=long*(1+growth*.9), bend=cell.kind==='bean'?r*.17:0;
-    c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle);
+    c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle);c.scale(cell.stretchX||1,cell.stretchY||1);
     // Short, soft surface hairs distinguish the round character without a viral crown.
     if(cell.kind==='round') {
       c.strokeStyle=ink;c.lineWidth=2.3;c.lineCap='round';
@@ -80,9 +96,10 @@
     const faceX=cell.kind==='round'?0:long*.24;
     const shift=growth*r*(cell.kind==='round'?1.3:1.8);
     const fs=cell.faceScale||1;
-    face(c,faceX+shift,-r*.13,fs,time,cell.phase,still,false,cell.mood||0,cell.mouth||0);
+    const frame=faceFrame(cell,division);
+    face(c,frame.x,frame.y,fs,time,cell.phase,still,false,cell.mood||0,cell.mouth||0,p,mouthContents,cell.satisfied||0);
     if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9*fs,time,cell.phase+1,still,true,cell.mood||0);c.restore();}
     c.restore();
   }
-  window.BacteriumCharacter={draw,colours,mouthShape};
+  window.BacteriumCharacter={draw,colours,mouthShape,faceFrame};
 })();

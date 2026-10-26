@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit,urlunsplit
 from locale_source import js_parts
 ROOT=Path(__file__).resolve().parents[1]
+PRESENTATION_DIRS=('simulations/population-genetics/genetic-drift', 'simulations/ecology/population-growth')
+SHARED_JS=('model.js','family-model.js','duck-character.js','duck-mesh.js','division-model.js','bacterium-character.js')
 D=json.loads((ROOT/'content/locales/fr.json').read_text())
 # Terms used in the former English copy remain aliases for catalogue maintenance.
 ALIASES={k.replace('illustrations','animations').replace('Illustrations','Animations').replace('illustration','animation'):v for k,v in D.items()}
@@ -46,7 +48,7 @@ class Page(HTMLParser):
      # All internal page links stay in French; numerical code, artwork and CSS are shared.
      local=target.startswith(('simulations/','about/')) or target in ['index.html','simulations','about']
      ispage=target.endswith('.html') or '.' not in target.rsplit('/',1)[-1]
-     localized=local and ispage or target.endswith('.js') and '/genetic-drift/' in target and not target.endswith(('model.js','family-model.js','duck-character.js','duck-mesh.js')) or target.endswith('.svg')
+     localized=local and ispage or target.endswith('.js') and any(target.startswith(folder+'/') for folder in PRESENTATION_DIRS) and not target.endswith(SHARED_JS) or target.endswith('.svg')
      dest=('fr/'+target) if localized else target
      new=posixpath.relpath(dest, 'fr/'+str(self.path.parent))
      if u.path.endswith('/') and not new.endswith('/'):new+='/'
@@ -159,8 +161,8 @@ def build():
   out=re.sub(r'<p data-localized-fragment="([^"]+)">.*?</p>', lambda m: '<p data-localized-fragment="'+m[1]+'">'+D['html:'+m[1]]+'</p>', out, flags=re.S)
   dest=ROOT/'fr'/rel;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(language_links(out,rel,'fr'))
   p.write_text(language_links(p.read_text(),rel,'en'))
- for p in (ROOT/'simulations/population-genetics/genetic-drift').glob('*.js'):
-  if p.name in ['model.js','family-model.js','duck-character.js','duck-mesh.js']:continue
+ for p in (p for folder in PRESENTATION_DIRS for p in (ROOT/folder).glob('*.js')):
+  if p.name in SHARED_JS:continue
   dest=ROOT/'fr'/p.relative_to(ROOT);dest.write_text(localize_js(p.read_text(),p.name))
  for p in (ROOT/'assets/illustrations').rglob('*.svg'):
   # DNA letters stay unchanged; captions and accessible descriptions are translated.

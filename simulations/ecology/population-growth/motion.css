@@ -1,0 +1,22 @@
+[hidden]{display:none!important}
+.dish-page{width:92%;max-width:1120px;margin:auto;padding:21px 0 22px}
+.dish-top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}
+.dish-top .back-link{margin:0;font-size:13px}.dish-top .eyebrow{margin:0;font-size:9px;letter-spacing:1.3px}
+.dish-intro{display:flex;align-items:center;justify-content:space-between;gap:25px;margin:0 0 20px}
+.dish-intro h1{font-size:43px;line-height:1.1;letter-spacing:-1.2px;margin:0 0 9px}
+.dish-intro p{font-size:18px;color:#62736b;margin:0}.dish-intro .dish-invitation{font-family:var(--script);font-size:31px;color:#337d7c;transform:rotate(-4deg);padding:0 24px}
+.dish-board{overflow:hidden;border:1px solid #e1d9c5;border-radius:25px;background:linear-gradient(125deg,#fffcf4,#faf3e4);box-shadow:0 7px 28px #344e4407}
+.dish-stage{position:relative}.dish-stage canvas{display:block;width:100%;height:auto;aspect-ratio:1000/520}
+.dish-scene-top{position:absolute;z-index:1;left:27px;right:27px;top:20px;display:flex;justify-content:space-between;align-items:center;font:11px system-ui,sans-serif;color:#6b7b6e;pointer-events:none}
+.dish-preview-label{letter-spacing:.7px}.dish-count{background:#fffcf0d9;border:1px solid #dce0cc;border-radius:24px;padding:9px 16px;display:flex;align-items:baseline;gap:7px}.dish-count strong{font:600 23px Georgia,serif;color:#245d61}
+.dish-caption{position:absolute;bottom:17px;left:18px;right:18px;text-align:center;pointer-events:none}
+.dish-caption>span{font:italic 23px Georgia,serif;color:#2b6766}.dish-caption p{font:12px/1.5 system-ui,sans-serif;color:#6f7b69;margin:7px 0 0}
+.dish-controls{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #e3dfca;background:#f3efdf;padding:16px 26px}
+.dish-buttons{display:flex;gap:12px}.dish-buttons button{cursor:pointer;font-size:15px;min-height:44px;padding:11px 22px}
+.dish-tempo{display:flex;gap:10px;align-items:center;font:12px system-ui,sans-serif;color:#657466}.dish-tempo select{font:13px system-ui,sans-serif;color:var(--ink);min-height:38px;border:1px solid #cad2bc;border-radius:10px;background:#fffcf2;padding:8px 27px 8px 11px}
+.dish-tempo select:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
+.dish-footnote{text-align:center;font:11px/1.6 system-ui,sans-serif;color:#79816f;margin:16px 0 0}
+.dish-accessible{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#dish-loading{padding:22px;background:#f2eddb;border-radius:14px}
+@media(max-width:700px){.dish-page{width:94%;padding-top:18px}.dish-top .eyebrow{font-size:8px;letter-spacing:.5px}.dish-intro h1{font-size:33px}.dish-intro p{font-size:15px}.dish-intro .dish-invitation{display:none}.dish-scene-top{top:12px;left:15px;right:15px}.dish-count{padding:5px 11px;font-size:10px}.dish-count strong{font-size:18px}.dish-preview-label{font-size:9px}.dish-caption{bottom:10px}.dish-caption>span{font-size:18px}.dish-caption p{font-size:10px;margin-top:4px}.dish-controls{padding:14px;flex-wrap:wrap;gap:14px}.dish-tempo{margin-left:auto}.dish-buttons button{font-size:13px;padding:9px 16px}.dish-stage canvas{min-height:295px;object-fit:contain}.dish-footnote{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.dish-intro .dish-invitation{transform:none}}

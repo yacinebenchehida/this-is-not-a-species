@@ -58,9 +58,10 @@
       const s=finite(),unlimited=M.value(scenes[0].schedule,time),limited=M.value(s,time);
       // Each dish shrinks its drawings to fit its own population, from 10 cells on, so the dishes
       // never look full (space is not limiting here) and the smaller lunchbox crowd stays readable.
-      const fit=n=>Math.max(.22,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,n))));
+      const fit=n=>Math.max(.5,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,n))));
       const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0),f=share(time);
       scenes[0].update(time,fit(unlimited),1,0);scenes[1].update(time,fit(limited),food,moodOf(f));
+      scenes[0].finished=time>=end;
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
       $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);
@@ -77,7 +78,7 @@
       const split=splitAt!==null&&time-splitAt<25&&time>=splitAt;
       const done=time>=end,canExtend=end<maxEnd-1e-8,key=done?'end':time-fedAt<18?'fed':s.K===n0?'empty':time===0?'start':split?'split':f<.25?'low':count(0)>=n0*4?'many':'first';
       if(key!==storyKey){
-        $('growth-story').textContent=done?(canExtend?'La première observation s’arrête ici. Remplissez le panier-repas et continuez à regarder.':'Notre observation s’arrête ici. Au buffet, la croissance continuerait.'):key==='fed'?'Nourriture fraîche dans le panier-repas. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'Le panier-repas est vide. Remplissez-le pour que les cellules grandissent.':key==='start'?'Chaque morceau de sucre peut devenir une nouvelle cellule. Regardez les cellules les croquer.':key==='split'?'Ici, les histoires se séparent : la boîte du panier-repas prend du retard car sa nourriture s’épuise.':key==='low'?'Le panier-repas est presque vide. Remplissez-le et observez ce qui se passe.':key==='many'?'Au buffet, plus de cellules signifie plus de divisions. Le panier-repas se vide.':'Au coude à coude pour l’instant : les deux boîtes ont de quoi manger.';
+        $('growth-story').textContent=done?(canExtend?'La première observation s’arrête ici. Remplissez le panier-repas et continuez à regarder.':'Notre observation s’arrête ici. Au buffet, la croissance continuerait.'):key==='fed'?'Nourriture fraîche dans le panier-repas. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'Le panier-repas est vide. Remplissez-le pour que les cellules grandissent.':key==='start'?'Chaque morceau de sucre peut devenir une nouvelle cellule. Regardez les cellules les avaler.':key==='split'?'Ici, les histoires se séparent : la boîte du panier-repas prend du retard car sa nourriture s’épuise.':key==='low'?'Le panier-repas est presque vide. Remplissez-le et observez ce qui se passe.':key==='many'?'Au buffet, plus de cellules signifie plus de divisions. Le panier-repas se vide.':'Au coude à coude pour l’instant : les deux boîtes ont de quoi manger.';
         storyKey=key;
       }
       $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Recommencer <span aria-hidden="true">↻</span>':time>0?'Continuer <span aria-hidden="true">▶</span>':'Les voir grandir <span aria-hidden="true">▶</span>';

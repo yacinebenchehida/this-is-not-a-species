@@ -31,16 +31,15 @@
     oval(c,-9,3,3.2,1.4,'#f6ae9a66'); oval(c,9,3,3.2,1.4,'#f6ae9a66');
     // An open, chewing mouth while the cell nibbles a crumb.
     if(mouth>0){
-      // A big cartoon mouth: wide open, dark inside, pink tongue and two little teeth.
-      const w=2.6+mouth*4.6,h=.9+mouth*6.4,cy=4.8+mouth*2;
-      c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#244f57';c.fill();c.strokeStyle='#174b59';c.lineWidth=.9;c.stroke();
-      if(mouth>.25){
-        c.save();c.clip();oval(c,0,cy+h*.8,w*.7,h*.45,'#ee8f8b');
-        // Rows of pointed teeth along the top and bottom of the open mouth.
-        c.fillStyle='#fffdf3';c.strokeStyle='#9fb3b0';c.lineWidth=.35;
-        const n=5,tw=w*2/n,th=Math.min(h*.5,2.6+mouth*1.2);
-        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw;c.moveTo(x0,cy-h);c.lineTo(x0+tw/2,cy-h+th);c.lineTo(x0+tw,cy-h);}c.fill();c.stroke();
-        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw+tw/2;c.moveTo(x0-tw/2,cy+h);c.lineTo(x0,cy+h-th*.8);c.lineTo(x0+tw/2,cy+h);}c.fill();c.stroke();
+      // A huge cartoon mouth with shark-like rows of pointed teeth and a pink tongue.
+      const w=2.6+mouth*6.4,h=.9+mouth*7.6,cy=3.2+mouth*1.4;
+      c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#1f444b';c.fill();c.strokeStyle='#174b59';c.lineWidth=1.1;c.stroke();
+      if(mouth>.2){
+        c.save();c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.clip();oval(c,0,cy+h*.85,w*.65,h*.4,'#ee8f8b');
+        c.fillStyle='#fffdf3';c.strokeStyle='#8fa6a3';c.lineWidth=.4;
+        const n=4,tw=w*2/n,top=h*.62*Math.min(1,mouth*1.4),bottom=h*.5*Math.min(1,mouth*1.4);
+        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw;c.moveTo(x0,cy-h-1);c.lineTo(x0+tw/2,cy-h+top);c.lineTo(x0+tw,cy-h-1);}c.fill();c.stroke();
+        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw+tw/2;c.moveTo(x0-tw/2,cy+h+1);c.lineTo(x0,cy+h-bottom);c.lineTo(x0+tw/2,cy+h+1);}c.fill();c.stroke();
         c.restore();
       }
     }

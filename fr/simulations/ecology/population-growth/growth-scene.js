@@ -4,9 +4,12 @@
   'use strict';
   const ellipse=(c,x,y,rx,ry,fill)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,2*Math.PI);c.fillStyle=fill;c.fill();};
   const clamp=v=>Math.max(0,Math.min(1,v));
-  const centre={x:500,y:248},swim={x:343,y:122},pantry={x:290,y:96};
+  const centre={x:500,y:248},swim={x:343,y:122},pantry={x:290,y:96},liquid={x:396,y:158};
   // Above this many cells, crumbs are still eaten exactly, but cells no longer swim to them.
   const ANIMATED=400;
+  // Growth progress at which a cell swallows its cube, just before it divides.
+  const GULP=.94;
+  const smoothstep=t=>{t=clamp(t);return t*t*(3-2*t);};
   // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
   // grains. bites (0–3) removes rounded chunks, like a cartoon bite mark.
   const BITES=[[.9,-.55],[-.9,-.35],[.1,.95]];
@@ -33,7 +36,7 @@
   function seeded(seed){return()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
   class GrowthDish extends window.DishScene {
     start(schedule,options={}){
-      this.schedule=schedule;this.eventIndex=0;this.simTime=0;this.food=1;this.size=1.3;this.sprites=new Map();this.addedAt=-100;this.mood=0;this.canvas.dataset.mood='0';
+      this.schedule=schedule;this.eventIndex=0;this.simTime=0;this.food=1;this.size=1.3;this.sprites=new Map();this.addedAt=-100;this.mood=0;this.finished=false;this.finishedAt=null;this.canvas.dataset.mood='0';
       const seats=schedule.n0===4?[[300,192],[665,192],[355,310],[680,310]]:[[242,200],[390,145],[580,155],[750,220],[660,305],[455,325],[450,235],[280,310],[570,265],[355,205],[530,350],[710,170]];
       this.cells=Array.from({length:schedule.n0},(_,id)=>({id,x:seats[id][0],y:seats[id][1],angle:[-.45,.15,-.6,.6,.8,.2][id%6],colour:id%3,kind:['rod','round','bean'][id%3],base:22+(id%3),radius:23,visualStartTime:0,visualStartAge:0,phase:id*1.81,heading:id*2.17,speed:6+id%4}));
       // The lunchbox shows exactly its reserve, K − N0 crumbs. The buffet starts with the same
@@ -131,20 +134,25 @@
     }
     // Cells always stay inside the dish, whatever they are doing.
     keepInside(cell){
-      const u=(cell.x-centre.x)/swim.x,v=(cell.y-centre.y)/swim.y,edge=Math.hypot(u,v);
+      const r=cell.base,long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
+      const division=clamp((this.age(cell)-.25)/.75),growth=division<.65?division/.65:1;
+      const half=(long*(1+growth*.9)/2+(cell.kind==='round'?8:2))*this.size,side=(r+(cell.kind==='round'?8:2))*this.size;
+      const ca=Math.abs(Math.cos(cell.angle)),sa=Math.abs(Math.sin(cell.angle));
+      const ax=Math.max(30,liquid.x-half*ca-side*sa),ay=Math.max(16,liquid.y-half*sa-side*ca);
+      const u=(cell.x-centre.x)/ax,v=(cell.y-centre.y)/ay,edge=Math.hypot(u,v);
       if(edge>1){cell.x=centre.x+(cell.x-centre.x)/edge;cell.y=centre.y+(cell.y-centre.y)/edge;if(!cell.target)cell.heading=Math.atan2(-v,-u)+(cell.phase%1-.5);}
     }
     drawCrumbs(c,still){
-      const byId=new Map(this.cells.map(x=>[x.id,x]));
+      // When the observation ends, the buffet's cubes fade away so only the cells remain.
+      if(this.finished&&this.finishedAt===null)this.finishedAt=this.time;
+      if(!this.finished)this.finishedAt=null;
+      const fade=this.finishedAt===null?1:still?0:clamp(1-(this.time-this.finishedAt)/1.2);
+      if(fade<=0)return;
       for(const crumb of this.crumbs){
-        // A claimed crumb is nibbled down as its owner grows: what remains is the food not yet used.
-        // A claimed cube loses one bite each time its owner's growth passes a third of the way to
-        // division; the last bite is taken at the division itself.
-        let bites=0;
-        if(crumb.atMouth)continue;
-        if(crumb.owner!==null){const owner=byId.get(crumb.owner);bites=owner?Math.min(2,Math.floor(this.age(owner)*3)):0;}
+        // Cubes stay whole until a cell swallows one just before dividing.
+        if(crumb.atMouth||crumb.gulped)continue;
         const fall=still?1:clamp((this.time-crumb.dropAt)/.7),y=crumb.y-(1-fall)*(1-fall)*70;
-        nutrient(c,crumb.x,y,crumb.size,crumb.angle,still?1:Math.min(1,fall*1.6),bites);
+        nutrient(c,crumb.x,y,crumb.size,crumb.angle,(still?1:Math.min(1,fall*1.6))*fade);
       }
     }
     render(dt){
@@ -160,43 +168,27 @@
       const faceScale=Math.min(2.2,Math.max(1.5,.8/this.size)),animate=this.cells.length<=ANIMATED&&!still;
       for(const cell of this.cells){
         const age=this.age(cell),division=still?0:clamp((age-.25)/.75);
-        // Chomp: when the cell's growth crosses a third, two thirds or the end, it takes a bite.
-        const bite=cell.target?Math.min(3,Math.floor(age*3+1e-9)):0;
-        if(!still&&bite>(cell.bites||0)){cell.bites=bite;cell.chompAt=this.time;(cell.swallowed||(cell.swallowed=[])).push({at:this.time,seed:bite*1.7+cell.phase});}
         const near=animate&&cell.target&&cell.target.atMouth;
-        // Before each bite the mouth opens wide; then it snaps shut and chews for a moment.
-        const sinceChomp=this.time-(cell.chompAt??-9),nextBite=((cell.bites||0)+1)/3,toNext=nextBite-age;
-        const r=this.schedule.cells[cell.id],span=Number.isFinite(r.divide)?r.divide-r.born:Infinity,minutes=toNext*span;
+        // Shark-style gulp: as division nears the mouth opens wider and wider, then the whole cube
+        // is swallowed at once and the mouth snaps shut. One cube becomes one new cell.
+        if(near&&age>=GULP&&!cell.target.gulped){cell.target.gulped=true;cell.gulpAt=this.time;}
+        const sinceGulp=cell.gulpAt===undefined?Infinity:this.time-cell.gulpAt;
         let mouth=0;
-        if(near){
-          if(sinceChomp<.45)mouth=sinceChomp<.12?.15:.25+.2*Math.abs(Math.sin(sinceChomp*22));
-          else mouth=clamp(1.15-minutes/4);
-        }
+        if(sinceGulp<.32)mouth=1;
+        else if(sinceGulp<.75)mouth=sinceGulp<.42?.1:.18+.12*Math.abs(Math.sin(sinceGulp*24));
+        else if(near)mouth=clamp((age-.55)/(GULP-.55));
         if(!still&&(division>.015||mouth)&&this.cells.length<250){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0,faceScale,mouth},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell,faceScale),-128,-80);c.restore();}
-        // Swallowed sugar: each bite flies into the mouth, then glints inside the body and dissolves.
-        if(!still&&cell.swallowed&&cell.swallowed.length){
-          const reach=this.mouthReach(cell),ca=Math.cos(cell.angle),sa=Math.sin(cell.angle),mx=cell.x+ca*reach,my=cell.y+sa*reach;
-          const piece=Math.max(4,7*Math.min(1,this.size*1.2));
-          cell.swallowed=cell.swallowed.filter(b=>this.time-b.at<3.2);
-          for(const b of cell.swallowed){
-            const t=this.time-b.at;
-            if(t<.35){
-              // In flight: from the cube into the open mouth.
-              const k=t/.35,cx=mx+ca*piece*2*(1-k),cy=my+sa*piece*2*(1-k);
-              nutrient(c,cx,cy,piece*(1-.3*k),b.seed,1);
-            }else{
-              // Inside: a little cube drifting back into the body, fading as it is used for growth.
-              const k=Math.min(1,(t-.35)/2.85),back=reach*(.35+1.1*k),side=Math.sin(b.seed*3)*cell.radius*.3;
-              const ix=cell.x+ca*(reach-back)-sa*side,iy=cell.y+sa*(reach-back)+ca*side;
-              nutrient(c,ix,iy,piece*(1-.45*k),b.seed+t*.4,.95*(1-k*k));
-            }
-          }
+        // The swallowed cube: pulled into the mouth, then visible inside the body as it dissolves.
+        if(!still&&sinceGulp<1.6&&cell.target){
+          const reach=this.mouthReach(cell),ca=Math.cos(cell.angle),sa=Math.sin(cell.angle),size=cell.target.size*Math.max(.6,Math.min(1,this.size));
+          if(sinceGulp<.32){const k=smoothstep(sinceGulp/.32),d=reach+size*.9*(1-k);nutrient(c,cell.x+ca*d,cell.y+sa*d,size*(1-.35*k),cell.target.angle,1);}
+          else{const k=(sinceGulp-.32)/1.28,d=reach*(1-.9*k);nutrient(c,cell.x+ca*d,cell.y+sa*d,size*.65*(1-.6*k),cell.target.angle+k,.9*(1-k*k));}
         }
-        if(near){
-          // The cube being eaten sits right at the mouth, in front of the cell.
+        if(near&&!cell.target.gulped){
+          // The cube about to be swallowed sits right at the mouth, in front of the cell.
           const size=cell.target.size*Math.max(.55,Math.min(1,this.size)),reach=this.mouthReach(cell)+size*.9,mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
-          nutrient(c,mx,my,size,cell.target.angle,1,Math.min(2,Math.floor(age*3)));
+          nutrient(c,mx,my,size,cell.target.angle,1);
         }
       }
     }

@@ -58,9 +58,10 @@
       const s=finite(),unlimited=M.value(scenes[0].schedule,time),limited=M.value(s,time);
       // Each dish shrinks its drawings to fit its own population, from 10 cells on, so the dishes
       // never look full (space is not limiting here) and the smaller lunchbox crowd stays readable.
-      const fit=n=>Math.max(.22,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,n))));
+      const fit=n=>Math.max(.5,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,n))));
       const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0),f=share(time);
       scenes[0].update(time,fit(unlimited),1,0);scenes[1].update(time,fit(limited),food,moodOf(f));
+      scenes[0].finished=time>=end;
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
       $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);
@@ -77,7 +78,7 @@
       const split=splitAt!==null&&time-splitAt<25&&time>=splitAt;
       const done=time>=end,canExtend=end<maxEnd-1e-8,key=done?'end':time-fedAt<18?'fed':s.K===n0?'empty':time===0?'start':split?'split':f<.25?'low':count(0)>=n0*4?'many':'first';
       if(key!==storyKey){
-        $('growth-story').textContent=done?(canExtend?'The first view ends here. Top up the lunchbox and keep watching.':'Our viewing window ends here. At the buffet, growth would continue.'):key==='fed'?'Fresh food in the lunchbox. The same cells can grow faster again.':key==='empty'?'The lunchbox is empty. Top it up to let the cells grow.':key==='start'?'Each sugar cube can become one new cell. Watch the cells crunch them.':key==='split'?'Here the stories split: the lunchbox dish falls behind as its food runs short.':key==='low'?'The lunchbox is almost empty. Top it up and watch what happens.':key==='many'?'At the buffet, more cells means more divisions. The lunchbox is emptying.':'Neck and neck so far: both dishes have plenty to eat.';
+        $('growth-story').textContent=done?(canExtend?'The first view ends here. Top up the lunchbox and keep watching.':'Our viewing window ends here. At the buffet, growth would continue.'):key==='fed'?'Fresh food in the lunchbox. The same cells can grow faster again.':key==='empty'?'The lunchbox is empty. Top it up to let the cells grow.':key==='start'?'Each sugar cube can become one new cell. Watch the cells gulp them down.':key==='split'?'Here the stories split: the lunchbox dish falls behind as its food runs short.':key==='low'?'The lunchbox is almost empty. Top it up and watch what happens.':key==='many'?'At the buffet, more cells means more divisions. The lunchbox is emptying.':'Neck and neck so far: both dishes have plenty to eat.';
         storyKey=key;
       }
       $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Grow again <span aria-hidden="true">↻</span>':time>0?'Continue <span aria-hidden="true">▶</span>':'Let them grow <span aria-hidden="true">▶</span>';

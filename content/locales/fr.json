@@ -951,5 +951,13 @@
   "We watch until only 5% of the food remains in the lunchbox. Each refill starts a new stretch of growth, ending when the remaining food falls back to 5% of everything supplied.": "On observe jusqu’à ce qu’il ne reste que 5 % de nourriture dans le panier-repas. Chaque remplissage relance la croissance, jusqu’à ce que la réserve redescende à 5 % de toute la nourriture apportée.",
   "The buffet can outgrow the picture. We keep its cells moving and its calculated population counter increasing, even beyond 1,024. Its curve points onwards when it leaves the chart.": "La population du buffet peut dépasser le cadre du dessin. Ses cellules restent en mouvement et son compteur de population calculée continue d’augmenter, même au-delà de 1 024. Sa courbe se prolonge par une flèche lorsqu’elle sort du graphique.",
   "The buffet can outgrow the picture. Its cells keep moving and its calculated counter rises to 1,000,000, then reads “1,000,000+”. Its curve points onwards when it leaves the chart.": "La population du buffet peut dépasser le cadre du dessin. Ses cellules restent en mouvement et son compteur calculé augmente jusqu’à 1 000 000, puis indique « 1 000 000+ ». Sa courbe se prolonge par une flèche lorsqu’elle sort du graphique.",
-  "Only 5% of the food remains. The last traces take longer and longer to use up, so we pause here.": "Il ne reste que 5 % de nourriture. Les dernières traces sont consommées de plus en plus lentement : on s’arrête ici."
+  "Only 5% of the food remains. The last traces take longer and longer to use up, so we pause here.": "Il ne reste que 5 % de nourriture. Les dernières traces sont consommées de plus en plus lentement : on s’arrête ici.",
+  "An endless buffet or one lunchbox? Watch a bacterial colony grow as you change its food supply.": "Buffet à volonté ou panier-repas ? Faites varier la nourriture et regardez grandir une colonie de bactéries.",
+  "Bacterial growth": "La croissance bactérienne",
+  "Ready to explore": "À vous de jouer",
+  "See how chance changes a duck pond, one generation at a time.": "Découvrez comment le hasard transforme une mare, génération après génération.",
+  "Start with a dish of bacteria. Explore how food, births and deaths change a population.": "Tout commence dans une boîte de Petri. Découvrez comment la nourriture, les naissances et les morts font évoluer une population.",
+  "Start with the Petri Dish": "Commencer par la boîte de Petri",
+  "Step 1 is interactive. Animations for steps 2–4 are in development.": "L’étape 1 est interactive. Les animations des étapes 2 à 4 sont en préparation.",
+  "Two little worlds to play with.": "Deux petits mondes à explorer."
 }

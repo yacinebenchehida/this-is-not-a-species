@@ -9,10 +9,11 @@ Developer reference for the site's artwork.
 | `butterfly-mule.png`, `favicon.png` | Site mark and browser icon. |
 | `hero-landscape.webp` | Atmospheric landscape behind the homepage introduction. |
 | `evolution.webp`, `population-genetics.webp`, `ecology.webp`, `genomics.webp`, `bioinformatics.webp` | Homepage theme illustrations. |
-| `genetic-drift.webp`, `predator-prey.webp`, `sequencing-zoom.webp` | Homepage featured illustrations. |
+| `duck-pond-autumn.webp`, `petri-dish-autumn.webp` | Homepage previews for the two working animations. |
+| `genetic-drift.webp`, `predator-prey.webp`, `sequencing-zoom.webp` | Retained former homepage illustrations. |
 | `evolutionary-tree.png` | Retained source artwork; not used as a large page decoration. |
 
-The site mark and tree were extracted from the project's AI-assisted concept sheet. Homepage card illustrations were cropped from its AI-assisted homepage artwork. The panoramic landscape was generated to match that artwork.
+The site mark and tree were extracted from the project's AI-assisted concept sheet. Homepage card illustrations were cropped from its AI-assisted homepage artwork. The panoramic landscape was generated to match that artwork. The two autumn preview images were generated with the built-in image-generation tool using the existing ecology and genetic-drift homepage art as style references. The briefs requested textured natural-history screenprints on warm ivory paper: an ochre duck pond framed by autumn reeds, and glass Petri dishes with teal, ochre and rust rod-shaped bacteria. Neither contains labels or represents numerical output; the simulation characters remain separate.
 
 ## Inner galleries and exhibits
 

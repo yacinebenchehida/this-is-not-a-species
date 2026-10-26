@@ -67,3 +67,15 @@
 @media(prefers-reduced-motion:reduce){.exhibit-card:hover{transform:none}}
 
 .language-switch{display:flex;align-items:center;gap:7px;font:13px system-ui,sans-serif;white-space:nowrap;margin-left:16px}.language-switch a{text-decoration:none;padding:5px 3px;color:var(--muted)}.language-switch a[aria-current]{font-weight:700;color:var(--teal);border-bottom:2px solid var(--teal)}.language-switch a:focus-visible{outline:3px solid var(--teal);outline-offset:3px}@media(max-width:780px){.language-switch{margin-left:0}.header-inner{flex-wrap:wrap}.identity{margin-right:auto}}
+
+/* Working animations lead the homepage; their artwork belongs to the landscape. */
+.featured-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.feature{grid-template-columns:46% minmax(0,1fr);gap:22px;min-height:210px;background:var(--card)}
+.feature>img{height:100%;min-height:195px;object-fit:cover}
+.feature-copy{padding:14px 12px 12px 0}
+.feature h3{font-size:28px;line-height:1.1;margin-bottom:10px}
+.feature p{font-size:18px;line-height:1.35}
+.exhibit-card .series-note{font-size:14px;line-height:1.45;color:var(--muted);padding-top:12px;border-top:1px solid var(--line)}
+@media(max-width:1200px){.feature{gap:16px;grid-template-columns:43% minmax(0,1fr)}.feature h3{font-size:25px}.feature p{font-size:17px}}
+@media(max-width:900px){.featured-grid{grid-template-columns:1fr;gap:16px}.feature{grid-template-columns:37% minmax(0,1fr);min-height:190px}.feature>img{min-height:180px;max-height:230px}.feature-copy{padding:16px 14px 14px 0}}
+@media(max-width:600px){.feature{grid-template-columns:1fr;gap:0;padding:7px}.feature>img{height:auto;aspect-ratio:3/2;min-height:0;max-height:none}.feature-copy{padding:18px 15px 16px}.feature h3{font-size:27px}.feature p{font-size:18px}.feature .status{font-size:15px}}

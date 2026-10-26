@@ -200,7 +200,12 @@
     ],
     "interactive": true,
     "entry": "play.html",
-    "version": "growth-17"
+    "version": "growth-17",
+    "series": {
+      "title": "Bacterial growth, in 4 steps",
+      "description": "Start with a dish of bacteria. Explore how food, births and deaths change a population.",
+      "note": "Step 1 is interactive. Animations for steps 2–4 are in development."
+    }
   },
   {
     "theme": "ecology",
@@ -216,7 +221,8 @@
     "controls": [],
     "development": true,
     "entry": "play.html",
-    "version": "series-1"
+    "version": "series-1",
+    "series_parent": "population-growth"
   },
   {
     "theme": "ecology",
@@ -232,7 +238,8 @@
     "controls": [],
     "development": true,
     "entry": "play.html",
-    "version": "series-1"
+    "version": "series-1",
+    "series_parent": "population-growth"
   },
   {
     "theme": "ecology",
@@ -248,7 +255,8 @@
     "controls": [],
     "development": true,
     "entry": "play.html",
-    "version": "series-1"
+    "version": "series-1",
+    "series_parent": "population-growth"
   },
   {
     "theme": "ecology",

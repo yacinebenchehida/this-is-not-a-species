@@ -79,8 +79,8 @@
     $('rep-tally').classList.toggle('empty', !(teal + coral));
     $('rep-tally-mark').style.left = `${start * 100}%`;
     $('replicate-legend').innerHTML = mode === 'many'
-      ? `<span>The bar shows how the finished ponds split; the mark is the starting share.</span><span><i style="background:${TEAL}"></i>teal fixed</span><span><i style="background:${CORAL}"></i>coral fixed</span><span><i style="background:${OPEN}"></i>still mixed</span>`
-      : `<span>The bar shows how the finished ponds split; the mark is the starting share.</span><span><i style="background:${SMALL}"></i>6 ducks</span><span><i style="background:${LARGE}"></i>96 ducks</span><span>Small ponds swing harder and usually lose a colour sooner.</span>`;
+      ? `<span>The bar shows how the finished ponds split; the mark is the starting share.</span><span><i class="trace-key trace-dashed" style="color:${TEAL}"></i>teal fixed · dashed</span><span><i class="trace-key" style="color:${CORAL}"></i>coral fixed · solid</span><span><i class="trace-key trace-dotted" style="color:${OPEN}"></i>still mixed · dotted</span>`
+      : `<span>The bar shows how the finished ponds split; the mark is the starting share.</span><span><i class="trace-key trace-dotted" style="color:${SMALL}"></i>6 ducks · dotted</span><span><i class="trace-key" style="color:${LARGE}"></i>96 ducks · solid</span><span>Small ponds swing harder and usually lose a colour sooner.</span>`;
   }
   function drawPonds() {
     c.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
@@ -101,7 +101,7 @@
         if (r > 2.5) { c.strokeStyle = '#34777b'; c.lineWidth = .9; c.stroke(); }
         for (const k of [0, 1]) {
           const bx = x + (k ? 1 : -1) * r * 1.05;
-          if (r > 3.2) bead(c, bx, y, duck[k], r); else { c.beginPath(); c.arc(bx, y, Math.max(1.1, r), 0, Math.PI * 2); c.fillStyle = palette[duck[k]]; c.fill(); }
+          bead(c, bx, y, duck[k], Math.max(1.1, r));
         }
       });
       const value = pond.history[pond.history.length - 1], base = P.cy + P.ry * 1.09;
@@ -112,8 +112,7 @@
       const status = pond.fixedAt !== null ? (compact ? `${pond.fixedTo ? 'teal' : 'coral'} fixed` : `${pond.fixedTo ? 'Teal' : 'Coral'} fixed at generation ${pond.fixedAt}`) : `${Math.round(value * 100)}% teal`;
       c.fillText(status, P.cx, base + (compact ? 29 : 41));
       const width = P.rx * 1.3, x0 = P.cx - width / 2, by = base + (compact ? 35 : 50);
-      c.fillStyle = CORAL; c.beginPath(); c.roundRect(x0, by, width, compact ? 4 : 6, 3); c.fill();
-      if (value > 0) { c.fillStyle = TEAL; c.beginPath(); c.roundRect(x0, by, width * value, compact ? 4 : 6, 3); c.fill(); }
+      window.DuckCharacter.shareBar(c, x0, by, width, compact ? 4 : 6, value);
       c.textAlign = 'left';
     }
   }
@@ -131,7 +130,8 @@
       const stride = Math.max(1, Math.ceil(h.length / 300)), pts = [];
       for (let i = 0; i < h.length; i += stride) pts.push(`${x(i).toFixed(1)},${y(h[i]).toFixed(1)}`);
       pts.push(`${x(h.length - 1).toFixed(1)},${y(h[h.length - 1]).toFixed(1)}`);
-      return `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-opacity="${opacity}" stroke-width="1.8" stroke-linejoin="round"/>`;
+      const dash = mode !== 'many' ? (pond.size < 50 ? '2 4' : '') : pond.fixedTo === null ? '2 4' : pond.fixedTo ? '7 4' : '';
+      return `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-dasharray="${dash}" stroke-opacity="${opacity}" stroke-width="1.8" stroke-linejoin="round"/>`;
     }).join('');
     $('replicate-chart').innerHTML = `<svg viewBox="0 0 980 205" role="img" aria-label="Teal share in each of ${ponds.length} ponds over ${generation} generations, all starting at ${percent(start)}."><text class="chart-title" x="${left}" y="8">Teal share in each pond</text>${gridLines}<line x1="${left}" x2="${right}" y1="${y(start)}" y2="${y(start)}" stroke="#7d8a78" stroke-dasharray="4 4"/>${ticks}${lines}<text class="chart-label" x="${(left + right) / 2}" y="${bottom + 32}" text-anchor="middle">Generation</text></svg>`;
   }

@@ -79,8 +79,8 @@
     $('rep-tally').classList.toggle('empty', !(teal + coral));
     $('rep-tally-mark').style.left = `${start * 100}%`;
     $('replicate-legend').innerHTML = mode === 'many'
-      ? `<span>La barre montre la répartition des mares terminées ; le repère indique la proportion initiale.</span><span><i style="background:${TEAL}"></i>turquoise fixé</span><span><i style="background:${CORAL}"></i>corail fixé</span><span><i style="background:${OPEN}"></i>encore mélangées</span>`
-      : `<span>La barre montre la répartition des mares terminées ; le repère indique la proportion initiale.</span><span><i style="background:${SMALL}"></i>6 canards</span><span><i style="background:${LARGE}"></i>96 canards</span><span>Les petites mares fluctuent davantage et perdent généralement une couleur plus tôt.</span>`;
+      ? `<span>La barre montre la répartition des mares terminées ; le repère indique la proportion initiale.</span><span><i class="trace-key trace-dashed" style="color:${TEAL}"></i>turquoise fixé · tirets</span><span><i class="trace-key" style="color:${CORAL}"></i>corail fixé · trait plein</span><span><i class="trace-key trace-dotted" style="color:${OPEN}"></i>encore mélangées · pointillés</span>`
+      : `<span>La barre montre la répartition des mares terminées ; le repère indique la proportion initiale.</span><span><i class="trace-key trace-dotted" style="color:${SMALL}"></i>6 canards · pointillés</span><span><i class="trace-key" style="color:${LARGE}"></i>96 canards · trait plein</span><span>Les petites mares fluctuent davantage et perdent généralement une couleur plus tôt.</span>`;
   }
   function drawPonds() {
     c.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
@@ -101,7 +101,7 @@
         if (r > 2.5) { c.strokeStyle = '#34777b'; c.lineWidth = .9; c.stroke(); }
         for (const k of [0, 1]) {
           const bx = x + (k ? 1 : -1) * r * 1.05;
-          if (r > 3.2) bead(c, bx, y, duck[k], r); else { c.beginPath(); c.arc(bx, y, Math.max(1.1, r), 0, Math.PI * 2); c.fillStyle = palette[duck[k]]; c.fill(); }
+          bead(c, bx, y, duck[k], Math.max(1.1, r));
         }
       });
       const value = pond.history[pond.history.length - 1], base = P.cy + P.ry * 1.09;
@@ -112,8 +112,7 @@
       const status = pond.fixedAt !== null ? (compact ? `${pond.fixedTo ? 'turquoise' : 'corail'} fixé` : `${pond.fixedTo ? 'Turquoise' : 'Corail'} fixé à la génération ${pond.fixedAt}`) : `${percent(value)} de turquoise`;
       c.fillText(status, P.cx, base + (compact ? 29 : 41));
       const width = P.rx * 1.3, x0 = P.cx - width / 2, by = base + (compact ? 35 : 50);
-      c.fillStyle = CORAL; c.beginPath(); c.roundRect(x0, by, width, compact ? 4 : 6, 3); c.fill();
-      if (value > 0) { c.fillStyle = TEAL; c.beginPath(); c.roundRect(x0, by, width * value, compact ? 4 : 6, 3); c.fill(); }
+      window.DuckCharacter.shareBar(c, x0, by, width, compact ? 4 : 6, value);
       c.textAlign = 'left';
     }
   }
@@ -131,7 +130,8 @@
       const stride = Math.max(1, Math.ceil(h.length / 300)), pts = [];
       for (let i = 0; i < h.length; i += stride) pts.push(`${x(i).toFixed(1)},${y(h[i]).toFixed(1)}`);
       pts.push(`${x(h.length - 1).toFixed(1)},${y(h[h.length - 1]).toFixed(1)}`);
-      return `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-opacity="${opacity}" stroke-width="1.8" stroke-linejoin="round"/>`;
+      const dash = mode !== 'many' ? (pond.size < 50 ? '2 4' : '') : pond.fixedTo === null ? '2 4' : pond.fixedTo ? '7 4' : '';
+      return `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-dasharray="${dash}" stroke-opacity="${opacity}" stroke-width="1.8" stroke-linejoin="round"/>`;
     }).join('');
     $('replicate-chart').innerHTML = `<svg viewBox="0 0 980 205" role="img" aria-label="Proportion de turquoise dans chacune des ${ponds.length} mares sur ${generation} ${generation === 1 ? 'génération' : 'générations'}, toutes avec une proportion initiale de ${percent(start)}."><text class="chart-title" x="${left}" y="8">Proportion de turquoise dans chaque mare</text>${gridLines}<line x1="${left}" x2="${right}" y1="${y(start)}" y2="${y(start)}" stroke="#7d8a78" stroke-dasharray="4 4"/>${ticks}${lines}<text class="chart-label" x="${(left + right) / 2}" y="${bottom + 32}" text-anchor="middle">Génération</text></svg>`;
   }

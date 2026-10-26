@@ -12,6 +12,8 @@ Chaque canard porte deux perles colorées représentant les copies d’un gène.
 
 La mare propose des populations de 6 à 500 canards, des proportions initiales et une vitesse réglables, un mode détaillé pour observer les accouplements des petites populations et des comparaisons entre petites et grandes mares. Les cœurs désignent les parents d’un caneton ; les canards gris endormis n’ont transmis aucune copie du gène pendant cette génération. Aucun allèle n’est avantagé.
 
+Les allèles ont aussi des repères visuels permanents : les perles corail sont unies et les perles turquoise portent une bande sombre. Les légendes et les barres reprennent ces motifs ; les courbes des mares utilisent des styles de traits indiqués dans la légende.
+
 ## Parcourez la collection
 
 Découvrez cinq thèmes et vingt idées d’animations :

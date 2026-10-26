@@ -22,3 +22,11 @@
 @media(max-width:780px){.replicate-controls{margin-left:0}}
 .slow-toggle{display:flex!important;align-items:center;gap:8px;justify-content:flex-start!important;font-weight:600;margin:12px 0 0!important;cursor:pointer}.slow-toggle input{width:16px;height:16px;accent-color:var(--teal);margin:0;cursor:pointer}.slow-toggle span{font-weight:400;color:#67715c;font-size:10px}.slow-toggle:has(input:disabled){opacity:.5;cursor:default}.pond-control input[type=range]:disabled{opacity:.45;cursor:default}
 .count-swatch{display:inline-grid;place-items:center;min-width:22px;height:15px;padding:0 4px;border-radius:8px;background:#fffaf0;border:1.5px solid #34777b;font:700 9px system-ui,sans-serif;color:#1d3f3d;font-style:normal;box-sizing:border-box}.count-swatch::before{content:"";width:7px;height:5px;border-radius:50%;background:#f6c94a;margin-right:3px;display:inline-block;vertical-align:middle}.count-swatch{display:inline-flex;align-items:center;justify-content:center}
+
+/* Allele identity uses pattern as well as colour at every marker and bar. */
+.allele-swatch.teal{position:relative;overflow:hidden}
+.allele-swatch.teal::after{content:"";position:absolute;left:-25%;top:38%;width:150%;height:24%;background:#153f46;transform:rotate(45deg);box-shadow:0 0 0 .65px #fff9e5}
+#bar-A,.tally-bar span{background:repeating-linear-gradient(135deg,#399b94 0 5px,#153f46 5px 7px,#399b94 7px 10px)}
+.replicate-legend .trace-key{width:22px;height:0;border-radius:0;border-top:2px solid currentColor;background:none;vertical-align:3px}
+.replicate-legend .trace-dashed{border-top-style:dashed}
+.replicate-legend .trace-dotted{border-top-style:dotted}

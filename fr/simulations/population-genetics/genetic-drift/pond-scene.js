@@ -323,7 +323,8 @@
           birth.parents[child].forEach((copy, i) => {
             const a = this.poolBead(copy), b = this.nestBead(child, i), allele = this.population[copy >> 1][copy % 2];
             c.strokeStyle = fresh ? window.DuckCharacter.palette[allele] : '#58705f'; c.globalAlpha = fresh ? .9 : .16; c.lineWidth = fresh ? 2 : 1;
-            c.beginPath(); c.moveTo(a.x, a.y + a.r); c.bezierCurveTo(a.x, a.y + 30, b.x, b.y - 30, b.x, b.y - b.r); c.stroke(); c.globalAlpha = 1;
+            c.setLineDash(allele ? [4, 3] : []);
+            c.beginPath(); c.moveTo(a.x, a.y + a.r); c.bezierCurveTo(a.x, a.y + 30, b.x, b.y - 30, b.x, b.y - b.r); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
           });
         }
       }
@@ -334,8 +335,7 @@
         for (const k of [0, 1]) {
           const copy = 2 * i + k, b = this.poolBead(copy);
           c.globalAlpha = dozing && counts[copy] === 0 ? .25 : 1;
-          if (b.r >= 3.2) window.DuckCharacter.bead(c, b.x, b.y, this.population[i][k], b.r);
-          else ellipse(c, b.x, b.y, b.r, b.r, window.DuckCharacter.palette[this.population[i][k]]);
+          window.DuckCharacter.bead(c, b.x, b.y, this.population[i][k], b.r);
           c.globalAlpha = 1;
           if (birth && this.pool.cw >= 60 && (counts[copy] || dozing)) {
             c.fillStyle = counts[copy] ? '#304d43' : '#8a968a'; c.font = `${counts[copy] ? 600 : 400} 10px system-ui,sans-serif`; c.textAlign = 'center';
@@ -359,7 +359,7 @@
           if (this.nest.sprites) c.drawImage(this.sprites[alleles.join('') + 'n'], cell.x - 55 * s, cell.y + 14 * s - 70 * s, 115.2 * s, 115.2 * s);
           else {
             const r = this.nestBead(i, 0).r; ellipse(c, cell.x, cell.y + r * .3, r * 2.6, r * 1.7, '#f8d465');
-            for (const k of [0, 1]) { const b = this.nestBead(i, k); ellipse(c, b.x, b.y, b.r, b.r, window.DuckCharacter.palette[alleles[k]]); }
+            for (const k of [0, 1]) { const b = this.nestBead(i, k); window.DuckCharacter.bead(c, b.x, b.y, alleles[k], b.r); }
           }
           c.restore();
         } else {

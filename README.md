@@ -12,6 +12,8 @@ Every duck carries two coloured beads representing copies of a gene. Watch rando
 
 The pond includes populations of 6–500 ducks, adjustable starting shares and playback speed, a detailed mating mode for small populations, and comparisons between small and large ponds. Hearts identify the parents of one duckling; sleeping grey ducks passed on no gene copies that generation. Neither allele has an advantage.
 
+Alleles also have permanent visual cues: coral beads are plain and teal beads carry a dark band. The same distinction appears in the legends and proportion bars; replicate graph lines have labelled dash styles.
+
 ## Explore the collection
 
 Browse five themes and 20 animation ideas:

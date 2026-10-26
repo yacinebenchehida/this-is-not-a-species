@@ -543,5 +543,13 @@
   "(UC Davis).": "(UC Davis ; en anglais).",
   "html:drift-further-reading": "Pour une introduction plus formelle, consultez le <a href=\"http://raphael.leblois.free.fr/ressources/cours/Cours_DeriveMigrationMetapopFstat_ENS_2009.pdf#page=50\">cours de Raphaël Leblois, pages 50–73</a>.",
   "50%": "50 %",
-  "This personal project illustrates concepts in evolution, population genetics, ecology, genomics and bioinformatics in playful, concrete ways. The idea is simple: small interactive animations to explore the mechanisms behind the complexity of life.": "Ce projet personnel illustre des concepts d’évolution, de génétique des populations, d’écologie, de génomique et de bioinformatique de façon ludique et concrète. L’idée est simple : de petites animations interactives pour découvrir les mécanismes qui se cachent derrière la complexité du vivant."
+  "This personal project illustrates concepts in evolution, population genetics, ecology, genomics and bioinformatics in playful, concrete ways. The idea is simple: small interactive animations to explore the mechanisms behind the complexity of life.": "Ce projet personnel illustre des concepts d’évolution, de génétique des populations, d’écologie, de génomique et de bioinformatique de façon ludique et concrète. L’idée est simple : de petites animations interactives pour découvrir les mécanismes qui se cachent derrière la complexité du vivant.",
+  "Teal allele · banded": "Allèle turquoise · à bande",
+  "Coral allele · plain": "Allèle corail · uni",
+  ". Teal beads have a dark band; coral beads are plain. The same patterns identify the copies in the legend and bars. Neither gives a duck an advantage. Yet, by chance, their shares can change from one generation to the next.": ". Les perles turquoise portent une bande sombre ; les perles corail sont unies. Ces mêmes motifs identifient les copies dans la légende et les barres. Aucun allèle ne donne un avantage aux canards. Pourtant, leurs proportions peuvent changer d’une génération à l’autre, par le seul effet du hasard.",
+  "teal fixed · dashed": "turquoise fixé · tirets",
+  "coral fixed · solid": "corail fixé · trait plein",
+  "still mixed · dotted": "encore mélangées · pointillés",
+  "6 ducks · dotted": "6 canards · pointillés",
+  "96 ducks · solid": "96 canards · trait plein"
 }

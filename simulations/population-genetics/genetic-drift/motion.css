@@ -4,3 +4,7 @@
 @media(prefers-reduced-motion:reduce){.story-board *{scroll-behavior:auto!important}}
 
 .story-stages{position:relative;display:block;height:28px;padding:0}.story-stages button{position:absolute;top:0;transform:translateX(-50%)}.story-stages button:first-child{transform:none}
+
+/* The same broad band used by the canvas beads identifies teal copies. */
+.gene-dot.teal{position:relative;overflow:hidden}
+.gene-dot.teal::after{content:"";position:absolute;left:-25%;top:38%;width:150%;height:24%;background:#153f46;transform:rotate(45deg);box-shadow:0 0 0 1px #fff9e5}

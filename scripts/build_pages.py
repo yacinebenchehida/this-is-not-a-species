@@ -14,7 +14,7 @@ EXHIBITS = json.loads((ROOT / 'content/exhibits.json').read_text())
 THEME_NAMES = {slug: title for slug, title, _ in THEMES}
 FEATURED_SLUGS = ('genetic-drift', 'predator-prey', 'sequencing-zoom')
 HOMEPAGE_PREVIEWS = {
- 'genetic-drift': {'title':'Genetic Drift', 'description':'See how chance alone can change a population over time.', 'art':'genetic-drift'},
+ 'genetic-drift': {'title':'Genetic Drift', 'description':'See how chance alone can change a population over time.', 'art':'cartoons/duck-pond.webp'},
  'predator-prey': {'title':'Predator–Prey Dynamics', 'description':'Explore the cyclical dance between predators and prey.', 'art':'predator-prey'},
  'sequencing-zoom': {'title':'Inside an Illumina Sequencer', 'description':'Zoom from the instrument to the microscopic scale.', 'art':'sequencing-zoom'},
 }

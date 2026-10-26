@@ -33,11 +33,37 @@
     if (close) { c.lineTo(48, 36); c.lineTo(-46, 36); c.closePath(); }
   }
   function bead(c, x, y, allele, radius = 7.2) {
-    const g = c.createRadialGradient(x - 2, y - 2.5, 1, x, y, radius);
-    g.addColorStop(0, shine[allele]); g.addColorStop(1, palette[allele]);
-    c.beginPath(); c.arc(x, y, radius, 0, 2 * Math.PI); c.fillStyle = g; c.fill();
-    c.strokeStyle = '#1f3d3d29'; c.lineWidth = 1; c.stroke();
-    oval(c, x - 2.4, y - 2.8, 2.3, 1.3, '#ffffffbf', -.5);
+    c.save();
+    let fill = palette[allele];
+    if (radius >= 3.2) {
+      fill = c.createRadialGradient(x - radius * .28, y - radius * .35, radius * .12, x, y, radius);
+      fill.addColorStop(0, shine[allele]); fill.addColorStop(1, palette[allele]);
+    }
+    c.beginPath(); c.arc(x, y, radius, 0, 2 * Math.PI); c.fillStyle = fill; c.fill();
+    c.strokeStyle = '#28555e'; c.lineWidth = Math.max(.45, radius * .1); c.stroke();
+    if (radius >= 3.2) oval(c, x - radius * .33, y - radius * .39, radius * .32, radius * .18, '#ffffffbf', -.5);
+    // The teal copy always has a broad dark band; the coral copy stays plain.
+    // This visual identity is independent of colour, parent, sex and fitness.
+    if (allele === 1) {
+      c.beginPath(); c.arc(x, y, radius, 0, 2 * Math.PI); c.clip();
+      c.translate(x, y); c.rotate(Math.PI / 4); c.lineCap = 'butt';
+      c.beginPath(); c.moveTo(-radius * 1.5, 0); c.lineTo(radius * 1.5, 0);
+      c.strokeStyle = '#fff9e5'; c.lineWidth = Math.max(1.1, radius * .74); c.stroke();
+      c.strokeStyle = '#153f46'; c.lineWidth = Math.max(.7, radius * .5); c.stroke();
+    }
+    c.restore();
+  }
+  function shareBar(c, x, y, width, height, share) {
+    c.save(); c.beginPath(); c.roundRect(x, y, width, height, Math.min(3, height / 2)); c.clip();
+    c.fillStyle = palette[0]; c.fillRect(x, y, width, height);
+    const bandedWidth = width * Math.max(0, Math.min(1, share));
+    c.beginPath(); c.rect(x, y, bandedWidth, height); c.clip();
+    c.fillStyle = palette[1]; c.fillRect(x, y, bandedWidth, height);
+    c.strokeStyle = '#153f46'; c.lineWidth = 1.4;
+    for (let offset = -height; offset < bandedWidth + height; offset += 7) {
+      c.beginPath(); c.moveTo(x + offset, y + height); c.lineTo(x + offset + height, y); c.stroke();
+    }
+    c.restore();
   }
   /* pose: still, alpha, puff, nod, flap, roll, blink, highlight(s), dry (no water effects), shadow (false: no ground marks),
      tone ('grey' for a duck that passed on nothing), sleep (closed eye),
@@ -122,5 +148,5 @@
     const cos = Math.cos(roll), sin = Math.sin(roll);
     return localMarkers.map(m => ({ x: duck.x + (m.x * cos - m.y * sin) * scale * face, y: duck.y + bob + (m.x * sin + m.y * cos) * scale, allele: m.allele }));
   }
-  window.DuckCharacter = { draw, bead, palette, oval, markerSpots, renderer: 'reference-volume' };
+  window.DuckCharacter = { draw, bead, shareBar, palette, oval, markerSpots, renderer: 'reference-volume' };
 })();

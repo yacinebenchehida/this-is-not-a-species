@@ -172,7 +172,7 @@
           const destination = { x: m.x + (i ? 14 : -14), y: m.y - 8 };
           const control = { x: lerp(source.x, destination.x, .5), y: Math.min(source.y, destination.y) - 55 };
           const point = arcPoint(source, destination, control, q);
-          c.save(); c.shadowColor = '#fffbc8'; c.shadowBlur = 12; oval(c, point.x, point.y, 11, 11, '#fffbe2'); oval(c, point.x, point.y, 8.6, 8.6, palette[family.alleles[i]]); c.restore();
+          c.save(); c.shadowColor = '#fffbc8'; c.shadowBlur = 12; oval(c, point.x, point.y, 11, 11, '#fffbe2'); window.DuckCharacter.bead(c, point.x, point.y, family.alleles[i], 8.6); c.restore();
           if (q < .95) { c.beginPath(); c.moveTo(source.x, source.y); c.quadraticCurveTo(control.x, control.y, point.x, point.y); c.strokeStyle = '#fff8dc72'; c.lineWidth = 2; c.setLineDash([3, 6]); c.stroke(); c.setLineDash([]); }
         });
       }

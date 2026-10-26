@@ -40,6 +40,16 @@ Golden angular parcels represent growth material. The tray fill follows the actu
 
 Both dishes use the same drawing scale, which decreases with the larger population so all cells remain visible. The characters are not physically shrinking. Dense scenes use cached character drawings; cell counts and events are unchanged. Motion, positions and outlines are cosmetic.
 
+## Buffet, lunchbox and visible cues
+
+The interface calls the replenished dish the “endless buffet” and the finite dish “one lunchbox”; K is named the carrying capacity. These cues are drawn from the same model state and never change it:
+
+- Faces in the lunchbox dish follow each cell's relative division speed, R/K (the factor in dN/dt = rN·R/K): happy above 0.6, peckish above 0.25, hungry below. Peckish and hungry cells are also drawn paler so the cue survives small drawing scales. Buffet cells are always happy. Topping up raises R/K and the faces recover.
+- A doubling counter under the buffet dish shows floor(log2(count/N0)) completed doublings and the sequence N0, 2N0, 4N0, … (the last four values once it gets long).
+- “The stories split” is the first model time at which the buffet population is 1.25 times the lunchbox population. It is located by bisection within each playback step, so fast playback cannot skip it, and it is marked on the chart and announced once in the caption. Before it, the result line reads “neck and neck”.
+- A log-scale switch plots population on a base-2 logarithmic axis with ticks at powers of two, where exponential growth is a straight line.
+- Both dishes share a drawing scale of max(0.3, min(1.3, 1.3·sqrt(10/max(10, buffet N)))), which starts shrinking from 10 cells so dishes never look full. Space is not limiting in this model, and the page says so.
+
 ## Playback, graph and accessibility
 
 The initial viewing window ends at min(240 minutes, the unlimited trajectory’s crossing time for 256 cells). Nutrient additions can extend it, bounded by min(480 minutes, the unlimited trajectory’s crossing time for 512 cells). These observation boundaries are explicitly distinguished from biological cessation of exponential growth. Starting-population, division-time and supply changes reset both dishes. Replenishment acts on the existing finite population without resetting. Playback-speed changes preserve model time. “A little later” advances ten model minutes over about one wall-clock second. Pausing freezes model time and uptake progress while decorative cell movement may continue. Hidden tabs pause playback.

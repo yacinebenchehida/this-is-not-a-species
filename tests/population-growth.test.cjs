@@ -85,3 +85,10 @@ test('an empty nutrient reserve prevents growth until replenishment, without ins
     scene.update(150,1,.5);assert.ok(scene.cells.length>before.length);assert.equal(scene.cells.length,4+M.completed(fed,150));
   }
 });
+
+test('lunchbox moods are passed to the drawing without changing cell counts',()=>{
+  const context={window:{DishScene:class{constructor(){this.canvas={dataset:{}};}}}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth/growth-scene.js'),'utf8'),context);
+  const s=M.schedule(4,Math.LN2/30,52),scene=new context.window.GrowthDish();scene.start(s);
+  for(const [t,mood] of [[10,0],[60,1],[150,2]]){scene.update(t,.6,.5,mood);assert.equal(scene.canvas.dataset.mood,String(mood));assert.equal(scene.cells.length,4+M.completed(s,t));}
+});

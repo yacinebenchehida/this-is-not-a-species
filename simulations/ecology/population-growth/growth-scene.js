@@ -17,8 +17,9 @@
       this.canvas.dataset.cells=String(this.cells.length);
     }
     replenish(schedule){for(const cell of this.cells){cell.visualStartAge=this.age(cell);cell.visualStartTime=this.simTime;}this.schedule=schedule;this.addedAt=this.time;}
-    update(time,size,food){
-      this.simTime=time;this.size=size;this.food=food;for(const c of this.cells)c.radius=c.base*size;
+    update(time,size,food,mood=0){
+      this.simTime=time;this.size=size;this.food=food;
+      if(mood!==this.mood){this.mood=mood;this.canvas.dataset.mood=String(mood);}for(const c of this.cells)c.radius=c.base*size;
       while(this.eventIndex<this.schedule.events.length&&this.schedule.events[this.eventIndex].time<=time+1e-10){
         const e=this.schedule.events[this.eventIndex++],parent=this.cells.find(c=>c.id===e.parent),offset=parent.radius*(parent.kind==='round'?1.3:1.8);
         this.cells=this.cells.filter(c=>c!==parent);
@@ -27,8 +28,8 @@
       this.canvas.dataset.cells=String(this.cells.length);this.canvas.dataset.nutrients=String(food);
     }
     sprite(cell){
-      const key=cell.colour+'-'+cell.kind;
-      if(!this.sprites.has(key)){const s=document.createElement('canvas');s.width=256;s.height=160;const c=s.getContext('2d');c.translate(128,80);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,angle:0,radius:cell.base},0,0,true);this.sprites.set(key,s);}
+      const mood=this.mood||0,key=cell.colour+'-'+cell.kind+'-'+mood;
+      if(!this.sprites.has(key)){const s=document.createElement('canvas');s.width=256;s.height=160;const c=s.getContext('2d');c.translate(128,80);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,angle:0,radius:cell.base,mood},0,0,true);this.sprites.set(key,s);}
       return this.sprites.get(key);
     }
     age(cell){const r=this.schedule.cells[cell.id],base=cell.visualStartAge||0,start=cell.visualStartTime??r.born;return Number.isFinite(r.divide)?base+(1-base)*clamp((this.simTime-start)/(r.divide-start)):base;}
@@ -50,7 +51,7 @@
         const age=this.age(cell),division=still?0:clamp((age-.25)/.75);
         if(!still&&age>.08&&age<.53)feeding.push({cell,age});
         if(!still&&age>.43&&age<.61&&this.cells.length<100){c.save();c.globalAlpha=.2*Math.sin((age-.43)/.18*Math.PI);ellipse(c,cell.x,cell.y,cell.radius*2.1,cell.radius*1.5,'#f9df80');c.restore();}
-        if(division>.015&&this.cells.length<180){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base},this.time,division,still);c.restore();}
+        if(division>.015&&this.cells.length<180){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell),-128,-80);c.restore();}
       }
       // Parcels travel to the actual cells preparing to divide. Positions never alter the numerical uptake.

@@ -19,15 +19,19 @@
     c.bezierCurveTo(-end*.35,waist+bend,-end*.4,r,-end,r);
     c.bezierCurveTo(-end-r*1.33,r,-end-r*1.33,-r,-end,-r); c.closePath();
   }
-  function face(c,x,y,scale,time,phase,still,second=false) {
+  // mood 0 happy, 1 peckish (flat mouth), 2 hungry (heavy eyelids, small open mouth). Decorative only.
+  function face(c,x,y,scale,time,phase,still,second=false,mood=0) {
     c.save(); c.translate(x,y); c.scale(scale,scale);
     const blink = !still && (time + phase * 3.7) % 5.2 < .13;
     for(const side of [-1,1]) {
       if(blink){c.beginPath();c.moveTo(side*5-1.8,-2);c.quadraticCurveTo(side*5,-.5,side*5+1.8,-2);c.strokeStyle='#174b59';c.lineWidth=1.7;c.stroke();}
+      else if(mood===2){oval(c,side*5,-1.4,2.15,1.7,'#174b59');c.beginPath();c.moveTo(side*5-2.6,-2.7);c.lineTo(side*5+2.6,-2.7);c.strokeStyle='#174b59';c.lineWidth=1.5;c.stroke();oval(c,side*5-.6,-1.6,.5,.45,'#fffdf0');}
       else {oval(c,side*5,-2,2.15,2.65,'#174b59');oval(c,side*5-.6,-2.9,.65,.75,'#fffdf0');}
     }
     oval(c,-9,3,3.2,1.4,'#f6ae9a66'); oval(c,9,3,3.2,1.4,'#f6ae9a66');
-    c.beginPath();c.moveTo(-2.3,4);c.quadraticCurveTo(0,second?6.7:6,2.3,4);c.strokeStyle='#2d6870';c.lineWidth=1.05;c.stroke();
+    if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
+    else if(mood===1){c.beginPath();c.moveTo(-2.8,4.9);c.lineTo(2.8,4.9);c.strokeStyle='#2d6870';c.lineWidth=1.6;c.lineCap='round';c.stroke();}
+    else {c.beginPath();c.moveTo(-2.3,4);c.quadraticCurveTo(0,second?6.7:6,2.3,4);c.strokeStyle='#2d6870';c.lineWidth=1.05;c.stroke();}
     c.restore();
   }
   function draw(c,cell,time,division=0,still=false) {
@@ -52,12 +56,14 @@
     const spread=(length/long), spots=cell.kind==='round'?[[-7,9,3],[8,9,4]]:[[-long*.28,2,5],[-long*.11,7,4],[long*.08,6,3.5]];
     for(const [x,y,s] of spots)oval(c,x*spread,y,s,s*.93,p.spots+'b5');
     c.beginPath();c.moveTo(-length*.36,-r*.55);c.quadraticCurveTo(-length*.22,-r*.78,-length*.08,-r*.68);c.strokeStyle='#fffef063';c.lineWidth=2.6;c.lineCap='round';c.stroke();
+    // Hungrier cells look paler, a cue that stays visible when cells are drawn small.
+    if(cell.mood){outline(c,length,r,pinch,bend);c.fillStyle=cell.mood===2?'#f1efe4a6':'#f1efe44d';c.fill();}
     c.restore();
     // A second face appears only as two daughter compartments form.
     const faceX=cell.kind==='round'?0:long*.24;
     const shift=growth*r*(cell.kind==='round'?1.3:1.8);
-    face(c,faceX+shift,-r*.13,1,time,cell.phase,still);
-    if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9,time,cell.phase+1,still,true);c.restore();}
+    face(c,faceX+shift,-r*.13,1,time,cell.phase,still,false,cell.mood||0);
+    if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9,time,cell.phase+1,still,true,cell.mood||0);c.restore();}
     c.restore();
   }
   window.BacteriumCharacter={draw,colours};

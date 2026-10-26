@@ -72,7 +72,7 @@
         if(k<0)k=this.nearestFree(parent);
         if(k>=0)this.crumbs.splice(k,1);
         this.cells=this.cells.filter(c=>c!==parent);
-        e.daughters.forEach((id,k2)=>{const side=k2?1:-1;this.cells.push({...parent,id,target:null,visualStartTime:e.time,visualStartAge:0,x:parent.x+Math.cos(parent.angle)*offset*side,y:parent.y+Math.sin(parent.angle)*offset*side,phase:parent.phase+side*.7,heading:parent.angle+(k2?0:Math.PI),angle:parent.angle+side*.1});});
+        e.daughters.forEach((id,k2)=>{const side=k2?1:-1;this.cells.push({...parent,id,target:null,gulpAt:undefined,gulpFrom:null,gulpSize:0,bites:0,chompAt:undefined,visualStartTime:e.time,visualStartAge:0,x:parent.x+Math.cos(parent.angle)*offset*side,y:parent.y+Math.sin(parent.angle)*offset*side,phase:parent.phase+side*.7,heading:parent.angle+(k2?0:Math.PI),angle:parent.angle+side*.1});});
       }
       this.claim();
       this.canvas.dataset.cells=String(this.cells.length);this.canvas.dataset.crumbs=String(this.crumbs.length);this.canvas.dataset.nutrients=String(food);
@@ -114,7 +114,7 @@
           // Face the crumb and park the mouth on it. Mouths sit towards the cell's front end.
           const reach=this.mouthReach(cell),want=Math.atan2(crumb.y-cell.y,crumb.x-cell.x);
           let turn=want-cell.angle;turn=Math.atan2(Math.sin(turn),Math.cos(turn));cell.angle+=turn*Math.min(1,dt*3);
-          const tx=crumb.x-Math.cos(cell.angle)*reach,ty=crumb.y-Math.sin(cell.angle)*reach,pull=Math.min(1,dt*2.2);
+          const gap=crumb.size*1.1,tx=crumb.x-Math.cos(cell.angle)*(reach+gap),ty=crumb.y-Math.sin(cell.angle)*(reach+gap),pull=Math.min(1,dt*1.2);
           cell.x+=(tx-cell.x)*pull;cell.y+=(ty-cell.y)*pull;cell.heading=cell.angle;
         }else{
           cell.heading+=Math.sin(this.time*.49+cell.phase)*dt*.6;
@@ -153,7 +153,7 @@
       if(fade<=0)return;
       for(const crumb of this.crumbs){
         // Cubes stay whole until a cell swallows one just before dividing.
-        if(crumb.atMouth||crumb.gulped)continue;
+        if(crumb.gulped)continue;
         const fall=still?1:clamp((this.time-crumb.dropAt)/.7),y=crumb.y-(1-fall)*(1-fall)*70;
         nutrient(c,crumb.x,y,crumb.size,crumb.angle,(still?1:Math.min(1,fall*1.6))*fade);
       }
@@ -164,8 +164,9 @@
       // Freshly added food (a top-up, or the buffet's constant supply) glows briefly where it lands.
       if(!still&&this.time-this.addedAt<1.6){c.save();c.globalAlpha=.25*(1-(this.time-this.addedAt)/1.6);ellipse(c,centre.x,centre.y,pantry.x+20,pantry.y+16,'#f3cf6c');c.restore();}
       const live=this.cells.length<=ANIMATED&&!still;
+      // A cell is 'at' its cube when its mouth has reached the floating cube.
       if(live)for(const crumb of this.crumbs)crumb.atMouth=false;
-      if(live)for(const cell of this.cells)if(cell.target&&Math.hypot(cell.target.x-cell.x,cell.target.y-cell.y)<cell.radius*2.8+this.mouthReach(cell))cell.target.atMouth=true;
+      if(live)for(const cell of this.cells)if(cell.target){const reach=this.mouthReach(cell),mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;if(Math.hypot(cell.target.x-mx,cell.target.y-my)<cell.target.size*1.8+6)cell.target.atMouth=true;}
       this.drawCrumbs(c,still);
       // Big cartoon faces, which never shrink below a readable size however small the cells are.
       const faceScale=Math.min(2.2,Math.max(1.5,.8/this.size)),animate=this.cells.length<=ANIMATED&&!still;
@@ -174,11 +175,11 @@
         const near=animate&&cell.target&&cell.target.atMouth;
         // Shark-style gulp: as division nears the mouth opens wider and wider, then the whole cube
         // is swallowed at once and the mouth snaps shut. One cube becomes one new cell.
-        // Every cell swallows its whole cube once its growth reaches GULP, wherever the cube is.
-        if(!still&&cell.target&&age>=GULP&&!cell.target.gulped){
+        // It swallows the cube once it is next to it and ready; a cell that never got there eats it
+        // at the last moment, so the count of food stays exact.
+        if(!still&&cell.target&&!cell.target.gulped&&(age>=GULP&&cell.target.atMouth||age>=.985)){
           const t=cell.target,size=t.size*Math.max(.6,Math.min(1,this.size));
-          let from={x:t.x,y:t.y};
-          if(t.atMouth){const reach=this.mouthReach(cell)+size*.9;from={x:cell.x+Math.cos(cell.angle)*reach,y:cell.y+Math.sin(cell.angle)*reach};}
+          const from={x:t.x,y:t.y};
           t.gulped=true;cell.gulpAt=this.time;cell.gulpFrom=from;cell.gulpSize=size;
         }
         const sinceGulp=cell.gulpAt===undefined?Infinity:this.time-cell.gulpAt;
@@ -193,11 +194,6 @@
           const k=smoothstep(sinceGulp/GULP_TIME),reach=this.mouthReach(cell);
           const mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
           nutrient(c,lerp(cell.gulpFrom.x,mx,k),lerp(cell.gulpFrom.y,my,k),cell.gulpSize*(1-k),(cell.target?cell.target.angle:0)+k*2,1);
-        }
-        if(near&&!cell.target.gulped){
-          // The cube about to be swallowed sits right at the mouth, in front of the cell.
-          const size=cell.target.size*Math.max(.55,Math.min(1,this.size)),reach=this.mouthReach(cell)+size*.9,mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
-          nutrient(c,mx,my,size,cell.target.angle,1);
         }
       }
     }

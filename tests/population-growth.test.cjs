@@ -42,9 +42,46 @@ test('drawn cells match retained events after small steps, fast jumps and a rese
   }
 });
 test('reduced-motion rendering keeps every cell and suppresses ambient motion and stretching',()=>{
-  let draws=0;const c=new Proxy({drawImage:()=>draws++},{get:(o,k)=>o[k]||(()=>{})});
+  let draws=0;const c=new Proxy({drawImage:()=>draws++,createLinearGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
   const context={window:{DishScene:class{constructor(){this.canvas={dataset:{},width:1000,height:520};this.c=c;this.time=0;this.reduced={matches:true};}move(){throw new Error('Ambient movement must stay off');}},BacteriumCharacter:{draw(){throw new Error('No stretching in reduced motion');}}}};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth/growth-scene.js'),'utf8'),context);
   const scene=new context.window.GrowthDish();scene.start(M.schedule(4,Math.LN2/30,48));scene.update(120,1,.3);scene.sprite=()=>({});
   const before=JSON.stringify(scene.cells);scene.render(1);assert.equal(JSON.stringify(scene.cells),before);assert.equal(scene.time,0);assert.equal(draws,scene.cells.length+1);
+});
+test('nutrients are conserved during growth and replenishment increases growth without adding cells',()=>{
+  for(const amount of [24,48,96])for(const time of [0,14.7,60,120,180]){
+    const s=M.schedule(4,Math.LN2/30,28),before=M.value(s,time),stock=M.nutrients(s,time),fed=M.feed(s,time,amount);
+    close(M.value(fed,time),before);close(M.nutrients(fed,time),stock+amount);
+    assert.equal(M.completed(fed,time),M.completed(s,time));
+    for(const t of [time,time+10,time+60]){close(M.value(fed,t)+M.nutrients(fed,t),s.K+amount);assert.ok(M.nutrients(fed,t)<=stock+amount+1e-9);}
+    assert.ok(M.value(fed,time+10)>M.value(s,time+10));
+    for(const t of [0,time/2].filter(t=>t<time)){close(M.value(fed,t),M.value(s,t));close(M.nutrients(fed,t),M.nutrients(s,t));}
+    const alive=new Set([0,1,2,3]);let previous=0;
+    fed.events.forEach((e,i)=>{assert.ok(e.time>previous);previous=e.time;assert.ok(alive.delete(e.parent));e.daughters.forEach(id=>alive.add(id));assert.equal(alive.size,5+i);close(M.value(fed,e.time),5+i);});
+    assert.deepEqual(fed.events.slice(0,M.completed(s,time)),s.events.slice(0,M.completed(s,time)));
+  }
+});
+test('multiple nutrient additions preserve the existing rendered lineage and later event processing',()=>{
+  const context={window:{DishScene:class{constructor(){this.canvas={dataset:{}};this.time=0;}}}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth/growth-scene.js'),'utf8'),context);
+  const scene=new context.window.GrowthDish();let s=M.schedule(4,Math.LN2/30,28);scene.start(s);
+  for(const t of [70,120,150]){
+    scene.update(t,1,1);const ids=Array.from(scene.cells,c=>c.id),n=M.value(s,t);s=M.feed(s,t,24);scene.replenish(s);scene.update(t,1,1);
+    assert.deepEqual(Array.from(scene.cells,c=>c.id),ids);close(M.value(s,t),n);
+  }
+  for(let t=150;t<=240;t+=.7){scene.update(t,.5,.2);assert.equal(scene.cells.length,4+M.completed(s,t));}
+  const zero=M.feed(M.schedule(4,0,28),10,24);assert.equal(M.value(zero,100),4);assert.equal(zero.events.length,0);
+  assert.throws(()=>M.feed(s,140,24),RangeError);assert.throws(()=>M.feed(s,200,0),RangeError);assert.throws(()=>M.feed(M.schedule(4,1),0,24),RangeError);
+});
+test('an empty nutrient reserve prevents growth until replenishment, without instant cell growth',()=>{
+  const context={window:{DishScene:class{constructor(){this.canvas={dataset:{}};this.time=0;}}}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth/growth-scene.js'),'utf8'),context);
+  for(const initialReserve of [0,24,48]){
+    const s=M.schedule(4,Math.LN2/30,4+initialReserve),scene=new context.window.GrowthDish();scene.start(s);scene.update(120,1,0);
+    const before=Array.from(scene.cells,c=>({id:c.id,age:scene.age(c)}));
+    const fed=M.feed(s,120,24);scene.replenish(fed);
+    for(let i=0;i<scene.cells.length;i++){assert.equal(scene.cells[i].id,before[i].id);close(scene.age(scene.cells[i]),before[i].age);}
+    if(initialReserve===0){assert.equal(scene.cells.length,4);assert.equal(M.nutrients(s,120),0);assert.equal(M.value(s,120),4);assert.ok(scene.cells.every(c=>scene.age(c)===0));}
+    scene.update(150,1,.5);assert.ok(scene.cells.length>before.length);assert.equal(scene.cells.length,4+M.completed(fed,150));
+  }
 });

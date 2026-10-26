@@ -4,55 +4,78 @@
   try{
     const M=window.GrowthModel,scenes=[new window.GrowthDish($('unlimited-canvas')),new window.GrowthDish($('limited-canvas'))];
     const fmt=new Intl.NumberFormat(document.documentElement.lang,{maximumFractionDigits:0});
-    let n0,r,K,end,time=0,running=false,stepTo=null,last=null,lastPaint=0,lastUI=0,storyKey='';
+    const percentage=new Intl.NumberFormat(document.documentElement.lang,{style:'percent',maximumFractionDigits:0});
+    let n0,r,end,maxEnd,time=0,running=false,stepTo=null,last=null,lastPaint=0,lastUI=0,storyKey='',focused=false,fedAt=-100;
     const count=i=>n0+scenes[i].eventIndex;
+    const finite=()=>scenes[1].schedule;
     function svg(tag,attrs={},text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));if(text!==undefined)el.textContent=text;return el;}
     function chart(){
-      const left=47,right=970,top=19,bottom=190,ceiling=Math.max(64,Math.ceil(Math.max(K,M.population(time,n0,r))/64)*64);
+      const s=finite(),left=47,right=970,top=24,bottom=190;
+      const ceiling=focused?Math.ceil(s.K/16)*16:Math.max(64,Math.ceil(Math.max(s.K,M.value(scenes[0].schedule,time))/64)*64);
       const x=t=>left+t/end*(right-left),y=n=>bottom-n/ceiling*(bottom-top);
-      const g=svg('svg',{viewBox:'0 0 1000 230',role:'img','aria-label':'Évolution des effectifs dans les deux boîtes.'});
+      const g=svg('svg',{viewBox:'0 0 1000 230',role:'img','aria-label':focused?'La population limitée et l’effectif que les nutriments peuvent soutenir.':'Évolution des effectifs dans les deux boîtes.'});
       for(let i=0;i<=4;i++){
         const value=ceiling*i/4,yy=y(value);g.append(svg('line',{x1:left,x2:right,y1:yy,y2:yy,stroke:'#e7e4d3'}));g.append(svg('text',{x:left-10,y:yy+4,'text-anchor':'end',class:'chart-tick'},fmt.format(value)));
-        const t=end*i/4;g.append(svg('text',{x:x(t),y:bottom+18,'text-anchor':'middle',class:'chart-tick'},fmt.format(t)));
+        g.append(svg('text',{x:x(end*i/4),y:bottom+18,'text-anchor':'middle',class:'chart-tick'},fmt.format(end*i/4)));
       }
-      g.append(svg('text',{x:left,y:11,class:'chart-axis'},'Bactéries'));
+      g.append(svg('text',{x:left,y:12,class:'chart-axis'},'Bactéries'));
       g.append(svg('text',{x:510,y:225,'text-anchor':'middle',class:'chart-axis'},'Temps (minutes)'));
-      g.append(svg('line',{x1:left,x2:right,y1:y(K),y2:y(K),stroke:'#89966e','stroke-width':1.5,'stroke-dasharray':'2 5'}));
-      for(let i=0;i<2;i++){
-        const points=[];for(let j=0;j<=120;j++){const t=time*j/120;points.push(x(t).toFixed(2)+','+y(M.population(t,n0,r,i?K:Infinity)).toFixed(2));}
-        const colour=i?'#d8734b':'#267b79',yy=y(M.population(time,n0,r,i?K:Infinity));
+      for(let i=0;i<s.segments.length;i++){
+        const segment=s.segments[i],until=s.segments[i+1]?.time??end;
+        g.append(svg('line',{x1:x(segment.time),x2:x(until),y1:y(segment.K),y2:y(segment.K),stroke:'#89966e','stroke-width':1.5,'stroke-dasharray':'2 5'}));
+        if(i){
+          g.append(svg('line',{x1:x(segment.time),x2:x(segment.time),y1:top,y2:bottom,stroke:'#cbad62','stroke-width':1,'stroke-dasharray':'4 5'}));
+          g.append(svg('circle',{cx:x(segment.time),cy:y(segment.n),r:4,fill:'#e4b94f',stroke:'#a48130','stroke-width':1}));
+          if(i===s.segments.length-1)g.append(svg('text',{x:Math.min(right-100,x(segment.time)+7),y:15,class:'chart-tick'},'Nutriments ajoutés'));
+        }
+      }
+      for(let i=focused?1:0;i<2;i++){
+        const points=[];for(let j=0;j<=160;j++){const t=time*j/160;points.push(x(t).toFixed(2)+','+y(M.value(scenes[i].schedule,t)).toFixed(2));}
+        const colour=i?'#d8734b':'#267b79',yy=y(M.value(scenes[i].schedule,time));
         g.append(svg('polyline',{points:points.join(' '),fill:'none',stroke:colour,'stroke-width':3,'stroke-linejoin':'round','stroke-dasharray':i?'9 5':''}));
         g.append(svg('circle',{cx:x(time),cy:yy,r:4,fill:colour,stroke:'#fffbf1','stroke-width':2}));
       }
-      $('growth-chart').replaceChildren(g);
+      $('growth-chart').replaceChildren(g);$('unlimited-chart-key').hidden=focused;
+      $('growth-chart-focus').setAttribute('aria-pressed',String(focused));
+      $('growth-chart-focus').textContent=focused?'Voir les deux populations':'Observer le ralentissement';
+      $('chart-view-note').textContent=focused?'La population limitée vue de plus près.':'Les deux populations à la même échelle.';
     }
     function update(full=false){
-      const unlimited=M.population(time,n0,r),size=Math.min(1.45,1.45*Math.sqrt(32/Math.max(32,unlimited))),food=M.remaining(time,n0,r,K);
+      const s=finite(),unlimited=M.value(scenes[0].schedule,time),size=Math.min(1.45,1.45*Math.sqrt(32/Math.max(32,unlimited)));
+      const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0);
       scenes[0].update(time,size,1);scenes[1].update(time,size,food);
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
-      $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=new Intl.NumberFormat(document.documentElement.lang,{style:'percent',maximumFractionDigits:0}).format(food);
-      $('unlimited-canvas').setAttribute('aria-label',`${count(0)} bactéries dont la nourriture est renouvelée.`);
-      $('limited-canvas').setAttribute('aria-label',`${count(1)} bactéries dont la nourriture est limitée.`);
-      $('unlimited-phase').textContent=time===0?'Tout commence petit.':count(0)<n0*4?'Plus de cellules, plus de divisions.':'De plus en plus de petites vies.';
-      $('limited-phase').textContent=time===0?'Tout commence petit.':food>.55?'Ça grandit, la nourriture abonde.':food>.2?'Moins de nourriture. Un rythme plus doux.':'Presque à la limite de la réserve.';
-      const done=time>=end,key=done?'end':time===0?'start':food<.2?'low':count(0)>=n0*4?'many':'first';
-      if(key!==storyKey){$('growth-story').textContent=done?'Notre observation s’arrête ici. Avec une nourriture illimitée, la croissance continuerait.':key==='start'?'Une cellule se divise en deux. Puis ses cellules filles peuvent se diviser à leur tour.':key==='low'?'La réserve de nourriture s’épuise dans la boîte limitée. Moins de divisions, mais toujours de la vie.':key==='many'?'Aucune cellule ne se divise plus vite. Il y a simplement plus de cellules qui se divisent.':'Les deux populations grandissent. La boîte limitée consomme progressivement sa réserve.';storyKey=key;}
+      $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);
+      $('unlimited-canvas').setAttribute('aria-label',`${count(0)} bactéries recevant des nutriments renouvelés.`);
+      $('limited-canvas').setAttribute('aria-label',`${count(1)} bactéries utilisant une réserve limitée de nutriments.`);
+      $('unlimited-phase').textContent=time===0?'Nutriments prêts. Cellules prêtes.':count(0)<n0*4?'Absorber. Grandir. Se diviser.':'Davantage de cellules grandissent et se divisent.';
+      $('limited-phase').textContent=s.K===n0?'Pas encore de nutriments. On attend pour grandir.':time-fedAt<18?'De nouveaux nutriments. La croissance reprend.':time===0?'Nutriments prêts. Cellules prêtes.':food>.55?'On absorbe des nutriments et on grandit.':food>.2?'La réserve diminue. La croissance ralentit.':'Presque plus de matière pour grandir.';
+      const done=time>=end,canExtend=end<maxEnd-1e-8,key=done?'end':time-fedAt<18?'fed':s.K===n0?'empty':time===0?'start':food<.25?'low':count(0)>=n0*4?'many':'first';
+      if(key!==storyKey){
+        $('growth-story').textContent=done?(canExtend?'Cette première observation s’arrête ici. Ajoutez des nutriments à la boîte limitée pour poursuivre.':'Notre observation s’arrête ici. Avec des nutriments renouvelés, la croissance continuerait.'):key==='fed'?'De nouveaux nutriments sont ajoutés. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'La boîte limitée ne contient pas de nutriments. Ajoutez-en pour permettre aux cellules de grandir.':key==='start'?'Regardez les nutriments dorés entrer dans les cellules avant qu’elles grandissent et se divisent.':key==='low'?'La réserve est presque épuisée. Ajoutez des nutriments et observez ce qui se passe.':key==='many'?'Davantage de cellules se divisent dans la boîte alimentée en continu. L’autre boîte dispose de moins de matière.':'Les cellules absorbent des nutriments, grandissent et se divisent. Les nouvelles cellules consomment à leur tour la réserve.';
+        storyKey=key;
+      }
       $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Recommencer <span aria-hidden="true">↻</span>':time>0?'Continuer <span aria-hidden="true">▶</span>':'Les voir grandir <span aria-hidden="true">▶</span>';
       $('growth-step').disabled=running||stepTo!==null||done;
-      $('growth-result').textContent=time===0?'Observez deux populations grandir à partir du même effectif.':`${fmt.format(time)} minutes : ${count(0)} avec nourriture renouvelée, ${count(1)} avec une réserve limitée.`;
+      $('growth-feed').disabled=done&&!canExtend||s.K-n0>=192;
+      $('growth-feed-label').textContent=done&&canExtend?'Ajouter des nutriments et continuer':'Ajouter des nutriments';
+      $('growth-feed').classList.toggle('is-useful',!done&&food<.35);
+      $('feed-hint').textContent=done?(canExtend?'Alimentez les cellules déjà présentes et poursuivez l’histoire.':'Limite d’observation atteinte. Recommencez pour une nouvelle expérience.'):s.K-n0>=192?'La réserve est pleine pour cette expérience.':'Même population. De nouveaux nutriments.';
+      $('growth-result').textContent=time===0?'Observez deux populations grandir à partir du même effectif.':`${fmt.format(time)} minutes : ${count(0)} avec des nutriments renouvelés, ${count(1)} avec une réserve limitée.`;
       chart();
     }
     function reset(){
-      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);K=Number($('growth-food').value);end=Math.min(240,M.crossing(512,n0,r));
-      time=0;running=false;stepTo=null;storyKey='';scenes[0].start(M.schedule(n0,r));scenes[1].start(M.schedule(n0,r,K));
-      $('food-capacity-label').textContent=`${K} bactéries`;
-      $('food-capacity-note').textContent=`De quoi nourrir environ ${K} bactéries dans la boîte limitée.`;
-      $('growth-food').setAttribute('aria-valuetext',`Permet de nourrir environ ${K} bactéries`);update(true);
+      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);const supply=Number($('growth-food').value);end=Math.min(240,M.crossing(256,n0,r));maxEnd=Math.min(480,M.crossing(512,n0,r));
+      time=0;running=false;stepTo=null;storyKey='';fedAt=-100;scenes[0].start(M.schedule(n0,r));scenes[1].start(M.schedule(n0,r,n0+supply));
+      const levels={0:'Aucune',24:'Petite',48:'Moyenne',72:'Grande',96:'Abondante'};
+      $('food-capacity-label').textContent=levels[supply];$('growth-food').setAttribute('aria-valuetext',levels[supply]);update(true);
     }
     $('growth-play').addEventListener('click',()=>{if(running||stepTo!==null){running=false;stepTo=null;}else{if(time>=end)reset();running=true;}update(true);});
     $('growth-step').addEventListener('click',()=>{if(!running&&stepTo===null&&time<end){stepTo=Math.min(end,time+10);update(true);}});
     $('growth-reset').addEventListener('click',reset);
+    $('growth-feed').addEventListener('click',()=>{if(time>=end&&end>=maxEnd-1e-8||finite().K-n0>=192)return;const resume=time>=end;scenes[1].replenish(M.feed(finite(),time,Math.min(Number($('growth-food').value)||24,192-(finite().K-n0))));fedAt=time;storyKey='';end=Math.min(maxEnd,Math.max(end,time+Math.LN2/r));if(resume){running=true;stepTo=null;}update(true);});
+    $('growth-chart-focus').addEventListener('click',()=>{focused=!focused;chart();});
     for(const id of ['growth-start','growth-division'])$(id).addEventListener('change',reset);
     $('growth-food').addEventListener('input',reset);
     document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false;stepTo=null;update(true);}last=null;});
@@ -65,6 +88,6 @@
       }
       requestAnimationFrame(frame);
     }
-    reset();$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
+    reset();window.NutrientArt.mechanism($('growth-mechanism'));$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
   }catch(error){$('growth-loading').textContent='Impossible d’ouvrir les boîtes. Veuillez recharger la page.';console.error('Croissance des populations:',error);}
 })();

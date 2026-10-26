@@ -24,7 +24,7 @@ Browse five themes and 20 animation ideas:
 - [Genomics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/genomics/)
 - [Bioinformatics](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/bioinformatics/)
 
-The Duck Pond and [The Petri Dish](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/ecology/population-growth/play.html) are playable. In the Petri Dish, compare growth with replenished or limited food, and change the starting population, division time and food supply. The other entries are previews marked **Coming soon**. The website is available in English and French: the **EN / FR** links open the same page in the other language, including animation controls and explanations.
+The Duck Pond and [The Petri Dish](https://yacinebenchehida.github.io/this-is-not-a-species/simulations/ecology/population-growth/play.html) are playable. In the Petri Dish, watch nutrient uptake, compare renewed and finite supplies, change the starting population and division time, and add nutrients to the existing culture. The other entries are previews marked **Coming soon**. The website is available in English and French: the **EN / FR** links open the same page in the other language, including animation controls and explanations.
 
 ## About
 

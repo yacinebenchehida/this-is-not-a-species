@@ -195,12 +195,12 @@
     "controls": [
       "Starting bacteria",
       "Division time",
-      "Food supply",
+      "Nutrient supply",
       "Playback speed"
     ],
     "interactive": true,
     "entry": "play.html",
-    "version": "growth-1"
+    "version": "growth-2"
   },
   {
     "theme": "ecology",

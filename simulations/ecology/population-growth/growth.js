@@ -4,55 +4,78 @@
   try{
     const M=window.GrowthModel,scenes=[new window.GrowthDish($('unlimited-canvas')),new window.GrowthDish($('limited-canvas'))];
     const fmt=new Intl.NumberFormat(document.documentElement.lang,{maximumFractionDigits:0});
-    let n0,r,K,end,time=0,running=false,stepTo=null,last=null,lastPaint=0,lastUI=0,storyKey='';
+    const percentage=new Intl.NumberFormat(document.documentElement.lang,{style:'percent',maximumFractionDigits:0});
+    let n0,r,end,maxEnd,time=0,running=false,stepTo=null,last=null,lastPaint=0,lastUI=0,storyKey='',focused=false,fedAt=-100;
     const count=i=>n0+scenes[i].eventIndex;
+    const finite=()=>scenes[1].schedule;
     function svg(tag,attrs={},text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));if(text!==undefined)el.textContent=text;return el;}
     function chart(){
-      const left=47,right=970,top=19,bottom=190,ceiling=Math.max(64,Math.ceil(Math.max(K,M.population(time,n0,r))/64)*64);
+      const s=finite(),left=47,right=970,top=24,bottom=190;
+      const ceiling=focused?Math.ceil(s.K/16)*16:Math.max(64,Math.ceil(Math.max(s.K,M.value(scenes[0].schedule,time))/64)*64);
       const x=t=>left+t/end*(right-left),y=n=>bottom-n/ceiling*(bottom-top);
-      const g=svg('svg',{viewBox:'0 0 1000 230',role:'img','aria-label':'Population size through time in the two dishes.'});
+      const g=svg('svg',{viewBox:'0 0 1000 230',role:'img','aria-label':focused?'The limited population and its nutrient-supported limit.':'Population size through time in the two dishes.'});
       for(let i=0;i<=4;i++){
         const value=ceiling*i/4,yy=y(value);g.append(svg('line',{x1:left,x2:right,y1:yy,y2:yy,stroke:'#e7e4d3'}));g.append(svg('text',{x:left-10,y:yy+4,'text-anchor':'end',class:'chart-tick'},fmt.format(value)));
-        const t=end*i/4;g.append(svg('text',{x:x(t),y:bottom+18,'text-anchor':'middle',class:'chart-tick'},fmt.format(t)));
+        g.append(svg('text',{x:x(end*i/4),y:bottom+18,'text-anchor':'middle',class:'chart-tick'},fmt.format(end*i/4)));
       }
-      g.append(svg('text',{x:left,y:11,class:'chart-axis'},'Bacteria'));
+      g.append(svg('text',{x:left,y:12,class:'chart-axis'},'Bacteria'));
       g.append(svg('text',{x:510,y:225,'text-anchor':'middle',class:'chart-axis'},'Time (minutes)'));
-      g.append(svg('line',{x1:left,x2:right,y1:y(K),y2:y(K),stroke:'#89966e','stroke-width':1.5,'stroke-dasharray':'2 5'}));
-      for(let i=0;i<2;i++){
-        const points=[];for(let j=0;j<=120;j++){const t=time*j/120;points.push(x(t).toFixed(2)+','+y(M.population(t,n0,r,i?K:Infinity)).toFixed(2));}
-        const colour=i?'#d8734b':'#267b79',yy=y(M.population(time,n0,r,i?K:Infinity));
+      for(let i=0;i<s.segments.length;i++){
+        const segment=s.segments[i],until=s.segments[i+1]?.time??end;
+        g.append(svg('line',{x1:x(segment.time),x2:x(until),y1:y(segment.K),y2:y(segment.K),stroke:'#89966e','stroke-width':1.5,'stroke-dasharray':'2 5'}));
+        if(i){
+          g.append(svg('line',{x1:x(segment.time),x2:x(segment.time),y1:top,y2:bottom,stroke:'#cbad62','stroke-width':1,'stroke-dasharray':'4 5'}));
+          g.append(svg('circle',{cx:x(segment.time),cy:y(segment.n),r:4,fill:'#e4b94f',stroke:'#a48130','stroke-width':1}));
+          if(i===s.segments.length-1)g.append(svg('text',{x:Math.min(right-100,x(segment.time)+7),y:15,class:'chart-tick'},'Nutrients added'));
+        }
+      }
+      for(let i=focused?1:0;i<2;i++){
+        const points=[];for(let j=0;j<=160;j++){const t=time*j/160;points.push(x(t).toFixed(2)+','+y(M.value(scenes[i].schedule,t)).toFixed(2));}
+        const colour=i?'#d8734b':'#267b79',yy=y(M.value(scenes[i].schedule,time));
         g.append(svg('polyline',{points:points.join(' '),fill:'none',stroke:colour,'stroke-width':3,'stroke-linejoin':'round','stroke-dasharray':i?'9 5':''}));
         g.append(svg('circle',{cx:x(time),cy:yy,r:4,fill:colour,stroke:'#fffbf1','stroke-width':2}));
       }
-      $('growth-chart').replaceChildren(g);
+      $('growth-chart').replaceChildren(g);$('unlimited-chart-key').hidden=focused;
+      $('growth-chart-focus').setAttribute('aria-pressed',String(focused));
+      $('growth-chart-focus').textContent=focused?'Show both populations':'Inspect the slowdown';
+      $('chart-view-note').textContent=focused?'A closer view of the limited population.':'Both populations on the same scale.';
     }
     function update(full=false){
-      const unlimited=M.population(time,n0,r),size=Math.min(1.45,1.45*Math.sqrt(32/Math.max(32,unlimited))),food=M.remaining(time,n0,r,K);
+      const s=finite(),unlimited=M.value(scenes[0].schedule,time),size=Math.min(1.45,1.45*Math.sqrt(32/Math.max(32,unlimited)));
+      const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0);
       scenes[0].update(time,size,1);scenes[1].update(time,size,food);
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
-      $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=new Intl.NumberFormat(document.documentElement.lang,{style:'percent',maximumFractionDigits:0}).format(food);
-      $('unlimited-canvas').setAttribute('aria-label',`${count(0)} bacteria with replenished food.`);
-      $('limited-canvas').setAttribute('aria-label',`${count(1)} bacteria with a limited food supply.`);
-      $('unlimited-phase').textContent=time===0?'A few little beginnings.':count(0)<n0*4?'More cells, more divisions.':'More and more little lives.';
-      $('limited-phase').textContent=time===0?'A few little beginnings.':food>.55?'Growing, with food to spare.':food>.2?'Less food. A gentler pace.':'Nearly at the food-supported limit.';
-      const done=time>=end,key=done?'end':time===0?'start':food<.2?'low':count(0)>=n0*4?'many':'first';
-      if(key!==storyKey){$('growth-story').textContent=done?'Our viewing window ends here. With unlimited food, growth would continue.':key==='start'?'A cell divides into two. Then its daughters can divide too.':key==='low'?'The limited dish is running low on food. Fewer divisions, but still plenty of life.':key==='many'?'No cell is dividing faster. There are simply more cells dividing.':'Both populations grow. The limited dish gradually uses up its food.';storyKey=key;}
+      $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);
+      $('unlimited-canvas').setAttribute('aria-label',`${count(0)} bacteria receiving replenished nutrients.`);
+      $('limited-canvas').setAttribute('aria-label',`${count(1)} bacteria using a finite nutrient reserve.`);
+      $('unlimited-phase').textContent=time===0?'Nutrients ready. Cells ready.':count(0)<n0*4?'Absorb nutrients. Grow. Divide.':'More cells can grow and divide.';
+      $('limited-phase').textContent=s.K===n0?'No nutrients yet. Waiting to grow.':time-fedAt<18?'Fresh material. Growth picks up.':time===0?'Nutrients ready. Cells ready.':food>.55?'Taking in nutrients and growing.':food>.2?'A dwindling reserve. Slower growth.':'Very little material left for growth.';
+      const done=time>=end,canExtend=end<maxEnd-1e-8,key=done?'end':time-fedAt<18?'fed':s.K===n0?'empty':time===0?'start':food<.25?'low':count(0)>=n0*4?'many':'first';
+      if(key!==storyKey){
+        $('growth-story').textContent=done?(canExtend?'The first view ends here. Add nutrients to the limited dish and keep watching.':'Our viewing window ends here. With replenished nutrients, growth would continue.'):key==='fed'?'Fresh nutrients added. The same cells can grow faster again.':key==='empty'?'There are no nutrients in the limited dish. Add some to let the cells grow.':key==='start'?'Watch the golden nutrient parcels enter cells before they grow and divide.':key==='low'?'The reserve is almost used up. Add nutrients and watch what happens.':key==='many'?'More cells are dividing in the replenished dish. Less material is left in the other dish.':'The cells absorb nutrients, grow, and divide. New cells use more of the reserve.';
+        storyKey=key;
+      }
       $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Grow again <span aria-hidden="true">↻</span>':time>0?'Continue <span aria-hidden="true">▶</span>':'Let them grow <span aria-hidden="true">▶</span>';
       $('growth-step').disabled=running||stepTo!==null||done;
-      $('growth-result').textContent=time===0?'Watch the two populations grow from the same starting point.':`${fmt.format(time)} minutes: ${count(0)} with replenished food, ${count(1)} with one serving.`;
+      $('growth-feed').disabled=done&&!canExtend||s.K-n0>=192;
+      $('growth-feed-label').textContent=done&&canExtend?'Add nutrients & continue':'Add nutrients';
+      $('growth-feed').classList.toggle('is-useful',!done&&food<.35);
+      $('feed-hint').textContent=done?(canExtend?'Replenish the existing cells and continue the story.':'Viewing limit reached. Start again for another experiment.'):s.K-n0>=192?'The reserve is full for this experiment.':'Same population. A fresh supply.';
+      $('growth-result').textContent=time===0?'Watch the two populations grow from the same starting point.':`${fmt.format(time)} minutes: ${count(0)} with replenished nutrients, ${count(1)} using a finite reserve.`;
       chart();
     }
     function reset(){
-      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);K=Number($('growth-food').value);end=Math.min(240,M.crossing(512,n0,r));
-      time=0;running=false;stepTo=null;storyKey='';scenes[0].start(M.schedule(n0,r));scenes[1].start(M.schedule(n0,r,K));
-      $('food-capacity-label').textContent=`${K} bacteria`;
-      $('food-capacity-note').textContent=`Enough food to support about ${K} bacteria in the limited dish.`;
-      $('growth-food').setAttribute('aria-valuetext',`Supports about ${K} bacteria`);update(true);
+      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);const supply=Number($('growth-food').value);end=Math.min(240,M.crossing(256,n0,r));maxEnd=Math.min(480,M.crossing(512,n0,r));
+      time=0;running=false;stepTo=null;storyKey='';fedAt=-100;scenes[0].start(M.schedule(n0,r));scenes[1].start(M.schedule(n0,r,n0+supply));
+      const levels={0:'None',24:'Small',48:'Medium',72:'Large',96:'Abundant'};
+      $('food-capacity-label').textContent=levels[supply];$('growth-food').setAttribute('aria-valuetext',levels[supply]);update(true);
     }
     $('growth-play').addEventListener('click',()=>{if(running||stepTo!==null){running=false;stepTo=null;}else{if(time>=end)reset();running=true;}update(true);});
     $('growth-step').addEventListener('click',()=>{if(!running&&stepTo===null&&time<end){stepTo=Math.min(end,time+10);update(true);}});
     $('growth-reset').addEventListener('click',reset);
+    $('growth-feed').addEventListener('click',()=>{if(time>=end&&end>=maxEnd-1e-8||finite().K-n0>=192)return;const resume=time>=end;scenes[1].replenish(M.feed(finite(),time,Math.min(Number($('growth-food').value)||24,192-(finite().K-n0))));fedAt=time;storyKey='';end=Math.min(maxEnd,Math.max(end,time+Math.LN2/r));if(resume){running=true;stepTo=null;}update(true);});
+    $('growth-chart-focus').addEventListener('click',()=>{focused=!focused;chart();});
     for(const id of ['growth-start','growth-division'])$(id).addEventListener('change',reset);
     $('growth-food').addEventListener('input',reset);
     document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false;stepTo=null;update(true);}last=null;});
@@ -65,6 +88,6 @@
       }
       requestAnimationFrame(frame);
     }
-    reset();$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
+    reset();window.NutrientArt.mechanism($('growth-mechanism'));$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
   }catch(error){$('growth-loading').textContent='The growing dishes could not open. Please reload the page.';console.error('Population growth:',error);}
 })();

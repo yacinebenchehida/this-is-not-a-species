@@ -36,3 +36,30 @@ for(const lang of ['en','fr'])test(`${lang}: start/pause/reset work on the first
     reset.click();assert.equal(Number(clock.textContent),0);assert.doesNotMatch(button.innerHTML,/Pause/);
   }
 });
+
+for(const lang of ['en','fr'])test(`${lang}: each refill runs until 5% food, with an independent buffet picture and counter`,()=>{
+  const ui=interfaceFor(lang),play=ui.get('growth-play'),feed=ui.get('growth-feed');
+  const number=id=>Number(ui.get(id).textContent.replace(/[^0-9]/g,''));
+  ui.get('growth-speed').value='18';play.click();ui.advance(12000);
+  assert.match(play.innerHTML,/Pause/,'512 buffet drawings must not stop the lunchbox');
+  assert.ok(number('unlimited-count')>512);
+  play.click();const before=number('limited-count');feed.click();
+  assert.equal(number('limited-count'),before,'a refill preserves the population');
+  play.click();ui.advance(3000);
+  assert.match(play.innerHTML,/Pause/,'keep running past the old time cutoff while food remains');
+  assert.ok(number('limited-food-label')>5);
+  for(let refill=0;refill<3;refill++){
+    ui.advance(60000);
+    assert.equal(play.disabled,true);assert.equal(number('limited-food-label'),5);
+    const stoppedTime=ui.get('growth-time').textContent,stoppedCells=number('limited-count');
+    ui.advance(2000);assert.equal(ui.get('growth-time').textContent,stoppedTime,'stop exactly at the resource threshold');
+    if(refill<2){
+      assert.equal(feed.disabled,false);feed.click();
+      assert.equal(play.disabled,false);assert.match(play.innerHTML,/Pause/,'a refill resumes a finished run');
+      assert.equal(ui.get('growth-time').textContent,stoppedTime);
+      assert.equal(number('limited-count'),stoppedCells);assert.ok(number('limited-food-label')>5);
+    }
+  }
+  assert.match(ui.get('unlimited-count').textContent,/\+$/,'the exponential counter can reach its explicit million-plus display limit');
+  assert.equal(number('unlimited-count'),1000000);
+});

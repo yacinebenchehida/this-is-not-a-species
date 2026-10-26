@@ -4,7 +4,7 @@
   'use strict';
   const ellipse=(c,x,y,rx,ry,fill)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,2*Math.PI);c.fillStyle=fill;c.fill();};
   const clamp=v=>Math.max(0,Math.min(1,v));
-  const centre={x:500,y:248},swim={x:343,y:122},pantry={x:318,y:108};
+  const centre={x:500,y:248},swim={x:343,y:122},pantry={x:290,y:96};
   // Above this many cells, crumbs are still eaten exactly, but cells no longer swim to them.
   const ANIMATED=400;
   // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
@@ -110,12 +110,11 @@
           let turn=want-cell.angle;turn=Math.atan2(Math.sin(turn),Math.cos(turn));cell.angle+=turn*Math.min(1,dt*3);
           const tx=crumb.x-Math.cos(cell.angle)*reach,ty=crumb.y-Math.sin(cell.angle)*reach,pull=Math.min(1,dt*2.2);
           cell.x+=(tx-cell.x)*pull;cell.y+=(ty-cell.y)*pull;cell.heading=cell.angle;
-          continue;
+        }else{
+          cell.heading+=Math.sin(this.time*.49+cell.phase)*dt*.6;
+          cell.x+=Math.cos(cell.heading)*cell.speed*dt;cell.y+=Math.sin(cell.heading)*cell.speed*.65*dt;
         }
-        cell.heading+=Math.sin(this.time*.49+cell.phase)*dt*.6;
-        cell.x+=Math.cos(cell.heading)*cell.speed*dt;cell.y+=Math.sin(cell.heading)*cell.speed*.65*dt;
-        const u=(cell.x-centre.x)/swim.x,v=(cell.y-centre.y)/swim.y,edge=Math.hypot(u,v);
-        if(edge>1){cell.x=centre.x+(cell.x-centre.x)/edge;cell.y=centre.y+(cell.y-centre.y)/edge;cell.heading=Math.atan2(-v,-u)+(cell.phase%1-.5);}
+        this.keepInside(cell);
       }
       // Spacing keeps faces legible. A grid keeps it fast with a thousand cells.
       const size=Math.max(8,46*this.size),grid=new Map();
@@ -128,6 +127,12 @@
           if(d<min){const n=(min-d)*Math.min(.16,dt*1.9);const fa=a.target&&animate?.25:1,fb=b.target&&animate?.25:1;a.x-=dx/d*n*fa;a.y-=dy/d*n*fa;b.x+=dx/d*n*fb;b.y+=dy/d*n*fb;}
         }
       }
+      for(const cell of this.cells)this.keepInside(cell);
+    }
+    // Cells always stay inside the dish, whatever they are doing.
+    keepInside(cell){
+      const u=(cell.x-centre.x)/swim.x,v=(cell.y-centre.y)/swim.y,edge=Math.hypot(u,v);
+      if(edge>1){cell.x=centre.x+(cell.x-centre.x)/edge;cell.y=centre.y+(cell.y-centre.y)/edge;if(!cell.target)cell.heading=Math.atan2(-v,-u)+(cell.phase%1-.5);}
     }
     drawCrumbs(c,still){
       const byId=new Map(this.cells.map(x=>[x.id,x]));
@@ -157,7 +162,7 @@
         const age=this.age(cell),division=still?0:clamp((age-.25)/.75);
         // Chomp: when the cell's growth crosses a third, two thirds or the end, it takes a bite.
         const bite=cell.target?Math.min(3,Math.floor(age*3+1e-9)):0;
-        if(!still&&bite>(cell.bites||0)){cell.bites=bite;cell.chompAt=this.time;}
+        if(!still&&bite>(cell.bites||0)){cell.bites=bite;cell.chompAt=this.time;(cell.swallowed||(cell.swallowed=[])).push({at:this.time,seed:bite*1.7+cell.phase});}
         const near=animate&&cell.target&&cell.target.atMouth;
         // Before each bite the mouth opens wide; then it snaps shut and chews for a moment.
         const sinceChomp=this.time-(cell.chompAt??-9),nextBite=((cell.bites||0)+1)/3,toNext=nextBite-age;
@@ -169,6 +174,25 @@
         }
         if(!still&&(division>.015||mouth)&&this.cells.length<250){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0,faceScale,mouth},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell,faceScale),-128,-80);c.restore();}
+        // Swallowed sugar: each bite flies into the mouth, then glints inside the body and dissolves.
+        if(!still&&cell.swallowed&&cell.swallowed.length){
+          const reach=this.mouthReach(cell),ca=Math.cos(cell.angle),sa=Math.sin(cell.angle),mx=cell.x+ca*reach,my=cell.y+sa*reach;
+          const piece=Math.max(4,7*Math.min(1,this.size*1.2));
+          cell.swallowed=cell.swallowed.filter(b=>this.time-b.at<3.2);
+          for(const b of cell.swallowed){
+            const t=this.time-b.at;
+            if(t<.35){
+              // In flight: from the cube into the open mouth.
+              const k=t/.35,cx=mx+ca*piece*2*(1-k),cy=my+sa*piece*2*(1-k);
+              nutrient(c,cx,cy,piece*(1-.3*k),b.seed,1);
+            }else{
+              // Inside: a little cube drifting back into the body, fading as it is used for growth.
+              const k=Math.min(1,(t-.35)/2.85),back=reach*(.35+1.1*k),side=Math.sin(b.seed*3)*cell.radius*.3;
+              const ix=cell.x+ca*(reach-back)-sa*side,iy=cell.y+sa*(reach-back)+ca*side;
+              nutrient(c,ix,iy,piece*(1-.45*k),b.seed+t*.4,.95*(1-k*k));
+            }
+          }
+        }
         if(near){
           // The cube being eaten sits right at the mouth, in front of the cell.
           const size=cell.target.size*Math.max(.55,Math.min(1,this.size)),reach=this.mouthReach(cell)+size*.9,mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;

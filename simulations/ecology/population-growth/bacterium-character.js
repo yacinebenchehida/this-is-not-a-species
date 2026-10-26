@@ -32,9 +32,17 @@
     // An open, chewing mouth while the cell nibbles a crumb.
     if(mouth>0){
       // A big cartoon mouth: wide open, dark inside, pink tongue and two little teeth.
-      const w=2.4+mouth*3.6,h=.9+mouth*5.2,cy=4.6+mouth*1.6;
+      const w=2.6+mouth*4.6,h=.9+mouth*6.4,cy=4.8+mouth*2;
       c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#244f57';c.fill();c.strokeStyle='#174b59';c.lineWidth=.9;c.stroke();
-      if(mouth>.3){c.save();c.clip();oval(c,0,cy+h*.75,w*.7,h*.5,'#ee8f8b');c.fillStyle='#fffdf3';c.fillRect(-w*.42,cy-h,w*.34,h*.42);c.fillRect(w*.08,cy-h,w*.34,h*.42);c.restore();}
+      if(mouth>.25){
+        c.save();c.clip();oval(c,0,cy+h*.8,w*.7,h*.45,'#ee8f8b');
+        // Rows of pointed teeth along the top and bottom of the open mouth.
+        c.fillStyle='#fffdf3';c.strokeStyle='#9fb3b0';c.lineWidth=.35;
+        const n=5,tw=w*2/n,th=Math.min(h*.5,2.6+mouth*1.2);
+        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw;c.moveTo(x0,cy-h);c.lineTo(x0+tw/2,cy-h+th);c.lineTo(x0+tw,cy-h);}c.fill();c.stroke();
+        c.beginPath();for(let i=0;i<n;i++){const x0=-w+i*tw+tw/2;c.moveTo(x0-tw/2,cy+h);c.lineTo(x0,cy+h-th*.8);c.lineTo(x0+tw/2,cy+h);}c.fill();c.stroke();
+        c.restore();
+      }
     }
     else if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
     else if(mood===1){c.beginPath();c.moveTo(-2.8,4.9);c.lineTo(2.8,4.9);c.strokeStyle='#2d6870';c.lineWidth=1.6;c.lineCap='round';c.stroke();}

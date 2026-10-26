@@ -7,11 +7,27 @@
   const centre={x:500,y:248},swim={x:343,y:122},pantry={x:318,y:108};
   // Above this many cells, crumbs are still eaten exactly, but cells no longer swim to them.
   const ANIMATED=400;
-  function nutrient(c,x,y,size=7,angle=0,alpha=1){
-    c.save();c.translate(x,y);c.rotate(angle);c.globalAlpha=alpha;c.lineJoin='round';
-    c.beginPath();c.moveTo(-size*.55,-size);c.lineTo(size*.5,-size*.85);c.lineTo(size,size*.05);c.lineTo(size*.45,size);c.lineTo(-size*.65,size*.75);c.lineTo(-size,-size*.1);c.closePath();
-    const g=c.createLinearGradient(-size,-size,size,size);g.addColorStop(0,'#fff0b4');g.addColorStop(.45,'#f4cf69');g.addColorStop(1,'#dca443');c.fillStyle=g;c.fill();c.strokeStyle='#b58431';c.lineWidth=Math.max(.8,size*.13);c.stroke();
-    c.beginPath();c.moveTo(-size*.55,-size*.55);c.lineTo(size*.25,-size*.55);c.strokeStyle='#fff7d9';c.lineWidth=Math.max(1,size*.2);c.lineCap='round';c.stroke();c.restore();
+  // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
+  // grains. bites (0–3) removes rounded chunks, like a cartoon bite mark.
+  const BITES=[[.9,-.55],[-.9,-.35],[.1,.95]];
+  function nutrient(c,x,y,size=7,angle=0,alpha=1,bites=0){
+    c.save();c.translate(x,y);c.rotate(angle*.35);c.globalAlpha=alpha;c.lineJoin='round';
+    const s=size,d=s*.45;
+    if(bites>0){
+      // Even-odd clipping: the cube's box minus one circle per bite.
+      c.beginPath();c.rect(-s*2,-s*2,s*4,s*4);
+      for(let i=0;i<Math.min(3,bites);i++){const [bx,by]=BITES[i];c.moveTo(bx*s+s*.62,by*s);c.arc(bx*s,by*s,s*.62,0,Math.PI*2);}
+      c.clip('evenodd');
+    }
+    c.beginPath();c.moveTo(-s,-s+d);c.lineTo(-s+d,-s);c.lineTo(s,-s);c.lineTo(s,s-d);c.lineTo(s-d,s);c.lineTo(-s,s);c.closePath();
+    c.fillStyle='#e9e3d2';c.fill();
+    c.beginPath();c.rect(-s,-s+d,s*2-d,s*2-d);c.fillStyle='#fffdf6';c.fill();
+    c.beginPath();c.moveTo(s-d,-s+d);c.lineTo(s,-s);c.lineTo(s,s-d);c.lineTo(s-d,s);c.closePath();c.fillStyle='#ddd4bd';c.fill();
+    c.beginPath();c.moveTo(-s,-s+d);c.lineTo(-s+d,-s);c.lineTo(s,-s);c.lineTo(s-d,-s+d);c.closePath();c.fillStyle='#f6f1e3';c.fill();
+    c.beginPath();c.moveTo(-s,-s+d);c.lineTo(-s+d,-s);c.lineTo(s,-s);c.lineTo(s,s-d);c.lineTo(s-d,s);c.lineTo(-s,s);c.closePath();
+    c.strokeStyle='#a99c7a';c.lineWidth=Math.max(.8,s*.12);c.stroke();
+    if(s>4){for(const [gx,gy] of [[-.45,-.1],[.15,.35],[-.1,.7],[.35,-.25]])c.fillRect(gx*s,gy*s,Math.max(1,s*.12),Math.max(1,s*.12));}
+    c.restore();
   }
   // A small seeded generator gives both dishes the same starting crumb layout.
   function seeded(seed){return()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -30,7 +46,7 @@
     }
     newCrumb(drop){
       let x,y;do{x=centre.x+(this.random()*2-1)*pantry.x;y=centre.y+(this.random()*2-1)*pantry.y;}while(((x-centre.x)/pantry.x)**2+((y-centre.y)/pantry.y)**2>1);
-      return {id:this.nextCrumb++,x,y,angle:this.random()*Math.PI,size:6+this.random()*1.5,owner:null,dropAt:drop?this.time:-100};
+      return {id:this.nextCrumb++,x,y,angle:this.random()*Math.PI,size:9+this.random()*1.2,owner:null,dropAt:drop?this.time:-100};
     }
     replenish(schedule){
       for(const cell of this.cells){cell.visualStartAge=this.age(cell);cell.visualStartTime=this.simTime;}
@@ -75,6 +91,13 @@
       if(!this.sprites.has(key)){const s=document.createElement('canvas');s.width=256;s.height=160;const c=s.getContext('2d');c.translate(128,80);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,angle:0,radius:cell.base,mood,faceScale},0,0,true);this.sprites.set(key,s);}
       return this.sprites.get(key);
     }
+    // Where the face sits along the cell's axis (same geometry as BacteriumCharacter), in dish units.
+    mouthReach(cell){
+      const r=cell.base,long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
+      const division=clamp((this.age(cell)-.25)/.75),growth=division<.65?division/.65:1;
+      const faceX=cell.kind==='round'?0:long*.24,shift=growth*r*(cell.kind==='round'?1.3:1.8);
+      return (faceX+shift+(cell.kind==='round'?r*.55:r*.35))*this.size;
+    }
     age(cell){const r=this.schedule.cells[cell.id],base=cell.visualStartAge||0,start=cell.visualStartTime??r.born;return Number.isFinite(r.divide)?base+(1-base)*clamp((this.simTime-start)/(r.divide-start)):base;}
     // Cosmetic movement: gentle wandering, spacing on a grid, and swimming to a claimed crumb.
     move(dt){
@@ -83,7 +106,7 @@
         const crumb=animate&&cell.target;
         if(crumb){
           // Face the crumb and park the mouth on it. Mouths sit towards the cell's front end.
-          const reach=cell.kind==='round'?0:cell.radius*1.1,want=Math.atan2(crumb.y-cell.y,crumb.x-cell.x);
+          const reach=this.mouthReach(cell),want=Math.atan2(crumb.y-cell.y,crumb.x-cell.x);
           let turn=want-cell.angle;turn=Math.atan2(Math.sin(turn),Math.cos(turn));cell.angle+=turn*Math.min(1,dt*3);
           const tx=crumb.x-Math.cos(cell.angle)*reach,ty=crumb.y-Math.sin(cell.angle)*reach,pull=Math.min(1,dt*2.2);
           cell.x+=(tx-cell.x)*pull;cell.y+=(ty-cell.y)*pull;cell.heading=cell.angle;
@@ -110,11 +133,13 @@
       const byId=new Map(this.cells.map(x=>[x.id,x]));
       for(const crumb of this.crumbs){
         // A claimed crumb is nibbled down as its owner grows: what remains is the food not yet used.
-        let left=1;
-        if(crumb.owner!==null){const owner=byId.get(crumb.owner);left=owner?1-this.age(owner):1;}
-        if(left<=.02)continue;
+        // A claimed cube loses one bite each time its owner's growth passes a third of the way to
+        // division; the last bite is taken at the division itself.
+        let bites=0;
+        if(crumb.atMouth)continue;
+        if(crumb.owner!==null){const owner=byId.get(crumb.owner);bites=owner?Math.min(2,Math.floor(this.age(owner)*3)):0;}
         const fall=still?1:clamp((this.time-crumb.dropAt)/.7),y=crumb.y-(1-fall)*(1-fall)*70;
-        nutrient(c,crumb.x,y,crumb.size*Math.sqrt(left),crumb.angle,still?1:Math.min(1,fall*1.6));
+        nutrient(c,crumb.x,y,crumb.size,crumb.angle,still?1:Math.min(1,fall*1.6),bites);
       }
     }
     render(dt){
@@ -122,22 +147,40 @@
       const c=this.c;c.setTransform(this.canvas.width/1000,0,0,this.canvas.height/520,0,0);c.clearRect(0,0,1000,520);c.drawImage(this.background,0,0,1000,520);
       // Freshly added food (a top-up, or the buffet's constant supply) glows briefly where it lands.
       if(!still&&this.time-this.addedAt<1.6){c.save();c.globalAlpha=.25*(1-(this.time-this.addedAt)/1.6);ellipse(c,centre.x,centre.y,pantry.x+20,pantry.y+16,'#f3cf6c');c.restore();}
+      const live=this.cells.length<=ANIMATED&&!still;
+      if(live)for(const crumb of this.crumbs)crumb.atMouth=false;
+      if(live)for(const cell of this.cells)if(cell.target&&Math.hypot(cell.target.x-cell.x,cell.target.y-cell.y)<cell.radius*2.8+this.mouthReach(cell))cell.target.atMouth=true;
       this.drawCrumbs(c,still);
-      // Faces never shrink below a readable size, however small the cells are drawn.
-      const faceScale=Math.min(1.8,Math.max(1,.55/this.size)),animate=this.cells.length<=ANIMATED&&!still;
+      // Big cartoon faces, which never shrink below a readable size however small the cells are.
+      const faceScale=Math.min(2.2,Math.max(1.5,.8/this.size)),animate=this.cells.length<=ANIMATED&&!still;
       for(const cell of this.cells){
         const age=this.age(cell),division=still?0:clamp((age-.25)/.75);
-        const nibbling=animate&&cell.target&&Math.hypot(cell.target.x-cell.x,cell.target.y-cell.y)<cell.radius*2.6;
-        const mouth=nibbling?.45+.55*Math.abs(Math.sin(this.time*7+cell.phase)):0;
+        // Chomp: when the cell's growth crosses a third, two thirds or the end, it takes a bite.
+        const bite=cell.target?Math.min(3,Math.floor(age*3+1e-9)):0;
+        if(!still&&bite>(cell.bites||0)){cell.bites=bite;cell.chompAt=this.time;}
+        const near=animate&&cell.target&&cell.target.atMouth;
+        // Before each bite the mouth opens wide; then it snaps shut and chews for a moment.
+        const sinceChomp=this.time-(cell.chompAt??-9),nextBite=((cell.bites||0)+1)/3,toNext=nextBite-age;
+        const r=this.schedule.cells[cell.id],span=Number.isFinite(r.divide)?r.divide-r.born:Infinity,minutes=toNext*span;
+        let mouth=0;
+        if(near){
+          if(sinceChomp<.45)mouth=sinceChomp<.12?.15:.25+.2*Math.abs(Math.sin(sinceChomp*22));
+          else mouth=clamp(1.15-minutes/4);
+        }
         if(!still&&(division>.015||mouth)&&this.cells.length<250){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0,faceScale,mouth},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell,faceScale),-128,-80);c.restore();}
+        if(near){
+          // The cube being eaten sits right at the mouth, in front of the cell.
+          const size=cell.target.size*Math.max(.55,Math.min(1,this.size)),reach=this.mouthReach(cell)+size*.9,mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
+          nutrient(c,mx,my,size,cell.target.angle,1,Math.min(2,Math.floor(age*3)));
+        }
       }
     }
   }
   function drawMechanism(canvas){
     const c=canvas.getContext('2d');c.clearRect(0,0,900,105);c.save();c.scale(1.5,1.5);
     const cell={x:95,y:36,radius:15,base:15,angle:-.1,colour:0,kind:'rod',phase:0};
-    window.BacteriumCharacter.draw(c,{...cell,mouth:.9},0,0,true);nutrient(c,40,34,7,.2);nutrient(c,59,36,5,-.1);
+    window.BacteriumCharacter.draw(c,{...cell,mouth:1,faceScale:1.4},0,0,true);nutrient(c,32,36,6,.2);nutrient(c,52,38,5,-.1,1,1);
     window.BacteriumCharacter.draw(c,{...cell,x:295},0,.53,true);
     for(const x of [476,527])window.BacteriumCharacter.draw(c,{...cell,x,radius:13,angle:x===476?-.12:.12},0,0,true);
     for(const x of [181,390]){c.beginPath();c.moveTo(x-10,35);c.lineTo(x+10,35);c.lineTo(x+4,30);c.moveTo(x+10,35);c.lineTo(x+4,40);c.strokeStyle='#9cab8c';c.lineWidth=1.8;c.lineCap='round';c.stroke();}c.restore();
@@ -145,7 +188,7 @@
   // The legend draws the same character, moods and paleness used in the dishes.
   function moodSwatch(canvas,mood){
     const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.save();c.translate(w/2-4,h/2);c.scale(h/33,h/33);
-    window.BacteriumCharacter.draw(c,{x:0,y:0,radius:15,base:15,angle:0,colour:0,kind:'rod',phase:0,mood,faceScale:1.25},0,0,true);c.restore();
+    window.BacteriumCharacter.draw(c,{x:0,y:0,radius:15,base:15,angle:0,colour:0,kind:'rod',phase:0,mood,faceScale:1.5},0,0,true);c.restore();
   }
   window.GrowthDish=GrowthDish;window.NutrientArt={draw:nutrient,mechanism:drawMechanism,moodSwatch};
 })();

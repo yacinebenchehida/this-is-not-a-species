@@ -30,7 +30,12 @@
     }
     oval(c,-9,3,3.2,1.4,'#f6ae9a66'); oval(c,9,3,3.2,1.4,'#f6ae9a66');
     // An open, chewing mouth while the cell nibbles a crumb.
-    if(mouth>0){oval(c,0,5,2.2+mouth*.8,.8+mouth*2.6,'#2d6870');oval(c,0,5.6+mouth*.9,1.3,.5+mouth*.9,'#e88f86');}
+    if(mouth>0){
+      // A big cartoon mouth: wide open, dark inside, pink tongue and two little teeth.
+      const w=2.4+mouth*3.6,h=.9+mouth*5.2,cy=4.6+mouth*1.6;
+      c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#244f57';c.fill();c.strokeStyle='#174b59';c.lineWidth=.9;c.stroke();
+      if(mouth>.3){c.save();c.clip();oval(c,0,cy+h*.75,w*.7,h*.5,'#ee8f8b');c.fillStyle='#fffdf3';c.fillRect(-w*.42,cy-h,w*.34,h*.42);c.fillRect(w*.08,cy-h,w*.34,h*.42);c.restore();}
+    }
     else if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
     else if(mood===1){c.beginPath();c.moveTo(-2.8,4.9);c.lineTo(2.8,4.9);c.strokeStyle='#2d6870';c.lineWidth=1.6;c.lineCap='round';c.stroke();}
     else {c.beginPath();c.moveTo(-2.3,4);c.quadraticCurveTo(0,second?6.7:6,2.3,4);c.strokeStyle='#2d6870';c.lineWidth=1.05;c.stroke();}

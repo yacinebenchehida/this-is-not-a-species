@@ -200,7 +200,7 @@
     ],
     "interactive": true,
     "entry": "play.html",
-    "version": "growth-17",
+    "version": "growth-20",
     "series": {
       "title": "Bacterial growth, in 4 steps",
       "description": "Start with a dish of bacteria. Explore how food, births and deaths change a population.",

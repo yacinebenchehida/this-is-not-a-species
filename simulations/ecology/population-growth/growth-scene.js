@@ -241,7 +241,7 @@
     const mouth=window.BacteriumCharacter.mouthShape(1),face=window.BacteriumCharacter.faceFrame(cell);
     window.BacteriumCharacter.draw(c,{...cell,mouth:1,faceScale:1.4},0,0,true);
     c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle);
-    nutrient(c,face.x+(mouth.w+2.3)*1.4+7,face.y+mouth.cy*1.4,5,-.2);c.restore();
+    nutrient(c,face.x+(mouth.w+2.3)*1.4+7,face.y+mouth.cy*1.4+4,5,-.2);c.restore();
     window.BacteriumCharacter.draw(c,{...cell,x:295},0,.53,true);
     for(const x of [476,527])window.BacteriumCharacter.draw(c,{...cell,x,radius:13,angle:x===476?-.12:.12},0,0,true);
     for(const x of [181,390]){c.beginPath();c.moveTo(x-10,35);c.lineTo(x+10,35);c.lineTo(x+4,30);c.moveTo(x+10,35);c.lineTo(x+4,40);c.strokeStyle='#9cab8c';c.lineWidth=1.8;c.lineCap='round';c.stroke();}c.restore();

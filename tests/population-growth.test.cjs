@@ -92,3 +92,19 @@ test('lunchbox moods are passed to the drawing without changing cell counts',()=
   const s=M.schedule(4,Math.LN2/30,52),scene=new context.window.GrowthDish();scene.start(s);
   for(const [t,mood] of [[10,0],[60,1],[150,2]]){scene.update(t,.6,.5,mood);assert.equal(scene.canvas.dataset.mood,String(mood));assert.equal(scene.cells.length,4+M.completed(s,t));}
 });
+
+test('crumbs: the lunchbox shows exactly its food left, and the buffet keeps its free crumbs',()=>{
+  const context={window:{DishScene:class{constructor(){this.canvas={dataset:{}};this.time=0;}}}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../simulations/ecology/population-growth/growth-scene.js'),'utf8'),context);
+  const r=Math.LN2/30;
+  for(const supply of [24,48,96]){
+    let s=M.schedule(4,r,4+supply);const box=new context.window.GrowthDish();box.start(s);
+    for(let t=0;t<=240;t+=7){
+      if(t===119){s=M.feed(s,t,24);box.replenish(s);}
+      box.update(t,.5,0,0);
+      assert.equal(box.crumbs.length,s.K-(4+box.eventIndex),'one crumb per unit of food left');
+    }
+  }
+  const buffet=new context.window.GrowthDish();buffet.start(M.schedule(4,r),{crumbs:48});
+  for(let t=0;t<=200;t+=5){buffet.update(t,.5,1,0);assert.equal(buffet.crumbs.filter(c=>c.owner===null).length,48,'free crumbs stay constant');}
+});

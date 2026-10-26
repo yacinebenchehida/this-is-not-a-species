@@ -20,7 +20,7 @@
     c.bezierCurveTo(-end-r*1.33,r,-end-r*1.33,-r,-end,-r); c.closePath();
   }
   // mood 0 happy, 1 peckish (flat mouth), 2 hungry (heavy eyelids, small open mouth). Decorative only.
-  function face(c,x,y,scale,time,phase,still,second=false,mood=0) {
+  function face(c,x,y,scale,time,phase,still,second=false,mood=0,mouth=0) {
     c.save(); c.translate(x,y); c.scale(scale,scale);
     const blink = !still && (time + phase * 3.7) % 5.2 < .13;
     for(const side of [-1,1]) {
@@ -29,7 +29,9 @@
       else {oval(c,side*5,-2,2.15,2.65,'#174b59');oval(c,side*5-.6,-2.9,.65,.75,'#fffdf0');}
     }
     oval(c,-9,3,3.2,1.4,'#f6ae9a66'); oval(c,9,3,3.2,1.4,'#f6ae9a66');
-    if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
+    // An open, chewing mouth while the cell nibbles a crumb.
+    if(mouth>0){oval(c,0,5,2.2+mouth*.8,.8+mouth*2.6,'#2d6870');oval(c,0,5.6+mouth*.9,1.3,.5+mouth*.9,'#e88f86');}
+    else if(mood===2){oval(c,0,5.2,2.1,2.5,'#2d6870');}
     else if(mood===1){c.beginPath();c.moveTo(-2.8,4.9);c.lineTo(2.8,4.9);c.strokeStyle='#2d6870';c.lineWidth=1.6;c.lineCap='round';c.stroke();}
     else {c.beginPath();c.moveTo(-2.3,4);c.quadraticCurveTo(0,second?6.7:6,2.3,4);c.strokeStyle='#2d6870';c.lineWidth=1.05;c.stroke();}
     c.restore();
@@ -62,8 +64,9 @@
     // A second face appears only as two daughter compartments form.
     const faceX=cell.kind==='round'?0:long*.24;
     const shift=growth*r*(cell.kind==='round'?1.3:1.8);
-    face(c,faceX+shift,-r*.13,1,time,cell.phase,still,false,cell.mood||0);
-    if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9,time,cell.phase+1,still,true,cell.mood||0);c.restore();}
+    const fs=cell.faceScale||1;
+    face(c,faceX+shift,-r*.13,fs,time,cell.phase,still,false,cell.mood||0,cell.mouth||0);
+    if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9*fs,time,cell.phase+1,still,true,cell.mood||0);c.restore();}
     c.restore();
   }
   window.BacteriumCharacter={draw,colours};

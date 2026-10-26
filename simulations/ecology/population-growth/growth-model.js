@@ -13,7 +13,7 @@
     validate(n0,r,K);if(n<=n0)return 0;if(r===0||n>=K)return Infinity;
     return K===Infinity?Math.log(n/n0)/r:Math.log(n*(K-n0)/(n0*(K-n)))/r;
   }
-  function schedule(n0,r,K=Infinity,limit=512){
+  function schedule(n0,r,K=Infinity,limit=1024){
     validate(n0,r,K);if(!Number.isInteger(n0)||!Number.isInteger(limit)||limit<n0)throw new RangeError('Invalid display limit.');
     const cells=Array.from({length:n0},(_,id)=>({id,born:0,divide:Infinity})),queue=cells.slice(),events=[];let head=0;
     for(let n=n0+1;n<=limit;n++){

@@ -57,7 +57,7 @@
     function update(full=false){
       const s=finite(),unlimited=M.value(scenes[0].schedule,time);
       // Cells shrink together early, so the dishes never look full: space is not limiting here.
-      const size=Math.max(.3,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,unlimited))));
+      const size=Math.max(.22,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,unlimited))));
       const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0),f=share(time);
       scenes[0].update(time,size,1,0);scenes[1].update(time,size,food,moodOf(f));
       if(!full)return;
@@ -76,11 +76,10 @@
       const split=splitAt!==null&&time-splitAt<25&&time>=splitAt;
       const done=time>=end,canExtend=end<maxEnd-1e-8,key=done?'end':time-fedAt<18?'fed':s.K===n0?'empty':time===0?'start':split?'split':f<.25?'low':count(0)>=n0*4?'many':'first';
       if(key!==storyKey){
-        $('growth-story').textContent=done?(canExtend?'La première observation s’arrête ici. Remplissez le panier-repas et continuez à regarder.':'Notre observation s’arrête ici. Au buffet, la croissance continuerait.'):key==='fed'?'Nourriture fraîche dans le panier-repas. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'Le panier-repas est vide. Remplissez-le pour que les cellules grandissent.':key==='start'?'Regardez les nutriments dorés entrer dans les cellules avant qu’elles grandissent et se divisent.':key==='split'?'Ici, les histoires se séparent : la boîte du panier-repas prend du retard car sa nourriture s’épuise.':key==='low'?'Le panier-repas est presque vide. Remplissez-le et observez ce qui se passe.':key==='many'?'Au buffet, plus de cellules signifie plus de divisions. Le panier-repas se vide.':'Au coude à coude pour l’instant : les deux boîtes ont de quoi manger.';
+        $('growth-story').textContent=done?(canExtend?'La première observation s’arrête ici. Remplissez le panier-repas et continuez à regarder.':'Notre observation s’arrête ici. Au buffet, la croissance continuerait.'):key==='fed'?'Nourriture fraîche dans le panier-repas. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'Le panier-repas est vide. Remplissez-le pour que les cellules grandissent.':key==='start'?'Chaque miette dorée peut devenir une nouvelle cellule. Regardez-les se faire manger.':key==='split'?'Ici, les histoires se séparent : la boîte du panier-repas prend du retard car sa nourriture s’épuise.':key==='low'?'Le panier-repas est presque vide. Remplissez-le et observez ce qui se passe.':key==='many'?'Au buffet, plus de cellules signifie plus de divisions. Le panier-repas se vide.':'Au coude à coude pour l’instant : les deux boîtes ont de quoi manger.';
         storyKey=key;
       }
       $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Recommencer <span aria-hidden="true">↻</span>':time>0?'Continuer <span aria-hidden="true">▶</span>':'Les voir grandir <span aria-hidden="true">▶</span>';
-      $('growth-step').disabled=running||stepTo!==null||done;
       $('growth-feed').disabled=done&&!canExtend||s.K-n0>=192;
       $('growth-feed-label').textContent=done&&canExtend?'Remplir et continuer':'Remplir le panier-repas';
       $('growth-feed').classList.toggle('is-useful',!done&&food<.35);
@@ -89,13 +88,12 @@
       chart();
     }
     function reset(){
-      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);const supply=Number($('growth-food').value);end=Math.min(240,M.crossing(256,n0,r));maxEnd=Math.min(480,M.crossing(512,n0,r));
-      time=0;running=false;stepTo=null;storyKey='';fedAt=-100;splitAt=null;lastDoublings=0;scenes[0].start(M.schedule(n0,r));scenes[1].start(M.schedule(n0,r,n0+supply));
+      n0=Number($('growth-start').value);r=Math.LN2/Number($('growth-division').value);const supply=Number($('growth-food').value);end=Math.min(240,M.crossing(512,n0,r));maxEnd=Math.min(480,M.crossing(1024,n0,r));
+      time=0;running=false;stepTo=null;storyKey='';fedAt=-100;splitAt=null;lastDoublings=0;scenes[0].start(M.schedule(n0,r),{crumbs:Math.max(24,supply)});scenes[1].start(M.schedule(n0,r,n0+supply));
       const levels={0:'Aucune',24:'Petite',48:'Moyenne',72:'Grande',96:'Abondante'};
       $('food-capacity-label').textContent=levels[supply];$('growth-food').setAttribute('aria-valuetext',levels[supply]);update(true);
     }
     $('growth-play').addEventListener('click',()=>{if(running||stepTo!==null){running=false;stepTo=null;}else{if(time>=end)reset();running=true;}update(true);});
-    $('growth-step').addEventListener('click',()=>{if(!running&&stepTo===null&&time<end){stepTo=Math.min(end,time+10);update(true);}});
     $('growth-reset').addEventListener('click',reset);
     $('growth-feed').addEventListener('click',()=>{if(time>=end&&end>=maxEnd-1e-8||finite().K-n0>=192)return;const resume=time>=end;scenes[1].replenish(M.feed(finite(),time,Math.min(Number($('growth-food').value)||24,192-(finite().K-n0))));fedAt=time;storyKey='';end=Math.min(maxEnd,Math.max(end,time+Math.LN2/r));if(resume){running=true;stepTo=null;}update(true);});
     $('growth-chart-focus').addEventListener('click',()=>{focused=!focused;chart();});
@@ -112,6 +110,6 @@
       }
       requestAnimationFrame(frame);
     }
-    reset();window.NutrientArt.mechanism($('growth-mechanism'));$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
+    reset();window.NutrientArt.mechanism($('growth-mechanism'));document.querySelectorAll('canvas.mood-face').forEach(el=>window.NutrientArt.moodSwatch(el,Number(el.dataset.mood)));$('growth-app').hidden=false;$('growth-loading').hidden=true;requestAnimationFrame(frame);
   }catch(error){$('growth-loading').textContent='Impossible d’ouvrir les boîtes. Veuillez recharger la page.';console.error('Croissance des populations:',error);}
 })();

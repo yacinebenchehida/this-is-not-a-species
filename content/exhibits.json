@@ -193,10 +193,14 @@
     "description": "Compare rapid population growth with the slowdown caused by limited resources.",
     "detail": "A bacterial population expands across a dish. Compare exponential and logistic growth, and explore how a carrying capacity limits continued expansion.",
     "controls": [
-      "Growth rate",
-      "Carrying capacity",
-      "Starting population"
-    ]
+      "Starting bacteria",
+      "Division time",
+      "Food supply",
+      "Playback speed"
+    ],
+    "interactive": true,
+    "entry": "play.html",
+    "version": "growth-1"
   },
   {
     "theme": "ecology",

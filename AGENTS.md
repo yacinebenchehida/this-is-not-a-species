@@ -61,7 +61,7 @@ This is a personal, playful, non-research science animation website. Prioritise 
 - `content/exhibits.json` is the single catalogue of titles, concepts, descriptions, intended controls, artwork and theme membership. The page generator reads it to create cards and canonical exhibit pages.
 - An exhibit has one primary `theme` and folder, and can appear in additional `themes` without duplicating its page or future implementation. Preserve existing exhibit URLs.
 - The catalogue at `simulations/index.html` lists each exhibit once, grouped by its primary theme. The homepage features three selected exhibits.
-- Implemented animations own their model, interface, styles and assumptions inside their canonical folder. The Duck Pond is interactive; the other 19 animations remain previews. Do not turn preview control labels into inactive form controls.
+- Implemented animations own their model, interface, styles and assumptions inside their canonical folder. The Duck Pond and Petri Dish are interactive; the other 18 animations remain previews. Do not turn preview control labels into inactive form controls.
 
 ## Repository maintenance
 - GitHub Pages publishes the committed static files from `main`; preserve the existing project URL and deployment settings.

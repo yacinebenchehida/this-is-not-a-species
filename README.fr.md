@@ -24,7 +24,7 @@ Découvrez cinq thèmes et vingt idées d’animations :
 - [Génomique](https://yacinebenchehida.github.io/this-is-not-a-species/fr/simulations/genomics/)
 - [Bioinformatique](https://yacinebenchehida.github.io/this-is-not-a-species/fr/simulations/bioinformatics/)
 
-La mare aux canards est utilisable ; les autres pages sont des aperçus indiqués **Bientôt disponible**. Le site existe en anglais et en français : les liens **EN / FR** ouvrent la page équivalente dans l’autre langue, y compris ses réglages et ses explications.
+La mare aux canards et [la boîte de Petri](https://yacinebenchehida.github.io/this-is-not-a-species/fr/simulations/ecology/population-growth/play.html) sont utilisables. Dans la boîte de Petri, comparez la croissance avec une nourriture renouvelée ou limitée, et modifiez l’effectif de départ, le temps de division et la réserve de nourriture. Les autres pages sont des aperçus indiqués **Bientôt disponible**. Le site existe en anglais et en français : les liens **EN / FR** ouvrent la page équivalente dans l’autre langue, y compris ses réglages et ses explications.
 
 ## À propos
 

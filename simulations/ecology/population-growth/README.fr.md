@@ -1,9 +1,13 @@
 # La boîte de Petri
 
-[English](README.md) · [Rencontrer les bactéries](motion.html)
+[English](README.md) · [Explorer l’animation en français](../../../fr/simulations/ecology/population-growth/play.html) · [Voir la division cellulaire de près](../../../fr/simulations/ecology/population-growth/motion.html)
 
-Cet aperçu montre huit cellules illustrées qui s’allongent, se resserrent au milieu et se divisent pour donner seize cellules filles. Lancez le récit, faites une pause, changez le rythme ou recommencez. La comparaison entre croissance exponentielle et croissance limitée par les ressources sera **bientôt disponible**.
+Deux petites populations prennent des chemins différents. Dans une boîte, la nourriture est renouvelée ; dans l’autre, la réserve est limitée. Les cellules grandissent et se divisent, les particules nutritives dorées disparaissent de la boîte limitée et un graphique suit les effectifs au fil du temps.
 
-Les personnages reprennent l’illustration de la boîte de Petri : des formes arrondies, des contours turquoise, de petits yeux et des teintes corail, jaunes et turquoise légèrement ombrées. Les formes et les couleurs sont décoratives : elles ne représentent ni des espèces différentes, ni des taux de croissance différents. Les petits mouvements évoquent un milieu liquide schématique. Si la réduction des animations est activée, les cellules restent immobiles et chaque division achevée est simplement représentée par le remplacement d’une cellule par ses deux filles.
+Modifiez le nombre de bactéries au départ, le temps de division et la réserve de nourriture, ou ajustez la vitesse de lecture. « Un peu plus tard » avance de dix minutes du modèle ; le bouton de remise à zéro réinitialise les deux boîtes. Modifier les paramètres de croissance relance l’expérience. Les équations et les hypothèses figurent dans « Pour en savoir plus sur ces boîtes ».
 
-Cette courte séquence est une étude visuelle, pas un modèle de croissance exponentielle ou logistique. Chacune des huit cellules de départ se divise une fois, selon un calendrier fixé. Chaque personnage représente une cellule ; le compteur augmente d’une unité uniquement lorsqu’une division s’achève. La position des cellules et le rythme de lecture ne modifient pas la séquence. La mortalité, les tirages génétiques et les ressources ne sont pas modélisés.
+Chaque personnage représente une cellule entière. Les deux boîtes utilisent la même échelle de dessin, qui diminue à mesure que les effectifs augmentent pour garder toutes les cellules visibles. Les couleurs et les formes sont décoratives, sans avantage particulier. À grande vitesse, certaines divisions ont lieu entre deux images, mais elles sont toutes comptées et toutes les cellules obtenues sont représentées. La réduction des animations désactive les déplacements et les étirements, sans modifier les populations.
+
+Les courbes suivent une règle déterministe de croissance exponentielle ou logistique. La position des cellules n’influence ni les divisions ni les ressources. Il s’agit d’une illustration pédagogique simplifiée, pas d’une culture de laboratoire complète ou d’une espèce bactérienne particulière. L’observation s’arrête après quatre heures du modèle ou lorsque la population illimitée atteint 512 cellules ; la croissance exponentielle continuerait au-delà.
+
+Les détails scientifiques et techniques sont documentés en anglais dans [MODEL.md](MODEL.md). L’étude visuelle séparée montre chacune des huit cellules initiales se diviser une fois.

@@ -12,7 +12,7 @@ from urllib.parse import urlsplit,urlunsplit
 from locale_source import js_parts
 ROOT=Path(__file__).resolve().parents[1]
 PRESENTATION_DIRS=('simulations/population-genetics/genetic-drift', 'simulations/ecology/population-growth')
-SHARED_JS=('model.js','family-model.js','duck-character.js','duck-mesh.js','division-model.js','bacterium-character.js')
+SHARED_JS=('model.js','family-model.js','duck-character.js','duck-mesh.js','division-model.js','growth-model.js','bacterium-character.js')
 D=json.loads((ROOT/'content/locales/fr.json').read_text())
 # Terms used in the former English copy remain aliases for catalogue maintenance.
 ALIASES={k.replace('illustrations','animations').replace('Illustrations','Animations').replace('illustration','animation'):v for k,v in D.items()}

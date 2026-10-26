@@ -87,8 +87,8 @@ motion_fragment=motion_folder/'motion-fragment.html'
 if motion_fragment.exists():
  (motion_folder/'motion.html').write_text(page('A little duck story',motion_fragment.read_text(),'../../../','Animations'))
 dish_folder=ROOT/'simulations/ecology/population-growth'
-if (dish_folder/'illustration.html').exists():
- (dish_folder/'motion.html').write_text(page('Meet the bacteria',(dish_folder/'illustration.html').read_text(),'../../../','Animations'))
+if (dish_folder/'motion-fragment.html').exists():
+ (dish_folder/'motion.html').write_text(page('Meet the bacteria',(dish_folder/'motion-fragment.html').read_text(),'../../../','Animations'))
 print(f'Generated {len(EXHIBITS) + len(THEMES) + 3 + int(motion_fragment.exists())} static pages')
 
 from build_locales import build

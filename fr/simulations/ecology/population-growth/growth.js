@@ -62,6 +62,8 @@
       const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0),f=share(time);
       scenes[0].update(time,fit(unlimited),1,0);scenes[1].update(time,fit(limited),food,moodOf(f));
       scenes[0].finished=time>=end;
+      // The scenes time the swallow from the playback speed (model minutes per second).
+      for(const scene of scenes)scene.minutesPerSecond=Number($('growth-speed').value);
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
       $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);

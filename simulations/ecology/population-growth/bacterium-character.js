@@ -20,6 +20,9 @@
     c.bezierCurveTo(-end-r*1.33,r,-end-r*1.33,-r,-end,-r); c.closePath();
   }
   // mood 0 happy, 1 peckish (flat mouth), 2 hungry (heavy eyelids, small open mouth). Decorative only.
+  // Mouth size and position in face units; it grows downward so it never covers the eyes.
+  // Values above 1 stretch it wide enough to wrap around a sugar cube.
+  function mouthShape(m){return {w:2.6+m*6.2,h:.9+m*5.8,cy:3.1+m*5.2};}
   function face(c,x,y,scale,time,phase,still,second=false,mood=0,mouth=0) {
     c.save(); c.translate(x,y); c.scale(scale,scale);
     const blink = !still && (time + phase * 3.7) % 5.2 < .13;
@@ -32,7 +35,7 @@
     // An open, chewing mouth while the cell nibbles a crumb.
     if(mouth>0){
       // A huge cartoon mouth with shark-like rows of pointed teeth and a pink tongue.
-      const w=2.6+mouth*6.4,h=.9+mouth*7.6,cy=3.2+mouth*1.4;
+      const {w,h,cy}=mouthShape(mouth);
       c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.fillStyle='#1f444b';c.fill();c.strokeStyle='#174b59';c.lineWidth=1.1;c.stroke();
       if(mouth>.2){
         c.save();c.beginPath();c.ellipse(0,cy,w,h,0,0,Math.PI*2);c.clip();oval(c,0,cy+h*.85,w*.65,h*.4,'#ee8f8b');
@@ -81,5 +84,5 @@
     if(division>.68){c.save();c.globalAlpha=Math.min(1,(division-.68)/.2);face(c,faceX-shift,-r*.12,.9*fs,time,cell.phase+1,still,true,cell.mood||0);c.restore();}
     c.restore();
   }
-  window.BacteriumCharacter={draw,colours};
+  window.BacteriumCharacter={draw,colours,mouthShape};
 })();

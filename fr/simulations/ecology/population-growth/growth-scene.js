@@ -13,6 +13,9 @@
   const lerp=(a,b,t)=>a+(b-a)*t;
   // Seconds the swallow takes on screen.
   const GULP_TIME=.45;
+  // Engulfing, in seconds: lunge with the mouth stretching open around the cube, snap shut, chew.
+  const ENGULF={open:.38,snap:.5,end:1.25,mouth:1.35};
+  const GULP_WORD=typeof document!=='undefined'&&document.documentElement&&String(document.documentElement.lang).startsWith('fr')?'Gloups !':'Gulp!';
   // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
   // grains. bites (0–3) removes rounded chunks, like a cartoon bite mark.
   const BITES=[[.9,-.55],[-.9,-.35],[.1,.95]];
@@ -104,17 +107,33 @@
       const faceX=cell.kind==='round'?0:long*.24,shift=growth*r*(cell.kind==='round'?1.3:1.8);
       return (faceX+shift+(cell.kind==='round'?r*.55:r*.35))*this.size;
     }
+    // Distance from the cell's centre to its front tip, in dish units.
+    frontReach(cell){
+      const r=cell.base,long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
+      const division=clamp((this.age(cell)-.25)/.75),growth=division<.65?division/.65:1;
+      return (long*(1+growth*.9)/2+2)*this.size;
+    }
+    // The mouth's centre and radii in dish units, for a given mouth opening m.
+    mouthGeom(cell,m,faceScale){
+      const r=cell.base,long=cell.kind==='round'?r*2.15:cell.kind==='bean'?r*3.25:r*3.65;
+      const division=clamp((this.age(cell)-.25)/.75),growth=division<.65?division/.65:1;
+      const faceX=cell.kind==='round'?0:long*.24,shift=growth*r*(cell.kind==='round'?1.3:1.8);
+      const {w,h,cy}=window.BacteriumCharacter.mouthShape(m),lx=(faceX+shift)*this.size,ly=(-r*.13+cy*faceScale)*this.size;
+      const ca=Math.cos(cell.angle),sa=Math.sin(cell.angle);
+      return {x:cell.x+lx*ca-ly*sa,y:cell.y+lx*sa+ly*ca,w:w*faceScale*this.size,h:h*faceScale*this.size,angle:cell.angle,ox:lx*ca-ly*sa,oy:lx*sa+ly*ca};
+    }
     age(cell){const r=this.schedule.cells[cell.id],base=cell.visualStartAge||0,start=cell.visualStartTime??r.born;return Number.isFinite(r.divide)?base+(1-base)*clamp((this.simTime-start)/(r.divide-start)):base;}
     // Cosmetic movement: gentle wandering, spacing on a grid, and swimming to a claimed crumb.
     move(dt){
       const animate=this.cells.length<=ANIMATED;
       for(const cell of this.cells){
+        if(cell.gulpAt!==undefined&&this.time-cell.gulpAt<ENGULF.end){this.keepInside(cell);continue;}
         const crumb=animate&&cell.target;
         if(crumb){
           // Face the crumb and park the mouth on it. Mouths sit towards the cell's front end.
-          const reach=this.mouthReach(cell),want=Math.atan2(crumb.y-cell.y,crumb.x-cell.x);
+          const want=Math.atan2(crumb.y-cell.y,crumb.x-cell.x);
           let turn=want-cell.angle;turn=Math.atan2(Math.sin(turn),Math.cos(turn));cell.angle+=turn*Math.min(1,dt*3);
-          const gap=crumb.size*1.1,tx=crumb.x-Math.cos(cell.angle)*(reach+gap),ty=crumb.y-Math.sin(cell.angle)*(reach+gap),pull=Math.min(1,dt*1.2);
+          const stop=this.frontReach(cell)+crumb.size*2.3,tx=crumb.x-Math.cos(cell.angle)*stop,ty=crumb.y-Math.sin(cell.angle)*stop,pull=Math.min(1,dt*1.2);
           cell.x+=(tx-cell.x)*pull;cell.y+=(ty-cell.y)*pull;cell.heading=cell.angle;
         }else{
           cell.heading+=Math.sin(this.time*.49+cell.phase)*dt*.6;
@@ -153,7 +172,7 @@
       if(fade<=0)return;
       for(const crumb of this.crumbs){
         // Cubes stay whole until a cell swallows one just before dividing.
-        if(crumb.gulped)continue;
+        if(crumb.gulped||crumb.atMouth)continue;
         const fall=still?1:clamp((this.time-crumb.dropAt)/.7),y=crumb.y-(1-fall)*(1-fall)*70;
         nutrient(c,crumb.x,y,crumb.size,crumb.angle,(still?1:Math.min(1,fall*1.6))*fade);
       }
@@ -166,7 +185,7 @@
       const live=this.cells.length<=ANIMATED&&!still;
       // A cell is 'at' its cube when its mouth has reached the floating cube.
       if(live)for(const crumb of this.crumbs)crumb.atMouth=false;
-      if(live)for(const cell of this.cells)if(cell.target){const reach=this.mouthReach(cell),mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;if(Math.hypot(cell.target.x-mx,cell.target.y-my)<cell.target.size*1.8+6)cell.target.atMouth=true;}
+      if(live)for(const cell of this.cells)if(cell.target&&!cell.target.gulped){const f=this.frontReach(cell),fx=cell.x+Math.cos(cell.angle)*f,fy=cell.y+Math.sin(cell.angle)*f;const d=Math.hypot(cell.target.x-cell.x,cell.target.y-cell.y);if(Math.hypot(cell.target.x-fx,cell.target.y-fy)<cell.target.size*3.2+6&&d>f)cell.target.atMouth=true;}
       this.drawCrumbs(c,still);
       // Big cartoon faces, which never shrink below a readable size however small the cells are.
       const faceScale=Math.min(2.2,Math.max(1.5,.8/this.size)),animate=this.cells.length<=ANIMATED&&!still;
@@ -177,23 +196,50 @@
         // is swallowed at once and the mouth snaps shut. One cube becomes one new cell.
         // It swallows the cube once it is next to it and ready; a cell that never got there eats it
         // at the last moment, so the count of food stays exact.
-        if(!still&&cell.target&&!cell.target.gulped&&(age>=GULP&&cell.target.atMouth||age>=.985)){
+        // Time left before this cell divides, in seconds of playback, so the swallow can finish first.
+        const rec=this.schedule.cells[cell.id],left=Number.isFinite(rec.divide)?(rec.divide-this.simTime)/Math.max(.1,this.minutesPerSecond||4):Infinity;
+        if(!still&&cell.target&&!cell.target.gulped&&(cell.target.atMouth&&left<=ENGULF.snap+.15||left<=.08)){
           const t=cell.target,size=t.size*Math.max(.6,Math.min(1,this.size));
-          const from={x:t.x,y:t.y};
-          t.gulped=true;cell.gulpAt=this.time;cell.gulpFrom=from;cell.gulpSize=size;
+          t.gulped=true;cell.gulpAt=this.time;cell.gulpFrom={x:t.x,y:t.y};cell.gulpSize=size;cell.gulpAngle=t.angle;
+          cell.engulf=t.atMouth;
+          if(cell.engulf){
+            // Lunge so the fully opened mouth is centred on the cube.
+            const g=this.mouthGeom(cell,ENGULF.mouth,faceScale);
+            cell.lungeFrom={x:cell.x,y:cell.y};cell.lungeTo={x:t.x-g.ox,y:t.y-g.oy};
+          }
         }
         const sinceGulp=cell.gulpAt===undefined?Infinity:this.time-cell.gulpAt;
         let mouth=0;
-        if(sinceGulp<GULP_TIME)mouth=1;
-        else if(sinceGulp<GULP_TIME+.45)mouth=sinceGulp<GULP_TIME+.1?.1:.18+.12*Math.abs(Math.sin(sinceGulp*24));
-        else if(near)mouth=clamp((age-.55)/(GULP-.55));
+        if(cell.engulf&&sinceGulp<ENGULF.end){
+          // Open wide while lunging onto the cube, snap shut over it, then chew happily.
+          if(sinceGulp<ENGULF.open){const k=smoothstep(sinceGulp/ENGULF.open);mouth=ENGULF.mouth*k;cell.x=lerp(cell.lungeFrom.x,cell.lungeTo.x,k);cell.y=lerp(cell.lungeFrom.y,cell.lungeTo.y,k);}
+          else if(sinceGulp<ENGULF.snap)mouth=ENGULF.mouth*(1-(sinceGulp-ENGULF.open)/(ENGULF.snap-ENGULF.open))+.02;
+          else mouth=.14+.12*Math.abs(Math.sin(sinceGulp*20));
+        }
+        else if(!cell.engulf&&sinceGulp<GULP_TIME)mouth=1;
+        else if(!cell.engulf&&sinceGulp<GULP_TIME+.45)mouth=.18+.12*Math.abs(Math.sin(sinceGulp*24));
+        else if(near)mouth=.12+.25*clamp(1-(left-ENGULF.snap)/1.5);
         if(!still&&(division>.015||mouth)&&this.cells.length<250){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0,faceScale,mouth},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell,faceScale),-128,-80);c.restore();}
-        // The whole cube flies into the wide-open mouth and shrinks to nothing: once eaten, it is gone.
-        if(!still&&sinceGulp<GULP_TIME&&cell.gulpFrom){
-          const k=smoothstep(sinceGulp/GULP_TIME),reach=this.mouthReach(cell);
-          const mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
-          nutrient(c,lerp(cell.gulpFrom.x,mx,k),lerp(cell.gulpFrom.y,my,k),cell.gulpSize*(1-k),(cell.target?cell.target.angle:0)+k*2,1);
+        if(near&&!cell.target.gulped)nutrient(c,cell.target.x,cell.target.y,cell.target.size,cell.target.angle,1);
+        if(!still&&cell.gulpFrom&&cell.engulf&&sinceGulp<ENGULF.snap){
+          // The cube sits inside the wide mouth; as the jaws snap shut it vanishes with them.
+          const g=this.mouthGeom(cell,mouth,faceScale);
+          c.save();
+          if(sinceGulp>=ENGULF.open){c.beginPath();c.ellipse(g.x,g.y,g.w*.82,g.h*.82,g.angle,0,Math.PI*2);c.clip();}
+          nutrient(c,cell.gulpFrom.x,cell.gulpFrom.y,cell.gulpSize,cell.gulpAngle,1);
+          c.restore();
+        }
+        else if(!still&&cell.gulpFrom&&!cell.engulf&&sinceGulp<GULP_TIME){
+          // A cell that never reached its cube: the cube flies into its mouth instead.
+          const k=smoothstep(sinceGulp/GULP_TIME),g=this.mouthGeom(cell,1,faceScale);
+          nutrient(c,lerp(cell.gulpFrom.x,g.x,k),lerp(cell.gulpFrom.y,g.y,k),cell.gulpSize*(1-k),cell.gulpAngle+k*2,1);
+        }
+        // A little comic "Gulp!" pops up after the jaws close.
+        if(!still&&cell.engulf&&sinceGulp>ENGULF.snap&&sinceGulp<ENGULF.end&&this.cells.length<=40){
+          const k=(sinceGulp-ENGULF.snap)/(ENGULF.end-ENGULF.snap),pop=Math.min(1,k*6),y=cell.y-cell.radius*1.6-14*k;
+          c.save();c.globalAlpha=1-k*k;c.translate(cell.x,y);c.scale(.7+.3*pop,.7+.3*pop);
+          c.font='700 17px Georgia,serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=4;c.strokeStyle='#fffaf0';c.strokeText(GULP_WORD,0,0);c.fillStyle='#d8734b';c.fillText(GULP_WORD,0,0);c.restore();
         }
       }
     }

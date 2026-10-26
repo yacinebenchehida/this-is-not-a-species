@@ -55,11 +55,12 @@
       $('chart-view-note').textContent=logScale?(fr?'Sur cette échelle, un doublement régulier devient une ligne droite.':'On this scale, steady doubling becomes a straight line.'):focused?'A closer view of the limited population.':'Both populations on the same scale.';
     }
     function update(full=false){
-      const s=finite(),unlimited=M.value(scenes[0].schedule,time);
-      // Cells shrink together early, so the dishes never look full: space is not limiting here.
-      const size=Math.max(.22,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,unlimited))));
+      const s=finite(),unlimited=M.value(scenes[0].schedule,time),limited=M.value(s,time);
+      // Each dish shrinks its drawings to fit its own population, from 10 cells on, so the dishes
+      // never look full (space is not limiting here) and the smaller lunchbox crowd stays readable.
+      const fit=n=>Math.max(.22,Math.min(1.3,1.3*Math.sqrt(10/Math.max(10,n))));
       const food=s.K===n0?0:M.nutrients(s,time)/(s.K-n0),f=share(time);
-      scenes[0].update(time,size,1,0);scenes[1].update(time,size,food,moodOf(f));
+      scenes[0].update(time,fit(unlimited),1,0);scenes[1].update(time,fit(limited),food,moodOf(f));
       if(!full)return;
       $('growth-time').textContent=fmt.format(time);$('unlimited-count').textContent=fmt.format(count(0));$('limited-count').textContent=fmt.format(count(1));
       $('limited-food-bar').style.width=food*100+'%';$('limited-food-label').textContent=percentage.format(food);

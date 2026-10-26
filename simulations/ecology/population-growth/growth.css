@@ -12,6 +12,7 @@
 @media(max-width:760px){.growth-intro{flex-wrap:wrap;gap:12px}.mechanism-mini{width:100%;max-width:none;border:0;padding:0 10px 8px}.nutrient-legend{order:3;width:100%;justify-content:center}.lab-toolbar{flex-wrap:wrap}.dish-title h2{font-size:22px}.chart-tools{flex-wrap:wrap}.feed-action{flex-wrap:nowrap}.mechanism-labels{font-size:11px}.supply-note{min-height:33px}}
 .feed-action{flex-wrap:wrap;gap:5px 12px}.feed-action button>span:last-child{font-size:18px;line-height:14px}.feed-action #growth-feed-label{font:600 12px/1.3 system-ui,sans-serif}.feed-action>span{line-height:1.4;max-width:260px}
 .doubling-line{margin:4px 0 0;text-align:center;font:600 13px/1.4 system-ui,sans-serif;color:#246c75;min-height:1.4em;font-variant-numeric:tabular-nums}.doubling-line.pop{animation:doubling-pop .6s ease-out}@keyframes doubling-pop{0%{transform:scale(1.12);color:#d8734b}100%{transform:scale(1)}}@media (prefers-reduced-motion:reduce){.doubling-line.pop{animation:none}}
-.mood-key canvas.mood-face{width:42px!important;height:20px!important;max-width:42px;flex-shrink:0}
+.mood-key canvas.mood-face{width:42px!important;height:20px!important;max-width:42px;flex-shrink:0;margin:0 0 0 6px!important;aspect-ratio:auto!important;display:inline-block!important;vertical-align:middle}
+.mood-key{margin-bottom:8px!important}
 .mood-key{margin:4px 0 0;text-align:center;font:12px/1.5 system-ui,sans-serif;color:#5c6a5f;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 6px}.mood-face{width:42px;height:20px;flex-shrink:0}
 

@@ -144,7 +144,7 @@
   }
   // The legend draws the same character, moods and paleness used in the dishes.
   function moodSwatch(canvas,mood){
-    const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.save();c.translate(w/2,h/2);c.scale(h/56,h/56);
+    const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.save();c.translate(w/2-4,h/2);c.scale(h/33,h/33);
     window.BacteriumCharacter.draw(c,{x:0,y:0,radius:15,base:15,angle:0,colour:0,kind:'rod',phase:0,mood,faceScale:1.25},0,0,true);c.restore();
   }
   window.GrowthDish=GrowthDish;window.NutrientArt={draw:nutrient,mechanism:drawMechanism,moodSwatch};

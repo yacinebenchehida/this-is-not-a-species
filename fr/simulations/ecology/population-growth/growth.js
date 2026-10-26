@@ -83,7 +83,9 @@
         $('growth-story').textContent=done?(canExtend?'La première observation s’arrête ici. Remplissez le panier-repas et continuez à regarder.':'Notre observation s’arrête ici. Au buffet, la croissance continuerait.'):key==='fed'?'Nourriture fraîche dans le panier-repas. Les mêmes cellules peuvent de nouveau grandir plus vite.':key==='empty'?'Le panier-repas est vide. Remplissez-le pour que les cellules grandissent.':key==='start'?'Chaque morceau de sucre peut devenir une nouvelle cellule. Regardez les cellules les avaler.':key==='split'?'Ici, les histoires se séparent : la boîte du panier-repas prend du retard car sa nourriture s’épuise.':key==='low'?'Le panier-repas est presque vide. Remplissez-le et observez ce qui se passe.':key==='many'?'Au buffet, plus de cellules signifie plus de divisions. Le panier-repas se vide.':'Au coude à coude pour l’instant : les deux boîtes ont de quoi manger.';
         storyKey=key;
       }
-      $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Recommencer <span aria-hidden="true">↻</span>':time>0?'Continuer <span aria-hidden="true">▶</span>':'Les voir grandir <span aria-hidden="true">▶</span>';
+      const playHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Recommencer <span aria-hidden="true">↻</span>':time>0?'Continuer <span aria-hidden="true">▶</span>':'Les voir grandir <span aria-hidden="true">▶</span>';
+      // Keep the label/icon nodes stable between state changes, including during a pointer press.
+      if($('growth-play').innerHTML!==playHTML)$('growth-play').innerHTML=playHTML;
       $('growth-feed').disabled=done&&!canExtend||s.K-n0>=192;
       $('growth-feed-label').textContent=done&&canExtend?'Remplir et continuer':'Remplir le panier-repas';
       $('growth-feed').classList.toggle('is-useful',!done&&food<.35);

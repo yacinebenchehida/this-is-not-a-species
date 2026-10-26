@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" role="img" aria-label="A static example of birth and death rates crossing at carrying capacity."><style>text{font-family:Georgia,serif;fill:#355d59;font-size:16px}.small{font-family:system-ui,sans-serif;font-size:13px}.axis{fill:none;stroke:#819581;stroke-width:1.5}.curve{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}</style>
+<rect x="90" y="48" width="830" height="210" rx="12" fill="#fffdf5"/>
+<path d="M110 65 L630 193 L110 193 Z" fill="#8cc9ba" opacity=".22"/><path d="M630 193 L890 257 L890 193 Z" fill="#eab7a2" opacity=".25"/>
+<path class="axis" d="M90 48 V258 H925"/>
+<path class="curve" d="M110 65 L890 257" stroke="#337f7b"/>
+<path class="curve" d="M110 193 H890" stroke="#c2785f" stroke-dasharray="9 6"/>
+<path d="M630 193 V258" stroke="#8d9c71" stroke-width="2" stroke-dasharray="3 5"/><circle cx="630" cy="193" r="7" fill="#f4ce71" stroke="#5c7f6e" stroke-width="2"/>
+<path d="M120 23 H153" stroke="#337f7b" stroke-width="4"/><text x="165" y="28">Divisions per bacterium</text>
+<path d="M560 23 H593" stroke="#c2785f" stroke-width="4" stroke-dasharray="8 5"/><text x="605" y="28">Deaths per bacterium</text>
+<text x="630" y="285" text-anchor="middle">K · births = deaths</text><text x="515" y="324" text-anchor="middle">Population size</text>
+<text class="small" transform="translate(28 157) rotate(-90)" text-anchor="middle">Events per bacterium, per hour</text>
+</svg>

@@ -42,7 +42,7 @@ def feature(ex, p='', catalogue=False, homepage=False):
  if homepage:
   ex = {**ex, **HOMEPAGE_PREVIEWS[ex['slug']]}
  concept = '' if homepage else f'<span class="concept-label">{escape(ex["concept"])}</span>'
- status = 'Explore animation' if ex.get('interactive') else 'Coming soon'
+ status = 'Explore animation' if ex.get('interactive') else 'Read the chapter · animation in development' if ex.get('development') else 'Coming soon'
  class_name = 'exhibit-card' if catalogue else 'feature'
  return f'''<a class="{class_name}" href="{exhibit_url(ex,p)}">{art(ex['art'],p,width=600,height=400,loading='lazy')}<div class="feature-copy">{concept}<h3>{escape(ex['title'])}</h3><p>{escape(ex['description'])}</p><span class="status">{status} <span aria-hidden="true">→</span></span></div></a>'''
 def theme_card(t,p=''):
@@ -50,7 +50,7 @@ def theme_card(t,p=''):
  return f'<a class="theme-card" href="{p}simulations/{slug}/">{art(slug,p,width=280,height=148,loading="lazy")}<h3>{title}<span aria-hidden="true">›</span></h3></a>'
 def section_heading(title,caption):
  return f'<div class="section-heading"><h2>{title}</h2><span class="rule" aria-hidden="true"></span><p>{caption}</p></div>'
-home=f'''<section class="hero" aria-labelledby="hero-title"><div class="hero-inner"><div class="hero-copy"><h1 id="hero-title">Interactive animations for evolution,<br class="desktop-break"> genomics, ecology and bioinformatics.</h1><div class="actions"><a class="btn primary" href="simulations/">Explore animations <span aria-hidden="true">→</span></a><a class="btn outline" href="about/">About the project</a></div></div></div></section><div class="content"><section id="themes" class="gallery-section">{section_heading('Explore the themes',"Different lenses on life's complexity.")}<div class="theme-grid">{''.join(theme_card(t) for t in THEMES)}</div></section><section id="simulations" class="gallery-section">{section_heading('Featured animations','Play, explore, and see ideas come to life.')}<div class="featured-grid">{''.join(feature(next(ex for ex in EXHIBITS if ex['slug']==slug),homepage=True) for slug in FEATURED_SLUGS)}</div><div class="browse-all"><a class="text-link" href="simulations/">Browse all 20 animations <span aria-hidden="true">→</span></a></div></section></div>'''
+home=f'''<section class="hero" aria-labelledby="hero-title"><div class="hero-inner"><div class="hero-copy"><h1 id="hero-title">Interactive animations for evolution,<br class="desktop-break"> genomics, ecology and bioinformatics.</h1><div class="actions"><a class="btn primary" href="simulations/">Explore animations <span aria-hidden="true">→</span></a><a class="btn outline" href="about/">About the project</a></div></div></div></section><div class="content"><section id="themes" class="gallery-section">{section_heading('Explore the themes',"Different lenses on life's complexity.")}<div class="theme-grid">{''.join(theme_card(t) for t in THEMES)}</div></section><section id="simulations" class="gallery-section">{section_heading('Featured animations','Play, explore, and see ideas come to life.')}<div class="featured-grid">{''.join(feature(next(ex for ex in EXHIBITS if ex['slug']==slug),homepage=True) for slug in FEATURED_SLUGS)}</div><div class="browse-all"><a class="text-link" href="simulations/">Browse all animations <span aria-hidden="true">→</span></a></div></section></div>'''
 (ROOT/'index.html').write_text(page('An interactive science playground',home,active='Home'))
 for slug,title,desc in THEMES:
  p='../../'
@@ -60,7 +60,7 @@ for slug,title,desc in THEMES:
  (ROOT/'simulations'/slug/'index.html').write_text(page(title,body,p,'Themes'))
 for ex in EXHIBITS:
  p='../../../';theme=ex['theme'];theme_title=THEME_NAMES[theme]
- if ex.get('interactive'):
+ if ex.get('interactive') or ex.get('development'):
   folder=ROOT/'simulations'/theme/ex['slug']
   body=(folder/'illustration.html').read_text()
   html=page(ex['title'],body,p,'Animations')

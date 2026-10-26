@@ -20,7 +20,7 @@
     else{const k=(t-.75)/.25,bump=Math.sin(Math.min(1,k*2)*Math.PI)**2*(1-k);travel=1;mouth=k<.6?.12+.16*bump:0;stretchX=1+.07*bump;stretchY=1-.06*bump;satisfied=smoothstep(k/.65);}
     return {mouth,travel,stretchX,stretchY,satisfied,visible:t<.75,closed:t>=.75,done:elapsed>=duration};
   }
-  const GULP_WORD=typeof document!=='undefined'&&document.documentElement&&String(document.documentElement.lang).startsWith('fr')?'Gloups !':'Gulp!';
+  const GULP_WORD='Gulp!';
   // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
   // grains. bites (0–3) removes rounded chunks, like a cartoon bite mark.
   const BITES=[[.9,-.55],[-.9,-.35],[.1,.95]];

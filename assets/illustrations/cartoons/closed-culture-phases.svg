@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" role="img" aria-label="A schematic four-phase curve for the number of living bacteria in a closed culture."><style>text{font-family:Georgia,serif;fill:#355d59;font-size:16px}.small{font-family:system-ui,sans-serif;font-size:13px}.axis{fill:none;stroke:#819581;stroke-width:1.5}.curve{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}</style>
+<rect x="90" y="48" width="210" height="220" fill="#eee2bd" opacity=".5"/><rect x="300" y="48" width="210" height="220" fill="#cbe4d8" opacity=".6"/><rect x="510" y="48" width="210" height="220" fill="#f3dfbf" opacity=".65"/><rect x="720" y="48" width="210" height="220" fill="#ead5cd" opacity=".6"/>
+<path class="axis" d="M90 48 V268 H938"/>
+<path class="curve" d="M90 250 C170 250 245 250 300 240" stroke="#ab975a"/>
+<path class="curve" d="M300 240 C400 225 430 82 510 70" stroke="#337f7b"/>
+<path class="curve" d="M510 70 C580 59 650 60 720 74" stroke="#b58a4d"/>
+<path class="curve" d="M720 74 C785 92 807 220 930 241" stroke="#b17265"/>
+<text x="195" y="31" text-anchor="middle">Lag</text><text x="405" y="31" text-anchor="middle">Exponential</text><text x="615" y="31" text-anchor="middle">Stationary</text><text x="825" y="31" text-anchor="middle">Death</text>
+<text x="510" y="324" text-anchor="middle">Time</text><text transform="translate(34 158) rotate(-90)" text-anchor="middle">Living bacteria</text>
+</svg>

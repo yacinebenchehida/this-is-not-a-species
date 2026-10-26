@@ -200,7 +200,55 @@
     ],
     "interactive": true,
     "entry": "play.html",
-    "version": "growth-14"
+    "version": "growth-15"
+  },
+  {
+    "theme": "ecology",
+    "slug": "births-deaths",
+    "title": "Births and deaths",
+    "concept": "Bacterial growth · step 2",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/petri-dish.webp",
+    "description": "Count births and deaths to understand why populations grow, stay stable or shrink.",
+    "detail": "Count births and deaths to understand why populations grow, stay stable or shrink.",
+    "controls": [],
+    "development": true,
+    "entry": "play.html",
+    "version": "series-1"
+  },
+  {
+    "theme": "ecology",
+    "slug": "growth-rate",
+    "title": "The growth rate r",
+    "concept": "Bacterial growth · step 3",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/petri-dish.webp",
+    "description": "See how sharing food changes growth and makes carrying capacity a balance of births and deaths.",
+    "detail": "See how sharing food changes growth and makes carrying capacity a balance of births and deaths.",
+    "controls": [],
+    "development": true,
+    "entry": "play.html",
+    "version": "series-1"
+  },
+  {
+    "theme": "ecology",
+    "slug": "growth-curve",
+    "title": "The real growth curve",
+    "concept": "Bacterial growth · step 4",
+    "themes": [
+      "ecology"
+    ],
+    "art": "cartoons/petri-dish.webp",
+    "description": "Follow the four phases of a closed bacterial culture, from adaptation to decline.",
+    "detail": "Follow the four phases of a closed bacterial culture, from adaptation to decline.",
+    "controls": [],
+    "development": true,
+    "entry": "play.html",
+    "version": "series-1"
   },
   {
     "theme": "ecology",

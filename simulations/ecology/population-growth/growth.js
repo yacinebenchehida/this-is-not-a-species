@@ -83,7 +83,9 @@
         $('growth-story').textContent=done?(canExtend?'The first view ends here. Top up the lunchbox and keep watching.':'Our viewing window ends here. At the buffet, growth would continue.'):key==='fed'?'Fresh food in the lunchbox. The same cells can grow faster again.':key==='empty'?'The lunchbox is empty. Top it up to let the cells grow.':key==='start'?'Each sugar cube can become one new cell. Watch the cells gulp them down.':key==='split'?'Here the stories split: the lunchbox dish falls behind as its food runs short.':key==='low'?'The lunchbox is almost empty. Top it up and watch what happens.':key==='many'?'At the buffet, more cells means more divisions. The lunchbox is emptying.':'Neck and neck so far: both dishes have plenty to eat.';
         storyKey=key;
       }
-      $('growth-play').innerHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Grow again <span aria-hidden="true">↻</span>':time>0?'Continue <span aria-hidden="true">▶</span>':'Let them grow <span aria-hidden="true">▶</span>';
+      const playHTML=running||stepTo!==null?'Pause <span aria-hidden="true">Ⅱ</span>':done?'Grow again <span aria-hidden="true">↻</span>':time>0?'Continue <span aria-hidden="true">▶</span>':'Let them grow <span aria-hidden="true">▶</span>';
+      // Keep the label/icon nodes stable between state changes, including during a pointer press.
+      if($('growth-play').innerHTML!==playHTML)$('growth-play').innerHTML=playHTML;
       $('growth-feed').disabled=done&&!canExtend||s.K-n0>=192;
       $('growth-feed-label').textContent=done&&canExtend?'Top up & continue':'Top up the lunchbox';
       $('growth-feed').classList.toggle('is-useful',!done&&food<.35);

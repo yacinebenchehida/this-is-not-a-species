@@ -147,7 +147,7 @@ def localize_svg(source):
  ET.register_namespace('', 'http://www.w3.org/2000/svg')
  root=ET.fromstring(source)
  for element in root.iter():
-  if element.text:element.text=text(element.text,True)
+  if element.text and element.tag not in ('{http://www.w3.org/2000/svg}style', '{http://www.w3.org/2000/svg}script'):element.text=text(element.text,True)
   if element.tail:element.tail=text(element.tail,True)
   for name in ['alt','title','aria-label']:
    if name in element.attrib:element.set(name,text(element.get(name),True))

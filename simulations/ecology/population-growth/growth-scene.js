@@ -8,8 +8,11 @@
   // Above this many cells, crumbs are still eaten exactly, but cells no longer swim to them.
   const ANIMATED=400;
   // Growth progress at which a cell swallows its cube, just before it divides.
-  const GULP=.94;
+  const GULP=.86;
   const smoothstep=t=>{t=clamp(t);return t*t*(3-2*t);};
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  // Seconds the swallow takes on screen.
+  const GULP_TIME=.45;
   // A sugar cube seen from above at a slight angle: light top, two shaded sides, a few sparkly
   // grains. bites (0–3) removes rounded chunks, like a cartoon bite mark.
   const BITES=[[.9,-.55],[-.9,-.35],[.1,.95]];
@@ -171,19 +174,25 @@
         const near=animate&&cell.target&&cell.target.atMouth;
         // Shark-style gulp: as division nears the mouth opens wider and wider, then the whole cube
         // is swallowed at once and the mouth snaps shut. One cube becomes one new cell.
-        if(near&&age>=GULP&&!cell.target.gulped){cell.target.gulped=true;cell.gulpAt=this.time;}
+        // Every cell swallows its whole cube once its growth reaches GULP, wherever the cube is.
+        if(!still&&cell.target&&age>=GULP&&!cell.target.gulped){
+          const t=cell.target,size=t.size*Math.max(.6,Math.min(1,this.size));
+          let from={x:t.x,y:t.y};
+          if(t.atMouth){const reach=this.mouthReach(cell)+size*.9;from={x:cell.x+Math.cos(cell.angle)*reach,y:cell.y+Math.sin(cell.angle)*reach};}
+          t.gulped=true;cell.gulpAt=this.time;cell.gulpFrom=from;cell.gulpSize=size;
+        }
         const sinceGulp=cell.gulpAt===undefined?Infinity:this.time-cell.gulpAt;
         let mouth=0;
-        if(sinceGulp<.32)mouth=1;
-        else if(sinceGulp<.75)mouth=sinceGulp<.42?.1:.18+.12*Math.abs(Math.sin(sinceGulp*24));
+        if(sinceGulp<GULP_TIME)mouth=1;
+        else if(sinceGulp<GULP_TIME+.45)mouth=sinceGulp<GULP_TIME+.1?.1:.18+.12*Math.abs(Math.sin(sinceGulp*24));
         else if(near)mouth=clamp((age-.55)/(GULP-.55));
         if(!still&&(division>.015||mouth)&&this.cells.length<250){c.save();c.translate(cell.x,cell.y);c.scale(this.size,this.size);window.BacteriumCharacter.draw(c,{...cell,x:0,y:0,radius:cell.base,mood:this.mood||0,faceScale,mouth},this.time,division,still);c.restore();}
         else{c.save();c.translate(cell.x,cell.y);c.rotate(cell.angle+(still?0:Math.sin(this.time*.8+cell.phase)*.035));c.scale(this.size,this.size);c.drawImage(this.sprite(cell,faceScale),-128,-80);c.restore();}
-        // The swallowed cube: pulled into the mouth, then visible inside the body as it dissolves.
-        if(!still&&sinceGulp<1.6&&cell.target){
-          const reach=this.mouthReach(cell),ca=Math.cos(cell.angle),sa=Math.sin(cell.angle),size=cell.target.size*Math.max(.6,Math.min(1,this.size));
-          if(sinceGulp<.32){const k=smoothstep(sinceGulp/.32),d=reach+size*.9*(1-k);nutrient(c,cell.x+ca*d,cell.y+sa*d,size*(1-.35*k),cell.target.angle,1);}
-          else{const k=(sinceGulp-.32)/1.28,d=reach*(1-.9*k);nutrient(c,cell.x+ca*d,cell.y+sa*d,size*.65*(1-.6*k),cell.target.angle+k,.9*(1-k*k));}
+        // The whole cube flies into the wide-open mouth and shrinks to nothing: once eaten, it is gone.
+        if(!still&&sinceGulp<GULP_TIME&&cell.gulpFrom){
+          const k=smoothstep(sinceGulp/GULP_TIME),reach=this.mouthReach(cell);
+          const mx=cell.x+Math.cos(cell.angle)*reach,my=cell.y+Math.sin(cell.angle)*reach;
+          nutrient(c,lerp(cell.gulpFrom.x,mx,k),lerp(cell.gulpFrom.y,my,k),cell.gulpSize*(1-k),(cell.target?cell.target.angle:0)+k*2,1);
         }
         if(near&&!cell.target.gulped){
           // The cube about to be swallowed sits right at the mouth, in front of the cell.

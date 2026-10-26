@@ -16,3 +16,6 @@
 .mood-key{margin-bottom:8px!important}
 .mood-key{margin:4px 0 0;text-align:center;font:12px/1.5 system-ui,sans-serif;color:#5c6a5f;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 6px}.mood-face{width:42px;height:20px;flex-shrink:0}
 
+
+/* Biology first; equations and display details stay optional. */
+.growth-maths{border-top:1px solid #dddcc5;margin:0 23px}.growth-maths summary{font-size:16px;padding:15px 0}.growth-maths .more-grid{padding-inline:0}.growth-drawing-note{margin:0 23px 20px;padding:15px 18px;background:#fffbf180;border-left:2px solid #b9c6a8;border-radius:0 8px 8px 0}.growth-drawing-note h3{font:600 12px/1.5 system-ui,sans-serif;color:#65775e;margin:0 0 5px}.growth-drawing-note p{font:12px/1.6 system-ui,sans-serif;color:#73816a;margin:0}

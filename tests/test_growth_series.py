@@ -44,7 +44,7 @@ class GrowthSeries(unittest.TestCase):
         for locale,phrase in [('', 'In this dish, bacteria never die'),('fr/','Dans cette boîte, les bactéries ne meurent jamais')]:
             html=(ROOT/locale/'simulations/ecology/population-growth/play.html').read_text()
             self.assertEqual(html.count(phrase),2)
-            self.assertIn(phrase,html.split('</details>')[1])
+            self.assertIn(phrase,html.rsplit('</details>',1)[1])
     def test_french_eating_caption_is_generated_from_the_dictionary(self):
         translations=json.loads((ROOT/'content/locales/fr.json').read_text())
         self.assertEqual(translations['Gulp!'],'Miam !')
